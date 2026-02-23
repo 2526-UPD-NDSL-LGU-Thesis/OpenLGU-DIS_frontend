@@ -2,8 +2,9 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
 	"name": "Node.js & TypeScript",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:dev-24-bookworm"
+
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:dev-24-bookworm" // From https://mcr.microsoft.com/en-us/artifact/mar/devcontainers/typescript-node
+
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
