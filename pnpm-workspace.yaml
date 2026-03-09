@@ -1,0 +1,4 @@
+packages:
+  # Specifies that all **direct** subdirectories of the directories below will be treated as a workspace (change as required)
+  - 'apps/*'
+  - 'packages/*'
