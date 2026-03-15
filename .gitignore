@@ -18,6 +18,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# Builds
+dist
+
 ## Turbo
 .turbo
 

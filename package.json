@@ -1,6 +1,7 @@
 {
   "name": "openlgu-dis-frontend",
   "private": true,
+  "packageManager": "pnpm@10.31.0",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "turbo dev",
