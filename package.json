@@ -9,6 +9,7 @@
     "lint": "turbo lint"
   },
   "devDependencies": {
-    "turbo": "^2.8.14"
+    "turbo": "^2.8.14",
+    "typescript": "^5.9.3"
   }
 }

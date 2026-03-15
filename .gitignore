@@ -17,6 +17,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+throwaway/*
 
 # Builds
 dist

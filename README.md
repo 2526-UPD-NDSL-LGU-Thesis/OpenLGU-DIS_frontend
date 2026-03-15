@@ -4,7 +4,7 @@ Frontend for the OpenLGU-DIS, an open customizable LGU ID system that leverages 
 
 
 ## Development / Forking
-
+// TODO: Adjust for monorepo structure
 To develop on the project, the supported way is to use the provided dev container.
 
 1. Clone / Fork the repository
