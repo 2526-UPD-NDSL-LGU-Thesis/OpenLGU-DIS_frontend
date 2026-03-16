@@ -1,5 +1,7 @@
+// Components
 import { Input } from "@openlgu-dis/ui/components/input";
 import { Button } from "@openlgu-dis/ui/components/button";
+import ThemeToggle from "@/components/ThemeToggle";
 
 function App() {
 
@@ -9,6 +11,7 @@ function App() {
       <Input/>
       <div></div>
       <Button variant="outline">Button</Button>
+      <ThemeToggle />
     </>
   )
 }

@@ -9,6 +9,8 @@
     "strict": true,
     "noEmit": true,
     "baseUrl": ".",
+    "declaration": true,
+    "declarationDir": "./dist/types",
     "paths": {
       "@openlgu-dis/ui/*": ["./src/*"]
     }
