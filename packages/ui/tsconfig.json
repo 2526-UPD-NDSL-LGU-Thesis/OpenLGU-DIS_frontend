@@ -10,7 +10,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@frontend/ui/*": ["./src/*"]
+      "@openlgu-dis/ui/*": ["./src/*"]
     }
   },
   "include": ["."],

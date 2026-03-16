@@ -39,6 +39,7 @@ However, some developers may prefer not to use dev containers (we hear that cont
     - package.json - contains dependencies and npm run scripts
     - tsconfig.json - 
     - vite.config.ts - the Vite configuration. See [Vite Config Docs](https://vite.dev/config/)
+- components.json - from shadcn which tells the CLI how and where to install components
 
 ## Note on Development Tooling and Preferences
 

@@ -5,16 +5,16 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/styles/globals.css",
+    "css": "../../packages/ui/src/styles/globals.css",
     "baseColor": "neutral",
     "cssVariables": true
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@openlgu-dis/ui/components",
+    "components": "@/components",
+    "hooks": "@/hooks",
+    "lib": "@/lib",
     "utils": "@openlgu-dis/ui/lib/utils",
-    "hooks": "@openlgu-dis/ui/hooks",
-    "lib": "@openlgu-dis/ui/lib",
     "ui": "@openlgu-dis/ui/components"
   },
   "rtl": true,
