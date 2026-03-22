@@ -3,3 +3,5 @@ packages:
   # Change as required
   - 'apps/*' # These are applications and services that will be built and deployed separately.
   - 'packages/*' # These are shared libraries and components that will be used across multiple applications and services. Think of it as your own internal dependency
+
+catalogs:
