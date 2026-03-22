@@ -10,6 +10,6 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
-    "turbo": "^2.8.20"
+    "turbo": "catalog:"
   }
 }

@@ -4,4 +4,33 @@ packages:
   - 'apps/*' # These are applications and services that will be built and deployed separately.
   - 'packages/*' # These are shared libraries and components that will be used across multiple applications and services. Think of it as your own internal dependency
 
-catalogs:
+catalogMode: strict
+catalogs: null
+catalog:
+  "@base-ui/react": ^1.3.0
+  "@eslint/js": ^9.39.4
+  "@fontsource-variable/noto-sans": ^5.2.10
+  "@tailwindcss/vite": ^4.2.2
+  "@turbo/gen": ^2.8.20
+  "@types/react": ^19.2.14
+  "@types/react-dom": ^19.2.3
+  "@vitejs/plugin-react": ^5.2.0
+  class-variance-authority: ^0.7.1
+  clsx: ^2.1.1
+  eslint: ^9.39.4
+  eslint-plugin-react-dom: ^2.13.0
+  eslint-plugin-react-hooks: ^7.0.1
+  eslint-plugin-react-refresh: ^0.4.26
+  eslint-plugin-react-x: ^2.13.0
+  lucide-react: ^0.577.0
+  react: ^19.2.4
+  react-dom: ^19.2.4
+  shadcn: ^4.1.0
+  tailwind-merge: ^3.5.0
+  tailwindcss: ^4.2.2
+  turbo: ^2.8.20
+  tw-animate-css: ^1.4.0
+  typescript: ^5.9.3
+  typescript-eslint: ^8.57.1
+  vite: ^8.0.1
+  zod: ^3.25.76
