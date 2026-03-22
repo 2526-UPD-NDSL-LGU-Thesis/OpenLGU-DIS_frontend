@@ -26,7 +26,7 @@ However, some developers may prefer not to use dev containers (we hear that cont
 
 ## Anatomy of the repository
 
-> This is a Monorepo of all the frontend
+> This is a Monorepo of all the frontend (See [turbo's docs](https://turborepo.dev/docs/crafting-your-repository/structuring-a-repository#specifying-packages-in-a-monorepo) to understand the structure)
 
 - /.devcontainer - contains dev containers
 - /.github - 

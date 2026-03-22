@@ -1,4 +1,5 @@
 packages:
-  # Specifies that all **direct** subdirectories of the directories below will be treated as a workspace (change as required)
-  - 'apps/*'
-  - 'packages/*'
+  # Specifies that all **direct** subdirectories of the directories below will be treated as a package (i.e., like a separate project))
+  # Change as required
+  - 'apps/*' # These are applications and services that will be built and deployed separately.
+  - 'packages/*' # These are shared libraries and components that will be used across multiple applications and services. Think of it as your own internal dependency

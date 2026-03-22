@@ -1,7 +1,7 @@
 {
   "name": "@openlgu-dis/frontend",
   "private": true,
-  "packageManager": "pnpm@10.31.0",
+  "packageManager": "pnpm@10.32.1",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "turbo dev",
@@ -9,7 +9,6 @@
     "lint": "turbo lint"
   },
   "devDependencies": {
-    "turbo": "^2.8.14",
-    "typescript": "^5.9.3"
+    "turbo": "^2.8.20"
   }
 }
