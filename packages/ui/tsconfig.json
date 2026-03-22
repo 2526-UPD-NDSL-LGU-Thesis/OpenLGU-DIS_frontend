@@ -1,5 +1,5 @@
 {
-  "extends": "@openlgu-dis/typescript-config/tsconfig.base.json",
+  "extends": "@openlgu-dis/typescript-config/base.json",
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -7,4 +7,6 @@
     "declarationDir": "./dist/types",
     "outDir": "dist",
   },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
 }

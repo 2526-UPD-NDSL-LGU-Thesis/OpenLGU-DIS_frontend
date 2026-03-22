@@ -3,10 +3,12 @@ packages:
   # Change as required
   - 'apps/*' # These are applications and services that will be built and deployed separately.
   - 'packages/*' # These are shared libraries and components that will be used across multiple applications and services. Think of it as your own internal dependency
+
 catalog:
   "@base-ui/react": ^1.3.0
-  "@eslint/js": ^9.39.4
+  "@eslint/js": ^9.39.1
   "@fontsource-variable/noto-sans": ^5.2.10
+  "@next/eslint-plugin-next": ^16.2.0
   "@tailwindcss/vite": ^4.2.2
   "@turbo/gen": ^2.8.20
   "@types/react": ^19.2.14
@@ -14,13 +16,17 @@ catalog:
   "@vitejs/plugin-react": ^5.2.0
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
-  eslint: ^9.39.4
+  eslint: ^9.39.1
+  eslint-config-prettier: ^10.1.1
+  eslint-plugin-only-warn: ^1.1.0
   eslint-plugin-react: ^7.37.5
   eslint-plugin-react-dom: ^2.13.0
-  eslint-plugin-react-hooks: ^7.0.1
+  eslint-plugin-react-hooks: ^5.2.0
   eslint-plugin-react-refresh: ^0.4.26
   eslint-plugin-react-x: ^2.13.0
+  eslint-plugin-turbo: ^2.7.1
   lucide-react: ^0.577.0
+  only-allow: ^1.2.2
   react: ^19.2.4
   react-dom: ^19.2.4
   shadcn: ^4.1.0
@@ -28,9 +34,8 @@ catalog:
   tailwindcss: ^4.2.2
   turbo: ^2.8.20
   tw-animate-css: ^1.4.0
-  typescript: ^5.9.3
-  typescript-eslint: ^8.57.1
+  typescript: ^5.9.2
+  typescript-eslint: ^8.50.0
   vite: ^8.0.1
   zod: ^3.25.76
-
 catalogMode: strict # Force you to analyze version ranges and update the catalog when you want to update a dependency. This is the recommended mode for most users.
