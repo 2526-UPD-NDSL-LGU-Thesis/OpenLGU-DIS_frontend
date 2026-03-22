@@ -3,7 +3,18 @@
 {
 	"name": "Node.js & TypeScript",
 
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:dev-24-bookworm" // From https://mcr.microsoft.com/en-us/artifact/mar/devcontainers/typescript-node
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:dev-24-bookworm",
+	
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"bradlc.vscode-tailwindcss",
+				"dbaeumer.vscode-eslint",
+				"Vercel.turbo-vsc",
+				"GitHub.copilot-chat"
+			]
+		}
+	} // From https://mcr.microsoft.com/en-us/artifact/mar/devcontainers/typescript-node
 
 
 	// Features to add to the dev container. More info: https://containers.dev/features.

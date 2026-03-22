@@ -42,5 +42,8 @@
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts"
+  },
+  "imports": {
+    "#*": "./src/*"
   }
 }
