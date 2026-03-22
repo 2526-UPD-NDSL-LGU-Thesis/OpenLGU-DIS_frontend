@@ -4,7 +4,7 @@ packages:
   - 'apps/*' # These are applications and services that will be built and deployed separately.
   - 'packages/*' # These are shared libraries and components that will be used across multiple applications and services. Think of it as your own internal dependency
 
-catalogMode: strict
+catalogMode: strict # Force you to analyze version ranges and update the catalog when you want to update a dependency. This is the recommended mode for most users.
 catalogs: null
 catalog:
   "@base-ui/react": ^1.3.0
