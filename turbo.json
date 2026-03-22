@@ -9,7 +9,7 @@
       "outputs": ["dist/**"]
     },
     "check-types": {
-      "dependsOn": ["^transit-node"]
+      "dependsOn": ["transit-node"]
     },
     "dev": {
       "persistent": true,

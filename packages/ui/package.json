@@ -35,7 +35,8 @@
     "globals": "^17.4.0",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:"
+    "typescript-eslint": "catalog:",
+    "@openlgu-dis/typescript-config": "workspace:*"
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",

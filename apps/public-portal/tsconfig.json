@@ -1,5 +1,5 @@
 {
-  "files": [],
+  "extends": "@openlgu-dis/typescript-config/base.json",
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }

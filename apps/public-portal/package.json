@@ -1,7 +1,7 @@
 {
   "name": "@openlgu-dis/public-portal",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -32,7 +32,8 @@
     "globals": "^16.5.0",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "@openlgu-dis/typescript-config": "workspace:*"
   },
   "imports": {
     "#*": "./src/*"
