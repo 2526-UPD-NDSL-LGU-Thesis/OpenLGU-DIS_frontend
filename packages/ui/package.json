@@ -24,19 +24,20 @@
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
+    "@openlgu-dis/typescript-config": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@turbo/gen": "catalog:",
     "@types/node": "^25.5.0",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "eslint": "catalog:",
+    "eslint-plugin-react": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
     "eslint-plugin-react-refresh": "catalog:",
     "globals": "^17.4.0",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:",
-    "@openlgu-dis/typescript-config": "workspace:*"
+    "typescript-eslint": "catalog:"
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",

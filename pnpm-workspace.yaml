@@ -3,9 +3,6 @@ packages:
   # Change as required
   - 'apps/*' # These are applications and services that will be built and deployed separately.
   - 'packages/*' # These are shared libraries and components that will be used across multiple applications and services. Think of it as your own internal dependency
-
-catalogMode: strict # Force you to analyze version ranges and update the catalog when you want to update a dependency. This is the recommended mode for most users.
-catalogs: null
 catalog:
   "@base-ui/react": ^1.3.0
   "@eslint/js": ^9.39.4
@@ -18,6 +15,7 @@ catalog:
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
   eslint: ^9.39.4
+  eslint-plugin-react: ^7.37.5
   eslint-plugin-react-dom: ^2.13.0
   eslint-plugin-react-hooks: ^7.0.1
   eslint-plugin-react-refresh: ^0.4.26
@@ -34,3 +32,5 @@ catalog:
   typescript-eslint: ^8.57.1
   vite: ^8.0.1
   zod: ^3.25.76
+
+catalogMode: strict # Force you to analyze version ranges and update the catalog when you want to update a dependency. This is the recommended mode for most users.
