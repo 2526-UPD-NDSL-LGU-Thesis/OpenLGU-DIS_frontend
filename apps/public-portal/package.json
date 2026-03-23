@@ -13,12 +13,15 @@
   "dependencies": {
     "@openlgu-dis/ui": "workspace:*",
     "@tailwindcss/vite": "catalog:",
+    "@zxing/browser": "catalog:",
+    "@zxing/library": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
+    "@openlgu-dis/typescript-config": "workspace:*",
     "@types/node": "^24.12.0",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -31,8 +34,7 @@
     "globals": "^16.5.0",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "catalog:",
-    "@openlgu-dis/typescript-config": "workspace:*"
+    "vite": "catalog:"
   },
   "imports": {
     "#*": "./src/*"
