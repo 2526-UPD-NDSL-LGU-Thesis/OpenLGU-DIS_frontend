@@ -6,6 +6,7 @@
     "jsx": "react-jsx",
     "declarationDir": "./dist/types",
     "outDir": "dist",
+    "rootDir": ".",
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]
