@@ -1,4 +1,4 @@
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "./theme-provider";
 
 // Components
 import { Button } from "@openlgu-dis/ui/components/button";

@@ -15,6 +15,7 @@
     "@tailwindcss/vite": "catalog:",
     "@zxing/browser": "catalog:",
     "@zxing/library": "catalog:",
+    "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "tailwindcss": "catalog:"
