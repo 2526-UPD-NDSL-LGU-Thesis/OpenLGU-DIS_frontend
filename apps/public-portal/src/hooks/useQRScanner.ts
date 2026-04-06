@@ -59,6 +59,7 @@ export function useQRScanner(): UseQRScannerResult {
 
     try {
       const result = await verifyQR(rawQRValue)
+      console.log(result)
       setVerificationResult(result)
     } finally {
       setIsLoading(false)

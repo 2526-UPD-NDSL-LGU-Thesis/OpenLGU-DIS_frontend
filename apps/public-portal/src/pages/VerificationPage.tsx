@@ -65,11 +65,11 @@ export function VerificationPage() {
 
       {verificationResult ? (
         <section className="flex flex-col gap-4 pt-2">
-          {verificationResult.status === "success" && verificationResult.profile ? (
-            <ResidentProfileCard profile={verificationResult.profile} />
-          ) : verificationResult.status === "error_not_registered" ||
-            verificationResult.status === "error_tampered" ? (
-            <ErrorCard status={verificationResult.status} />
+          {verificationResult.result === "success" && verificationResult.profile ? (
+            <ResidentProfileCard profile={verificationResult.profile} status={verificationResult.result} />
+          ) : verificationResult.result === "QR is not valid Base45" ||
+            verificationResult.result === "error_tampered" ? (
+            <ErrorCard status={verificationResult.result} />
           ) : null}
 
           <div>

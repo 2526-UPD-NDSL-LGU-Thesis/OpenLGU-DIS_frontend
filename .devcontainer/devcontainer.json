@@ -11,7 +11,10 @@
 				"bradlc.vscode-tailwindcss",
 				"dbaeumer.vscode-eslint",
 				"Vercel.turbo-vsc",
-				"GitHub.copilot-chat"
+				"GitHub.copilot-chat",
+				"ms-toolsai.jupyter",
+				"mads-hartmann.bash-ide-vscode",
+				"ms-azuretools.vscode-containers"
 			]
 		}
 	} // From https://mcr.microsoft.com/en-us/artifact/mar/devcontainers/typescript-node

@@ -6,19 +6,21 @@ export type VerificationStatus =
   | "success"
   | "error_tampered"
   | "error_not_registered"
+  | "other error"
 
-export interface ResidentProfile {
-  lguIdNumber: string
-  fullName: string
-  birthday: string
-  address: string
-  facePhotoUrl: string
+export interface ResidentProfile { // TODO SHOULD REFERENCE A DOCS FOR THE PROFILE AS ITS PARITY WITH BACKEND ALSO NAMING CONVENTION VAR AAAAA DIFFERENCE
+  lgu_uuid: string
+  full_name: string
+  birthdate: string
+  address?: string
+  face_data: string
   qrType: QRType
 }
 
 export interface VerificationResult {
-  status: VerificationStatus
+  result: VerificationStatus
   profile?: ResidentProfile
+  failedMsg?: string
   rawQRValue?: string
 }
 /* 

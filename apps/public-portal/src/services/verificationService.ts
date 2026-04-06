@@ -9,8 +9,9 @@ interface VerifyQRRequest {
   qr_data: string
 }
 
-interface VerifyQRResponse {
-  status: VerificationResult["status"]
+interface VerifyQRResponse { 
+  result: VerificationResult["result"]
+  failedMsg?: string; // TODO NEEDS TO BE MORE ELEGANT. Combining profile and failedMsg + THERE IS OVERLAP IN VERIFICATION.TS
   profile?: ResidentProfile
 }
 
@@ -28,9 +29,11 @@ function buildMockProfile(qrType: ResidentProfile["qrType"]): ResidentProfile {
 export async function verifyQR(rawQRValue: string): Promise<VerificationResult> {
   try {
     const payload: VerifyQRRequest = { qr_data: rawQRValue }
-
+    //console.log(JSON.stringify(payload));
+    const apiBase = import.meta.env.VITE_API_BASE_URL;
+    
     // TODO: Remove mock logic when backend is connected
-    const response = await fetch("/api/v1/public/verify-qr", {
+    const response = await fetch(`${apiBase}/api/authenticate/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,7 +45,7 @@ export async function verifyQR(rawQRValue: string): Promise<VerificationResult> 
       throw new Error(`Verification request failed with ${response.status}`)
     }
 
-    const data = (await response.json()) as VerifyQRResponse
+    const data = (await response.json()) as VerifyQRResponse;
 
     return {
       ...data,
