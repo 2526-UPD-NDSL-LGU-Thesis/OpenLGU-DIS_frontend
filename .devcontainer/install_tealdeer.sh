@@ -9,5 +9,5 @@ set -eux
 
 # TODO Build from source
 sudo apt-get update
-# sudo apt-get install -y --no-install-recommends tealdeer
-# tldr --update
+#sudo apt-get install -y --no-install-recommends tealdeer
+#tldr --update
