@@ -4,47 +4,26 @@ Frontend for the OpenLGU-DIS, an open customizable LGU ID system that leverages 
 
 
 ## Development / Forking
-// TODO: Adjust for monorepo structure
+
 To develop on the project, the supported way is to use the provided dev container.
 
 1. Clone / Fork the repository
 2. Open the repository within a dev container using any supported method (Recommended way: In VS Code using [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)).
-3. Run `pnpm install` to download all the dependencies the project needs. You may now start hacking at the code if you wish.
-4. Run `pnpm run dev` to start the development server and see the application.
-5. Run `pnpm run build` to make the production build and output it to `/dist` directory
-  - Make sure to preview this build locally via `pnpm run preview` run the files in that directory
+  - See docs on [developing with dev containers]() // TODO
+3. Run `pnpm install` in the root directory to download all the dependencies the entire project needs.
+  - Notice that we use `pnpm` as the package manager. Not `npm`, `yarn`, `deno`, or `bun`
+4. This is a [monorepo](https://en.wikipedia.org/wiki/Monorepo) with each application and library (both called packages) defined in `pnpm-workspace.yaml`. To start the dev server of one application, `cd` into the associated directory and run `turbo dev`. E.g.:
+  - `cd apps/public-portal`
+  - `turbo dev`
+  - See docs on [anatomy of the repository]() // TODO
+5. Run `turbo build` to make the production builds in each application's `/dist` directory
+  - `cd` into only one application if you need to only build that
+6. To create a new application, simply create a new **direct** subfolder in `/apps` and treat that as the root when following the documentation.  E.g.:
+  - `mkdir apps/<app-name>`
+  - `cd apps/<app-name>`
+  - `pnpm create vite`
+  - See [creating new project packages]() // TODO
+7. Make sure to follow `@openlguid/<name>` as naming convention of packages in `package.json` and to `pnpm install @openlguid/<library-name>` any shared libraries you need to use in your package.
 
-
-
-### Dev Container Details / Developing Without It
-
-
-We advise to use Dev Containers for development in order to simplify onboarding. The container will ensure we have the same development environment so you won't have the hassle of just trying to the software running on your machine. We don't provide explicit instructions for getting started without it.
-
-However, some developers may prefer not to use dev containers (we hear that container performance on MacOS can be poor). In such a case, the most assistance we provide is additional information on the dev container we use (aside from the devcontainer.json itself) in hopes that it'll help you in replicating the development environment.
-
-
-## Anatomy of the repository
-
-> This is a Monorepo of all the frontend (See [turbo's docs](https://turborepo.dev/docs/crafting-your-repository/structuring-a-repository#specifying-packages-in-a-monorepo) to understand the structure)
-
-- /.devcontainer - contains dev containers
-- /.github - 
-- /apps/* - contains each frontend webapp
-  - /src - the source directory contains the source code of the rpoject
-  - /src/assets - contains static assets that should be optimized
-  - /public - contains statis assets that should not be optimized
-  - index.html - the entry point of the project
-    - See [Vite Documentation](https://vite.dev/guide/#index-html-and-project-root) on this
-    - package.json - contains dependencies and npm run scripts
-    - tsconfig.json - 
-    - vite.config.ts - the Vite configuration. See [Vite Config Docs](https://vite.dev/config/)
-- components.json - from shadcn which tells the CLI how and where to install components
-
-## Note on Development Tooling and Preferences
-
-- Uses pnpm (for monorepo) ESLint, Tailwind, 
-- ESLint configuration as defined in `eslint.config.js`
-  - We use strict typescript linting as recommended. Bear this in mind
-  - We also use React linting via [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom)
+To learn more about the project's tooling, read more in the [contribution documentation]() // TODO
 
