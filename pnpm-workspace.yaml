@@ -2,6 +2,7 @@ packages:
   # Specifies that all **direct** subdirectories of the directories below will be treated as a package (i.e., like a separate project))
   # Change as required
   - 'apps/*' # These are applications and services that will be built and deployed separately.
+  - 'docs/*' # These are documentation websites modeling docs as code philsophy. Different sites for different end users.
   - 'libraries/*' # These are shared libraries and components that will be used across multiple applications and services. Think of it as your own internal dependency
 
 catalog:
@@ -18,8 +19,6 @@ catalog:
   '@zxing/library': ^0.21.3
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
-  electron: 41.2.0
-  electron-squirrel-startup: ^1.0.1
   eslint: ^9.39.4
   eslint-config-prettier: ^10.1.1
   eslint-plugin-only-warn: ^1.1.0
@@ -43,8 +42,3 @@ catalog:
   vite: ^8.0.1
   zod: ^3.25.76
 catalogMode: strict # Force you to analyze version ranges and update the catalog when you want to update a dependency. This is the recommended mode for most users.
-
-# Required by electron forge in its package.json so moved up here
-onlyBuiltDependencies:
-  - electron
-  - electron-winstaller
