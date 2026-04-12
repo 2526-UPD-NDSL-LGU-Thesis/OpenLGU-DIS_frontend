@@ -6,7 +6,8 @@ export type VerificationStatus =
   | "success"
   | "error_tampered"
   | "error_not_registered"
-  | "other error"
+  | "random_qr"
+  | "other_error"
 
 export interface ResidentProfile { // TODO SHOULD REFERENCE A DOCS FOR THE PROFILE AS ITS PARITY WITH BACKEND ALSO NAMING CONVENTION VAR AAAAA DIFFERENCE
   lgu_uuid: string

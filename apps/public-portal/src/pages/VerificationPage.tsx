@@ -1,12 +1,12 @@
 import { Loader2 } from "lucide-react"
 
-import { Button } from "@openlgu-dis/ui/components/button"
+import { Button } from "@openlguid/ui/components/button"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@openlgu-dis/ui/components/tabs"
+} from "@openlguid/ui/components/tabs"
 
 import { FileUploadScanner } from "../components/verification/FileUploadScanner"
 import { ErrorCard } from "../components/verification/ErrorCard"
@@ -67,8 +67,7 @@ export function VerificationPage() {
         <section className="flex flex-col gap-4 pt-2">
           {verificationResult.result === "success" && verificationResult.profile ? (
             <ResidentProfileCard profile={verificationResult.profile} status={verificationResult.result} />
-          ) : verificationResult.result === "QR is not valid Base45" ||
-            verificationResult.result === "error_tampered" ? (
+          ) : verificationResult.result === "random_qr" || verificationResult.result === "error_tampered" || verificationResult.result === "error_not_registered" ? (
             <ErrorCard status={verificationResult.result} />
           ) : null}
 

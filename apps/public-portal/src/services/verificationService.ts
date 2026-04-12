@@ -41,17 +41,20 @@ export async function verifyQR(rawQRValue: string): Promise<VerificationResult> 
       body: JSON.stringify(payload),
     })
 
+    console.log(response)
     if (!response.ok) {
       throw new Error(`Verification request failed with ${response.status}`)
     }
 
     const data = (await response.json()) as VerifyQRResponse;
+    console.log("why are we not here")
 
     return {
       ...data,
       rawQRValue,
     }
   } catch {
+    console.log("we're here for some reason")
     if (rawQRValue.includes("TAMPERED")) {
       return {
         status: "error_tampered",
@@ -59,24 +62,8 @@ export async function verifyQR(rawQRValue: string): Promise<VerificationResult> 
       }
     }
 
-    if (rawQRValue.includes("UNREGISTERED")) {
-      return {
-        status: "error_not_registered",
-        rawQRValue,
-      }
-    }
-
-    if (rawQRValue.includes("NATIONAL")) {
-      return {
-        status: "success",
-        profile: buildMockProfile("NATIONAL_ID"),
-        rawQRValue,
-      }
-    }
-
     return {
-      status: "success",
-      profile: buildMockProfile("LGU"),
+      result: "random_qr",
       rawQRValue,
     }
   }
