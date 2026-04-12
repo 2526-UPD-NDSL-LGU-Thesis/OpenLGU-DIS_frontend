@@ -1,7 +1,7 @@
 import { useTheme } from "./theme-provider";
 
 // Components
-import { Button } from "@openlgu-dis/ui/components/button";
+import { Button } from "@openlguid/ui/components/button";
 
 export default function ThemeToggle() {
     const { theme, setTheme } = useTheme();

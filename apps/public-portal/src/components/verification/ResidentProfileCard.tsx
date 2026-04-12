@@ -1,11 +1,11 @@
-import { Badge } from "@openlgu-dis/ui/components/badge"
+import { Badge } from "@openlguid/ui/components/badge"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openlgu-dis/ui/components/card"
+} from "@openlguid/ui/components/card"
 
 import type { ResidentProfile } from "../../types/verification"
 

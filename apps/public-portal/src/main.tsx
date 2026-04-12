@@ -1,4 +1,4 @@
-import "@openlgu-dis/ui/globals.css";
+import "@openlguid/ui/globals.css";
 import "./styles/locals.css";
 
 import { StrictMode } from 'react'

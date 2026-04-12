@@ -14,8 +14,8 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@openlgu-dis/ui/lib/utils",
-    "ui": "@openlgu-dis/ui/components"
+    "utils": "@openlguid/ui/lib/utils",
+    "ui": "@openlguid/ui/components"
   },
   "rtl": true,
   "menuColor": "inverted",

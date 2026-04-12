@@ -1,5 +1,5 @@
 {
-  "extends": "@openlgu-dis/typescript-config/base.json",
+  "extends": "@openlguid/typescript-config/base.json",
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",

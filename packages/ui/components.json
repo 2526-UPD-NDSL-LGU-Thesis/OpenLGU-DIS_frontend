@@ -11,11 +11,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@openlgu-dis/ui/components",
-    "utils": "@openlgu-dis/ui/lib/utils",
-    "hooks": "@openlgu-dis/ui/hooks",
-    "lib": "@openlgu-dis/ui/lib",
-    "ui": "@openlgu-dis/ui/components"
+    "components": "@openlguid/ui/components",
+    "utils": "@openlguid/ui/lib/utils",
+    "hooks": "@openlguid/ui/hooks",
+    "lib": "@openlguid/ui/lib",
+    "ui": "@openlguid/ui/components"
   },
   "rtl": true,
   "menuColor": "inverted",

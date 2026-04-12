@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { cn } from "@openlgu-dis/ui/lib/utils"
+import { cn } from "@openlguid/ui/lib/utils"
 
 function Card({
   className,

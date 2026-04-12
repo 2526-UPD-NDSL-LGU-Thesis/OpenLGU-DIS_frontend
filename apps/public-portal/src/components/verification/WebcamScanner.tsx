@@ -1,6 +1,6 @@
 import type { RefObject } from "react"
 
-import { Button } from "@openlgu-dis/ui/components/button"
+import { Button } from "@openlguid/ui/components/button"
 
 interface WebcamScannerProps {
   videoRef: RefObject<HTMLVideoElement | null>
