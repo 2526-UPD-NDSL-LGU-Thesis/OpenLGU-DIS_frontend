@@ -1,6 +1,15 @@
 # OpenLGU-DIS_frontend
 Frontend for the OpenLGU-DIS, an open customizable LGU ID system that leverages the Philippine National ID, PhilSys
 
+## Rationale
+
+// TODO
+
+For elaboration on motivation and significance, see our undergraduate [thesis paper]() about this framework.
+
+## Features
+
+// TODO Outline what's included in the framework. I'm not so fond of the heading though
 
 
 ## Development / Forking
@@ -27,3 +36,7 @@ To develop on the project, the supported way is to use the provided dev containe
 
 To learn more about the project's tooling, read more in the [contribution documentation]() // TODO
 
+
+## Deployment
+
+// TODO
