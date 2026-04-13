@@ -2,9 +2,11 @@
 > [!nav] | [[Set-up new project packages]] |
 
 > [!bibliography]
-> - https://www.electronforge.io/
-> - https://www.electronjs.org/docs/latest/tutorial/tutorial-first-app 
 > - https://pnpm.io/settings#nodelinker
+> - https://www.electronforge.io/
+> - https://www.npmjs.com/package/create-electron-app
+> - https://github.com/koderzi/electron-dev/blob/master/.devcontainer/devcontainer.json
+> - https://www.electronjs.org/docs/latest/tutorial/tutorial-first-app 
 
 // TODO Or run a script that automatically sets this up
 
@@ -36,9 +38,16 @@ echo "nodeLinker: hoisted" >> <app-name>/pnpm-workspace.yaml
 3. Initialize a new electron app inside it with Electron Forge. Recommend you use Vite with Typescript template for parity with other tooling in this monorepo. (See [Project tooling](// TODO) for more info)
 
 ```bash
-pnpm create electron-app@latest <app-name> --template=vite-typescript
+pnpm create electron-app@latest <app-name>
 cd <app-name>
 ```
+
+- y - to overwriting
+- Vite - for parity
+- Typescript - for types
+- electron@latest - cause don't get too experimental
+- n - to git because it already exists
+
 
 4. Make sure to edit the name in the local `package.json` to include @openlguid/<app-name> plus change the description!
 
