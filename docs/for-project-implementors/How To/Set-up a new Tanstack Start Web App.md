@@ -9,4 +9,14 @@
 
 1. Run `pnpx @tanstack/cli@latest create`
 
+2. Edit `package.json` name to be `@openlguid/<app-name>`
 
+3. Configure the following development technologies:
+// TODO
+
+- [[Shadcn]] (Using the shared library)
+- [[Typescript]]
+- [[Vite]]
+- [[Prettier]]
+- [[Backend connection]]
+  - copy .env.development

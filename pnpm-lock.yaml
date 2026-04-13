@@ -125,6 +125,9 @@ importers:
 
   apps/admin-platform:
     dependencies:
+      '@openlguid/ui':
+        specifier: workspace:*
+        version: link:../../libraries/ui
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.2.2(vite@8.0.8(@types/node@22.19.17)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
