@@ -10,7 +10,8 @@ import Header from '../components/Header'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
-import appCss from '../styles.css?url'
+import globalAppCss from '@openlguid/ui/globals.css';
+import localAppCss from '../styles/locals.css?url';
 
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -37,7 +38,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     links: [
       {
         rel: 'stylesheet',
-        href: appCss,
+        href: globalAppCss,
+      },
+      {
+        rel: 'stylesheet',
+        href: localAppCss,
       },
     ],
   }),

@@ -1,5 +1,5 @@
 {
-  "name": "admin-platform",
+  "name": "@openlguid/admin-platform",
   "private": true,
   "type": "module",
   "imports": {
@@ -15,6 +15,7 @@
     "check": "prettier --write . && eslint --fix"
   },
   "dependencies": {
+    "@openlguid/ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-query": "latest",
