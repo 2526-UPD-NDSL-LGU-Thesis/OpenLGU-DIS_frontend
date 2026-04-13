@@ -1,19 +1,26 @@
+// https://tanstack.com/start/latest/docs/framework/react/guide/routing#the-root-route
+/// <reference types="vite/client" />
+
 import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
+
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+
+import type { QueryClient } from '@tanstack/react-query'
+
+// UI Components
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
-
-import globalAppCss from '@openlguid/ui/globals.css';
+// Styling
+import globalAppCss from '@openlguid/ui/globals.css?url';
 import localAppCss from '../styles/locals.css?url';
 
-import type { QueryClient } from '@tanstack/react-query'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -32,7 +39,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'OpenLGUID Admin Application',
       },
     ],
     links: [

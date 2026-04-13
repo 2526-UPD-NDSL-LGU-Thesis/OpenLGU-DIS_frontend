@@ -1,3 +1,5 @@
+// Dictates the behavior of TanStack Router used within Start
+
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 
@@ -19,11 +21,12 @@ export function getRouter() {
     defaultPreloadStaleTime: 0,
   })
 
-  setupRouterSsrQueryIntegration({ router, queryClient: context.queryClient })
+  setupRouterSsrQueryIntegration({ router, queryClient: context.queryClient }) // TODO do I need this? We're not making an SSR. More like an SPA.
 
   return router
 }
 
+// https://tanstack.com/router/latest/docs/decisions-on-dx#declaring-the-router-instance-for-type-inference
 declare module '@tanstack/react-router' {
   interface Register {
     router: ReturnType<typeof getRouter>

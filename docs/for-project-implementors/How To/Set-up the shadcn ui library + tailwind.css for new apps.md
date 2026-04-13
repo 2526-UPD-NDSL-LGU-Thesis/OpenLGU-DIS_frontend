@@ -3,6 +3,7 @@
 
 > [!bibliography]
 > - https://ui.shadcn.com/docs/components-json
+> - https://tanstack.com/start/latest/docs/framework/react/guide/tailwind-integration
 
 ### Steps
 
@@ -11,6 +12,8 @@
 2. Install the shared package via `pnpm add @openlguid/ui --workspace`
 
 3. Write `import "@openlguid/ui/globals.css";` into whichever root file injects the styles into index.html
+
+Note that you must use append `?url` to the import for TanStack apps. And also inclued `/// <reference types="vite/client" />` at the top of the root file.
 
 E.g.,
 
