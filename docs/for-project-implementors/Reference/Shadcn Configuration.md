@@ -14,6 +14,7 @@
 
 ### Misc
 
+- Used `#` and `@` pre-pended to some imports for simplificaiton
 - In VSCode, if you have an issue with shadcn JSON schema not being loaded, the dev container may not be allowing the uri.
   - Look for json.schemaDownload.trustedDomains setting
   - Add `https://ui.shadcn.com/schema.json`
