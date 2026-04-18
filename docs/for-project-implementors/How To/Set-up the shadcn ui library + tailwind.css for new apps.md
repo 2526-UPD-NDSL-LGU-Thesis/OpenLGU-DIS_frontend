@@ -7,7 +7,7 @@
 
 ### Steps
 
-1. Copy the `app's components.json` in ui/config-templates into the root of the new app
+1. Copy the `app's components.json` and tsconfig snippets in ui/config-templates into the root of the new app
 
 2. Install the shared package via `pnpm add @openlguid/ui --workspace`
 
