@@ -9,7 +9,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
       "paths": {
-      "@openlguid/ui": ["./src/*"]
+      "@openlguid/ui/*": ["./src/*"]
     },
 
     "jsx": "react-jsx",
