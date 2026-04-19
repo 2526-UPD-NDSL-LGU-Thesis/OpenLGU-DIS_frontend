@@ -58,7 +58,8 @@
 				"ms-toolsai.jupyter",
 				"mads-hartmann.bash-ide-vscode",
 				"ms-azuretools.vscode-containers",
-				"vitest.explorer"
+				"vitest.explorer",
+				"vivaxy.vscode-conventional-commits"
 			]
 		}
 	}
