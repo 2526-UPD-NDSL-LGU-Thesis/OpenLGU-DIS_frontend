@@ -33,11 +33,11 @@ export async function verifyQR(rawQRValue: string): Promise<VerificationResult> 
     }
 
 
-    const responseData = (await response.json()) as VerifyQRResponse;
+    const responseBody = (await response.json()) as VerifyQRResponse;
     console.log("why are we not here")
 
     return {
-      ...responseData,
+      ...responseBody,
       rawQRValue,
     }
   }

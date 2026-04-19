@@ -35,6 +35,7 @@
     "eslint-plugin-react-refresh": "catalog:",
     "eslint-plugin-react-x": "catalog:",
     "globals": "^16.5.0",
+    "msw": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "vite": "catalog:",

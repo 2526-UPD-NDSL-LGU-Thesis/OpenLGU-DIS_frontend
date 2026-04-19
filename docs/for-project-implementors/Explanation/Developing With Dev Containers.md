@@ -1,6 +1,6 @@
+# Developing With Dev Containers 
 
-## Dev Container Details / 
-
+> | [Index](<../$ Navigation/Index.md>) |
 
 We advise to use Dev Containers for development in order to simplify onboarding. The container will ensure we have the same development environment so you won't have the hassle of just trying to the software running on your machine. We don't provide explicit instructions for getting started without it.
 
