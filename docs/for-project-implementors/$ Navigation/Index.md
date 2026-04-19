@@ -3,4 +3,4 @@
 
 ### Maintenance
 
-- [Updating dependencies](<../How Tos/Updating dependencies.md>)
+- [Updating dependencies](<../How Tos/Manage Dependencies.md>)

@@ -35,7 +35,8 @@
     "globals": "^16.5.0",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "imports": {
     "#*": "./src/*"
