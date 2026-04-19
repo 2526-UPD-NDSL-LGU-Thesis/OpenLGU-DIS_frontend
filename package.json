@@ -1,0 +1,16 @@
+{
+  "name": "@openlguid/frontend",
+  "private": true,
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "preinstall": "only-allow pnpm",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "only-allow": "catalog:",
+    "turbo": "catalog:"
+  }
+}

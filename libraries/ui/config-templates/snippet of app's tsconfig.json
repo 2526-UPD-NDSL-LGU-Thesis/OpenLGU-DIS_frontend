@@ -1,0 +1,8 @@
+{
+  "compileroptions": {
+    "paths": {
+      "#/*": ["./src/*"],
+      "@openlguid/ui/*": ["../../libraries/ui/src/*"]
+    }
+  }
+}

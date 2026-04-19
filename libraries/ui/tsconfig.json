@@ -1,0 +1,28 @@
+{
+  "extends": "@openlguid/typescript-config/base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    // Modules
+
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+      "paths": {
+      "@openlguid/ui/*": ["./src/*"]
+    },
+
+    "jsx": "react-jsx",
+    "strict": true,
+
+    // Outputs
+
+    "noEmit": true,
+    "declarationDir": "./dist/types",
+    "outDir": "dist",
+    "rootDir": ".",
+
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}
