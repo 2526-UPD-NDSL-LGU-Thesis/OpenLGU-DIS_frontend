@@ -59,7 +59,9 @@
 				"mads-hartmann.bash-ide-vscode",
 				"ms-azuretools.vscode-containers",
 				"vitest.explorer",
-				"vivaxy.vscode-conventional-commits"
+				"vivaxy.vscode-conventional-commits",
+				"DavidAnson.vscode-markdownlint",
+				"yzhang.markdown-all-in-one"
 			]
 		}
 	}
