@@ -13,3 +13,8 @@
 
 - Tanstack Router says [here](https://tanstack.com/router/latest/docs/installation/with-vite)
 -  
+
+### Weirdness
+
+- Why two different tsconfigs?
+    - https://github.com/vitejs/vite/discussions/20149

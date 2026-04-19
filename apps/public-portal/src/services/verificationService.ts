@@ -1,7 +1,7 @@
 import type {
   ResidentProfile,
   VerificationResult,
-} from "../types/verification"
+} from "#/types/verification"
 /*
 TODO: Change the import to I think my Node imports subpath
 */
