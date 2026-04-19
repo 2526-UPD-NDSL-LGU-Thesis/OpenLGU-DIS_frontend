@@ -9,3 +9,7 @@
 
 1. Run `pnpm create vite`
 
+### Tooling that needs additional set-up
+
+- Tanstack Router says [here](https://tanstack.com/router/latest/docs/installation/with-vite)
+-  
