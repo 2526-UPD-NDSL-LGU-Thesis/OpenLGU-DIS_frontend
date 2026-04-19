@@ -13,10 +13,6 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import type { QueryClient } from '@tanstack/react-query'
 
-// UI Components
-import Footer from '../components/Footer'
-import Header from '../components/Header'
-
 // Styling
 import globalAppCss from '@openlguid/ui/globals.css?url';
 import localAppCss from '../styles/locals.css?url';
@@ -64,9 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
-        <Header />
         {children}
-        <Footer />
         <TanStackDevtools
           config={{
             position: 'bottom-right',

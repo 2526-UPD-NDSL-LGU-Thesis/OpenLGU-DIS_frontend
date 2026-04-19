@@ -21,3 +21,4 @@
   - Reference: https://github.com/microsoft/vscode/issues/265177
 - tsconfigs for new apps must be set-up right. Specifically for pathing. I cried a lot with this problem
   - https://github.com/shadcn-ui/ui/issues/7750
+  - https://ui.shadcn.com/docs/components-json#aliases
