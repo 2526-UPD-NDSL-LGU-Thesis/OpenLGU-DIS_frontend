@@ -5,8 +5,8 @@ import {
 } from "@zxing/browser"
 import { NotFoundException } from "@zxing/library"
 
-import { verifyQR } from "../services/verificationService"
-import type { VerificationResult } from "../types/verification"
+import { verifyQR } from "../api/verificationService.js"
+import type { VerificationResult } from "../types/verification.js"
 
 interface UseQRScannerResult {
   videoRef: RefObject<HTMLVideoElement | null>

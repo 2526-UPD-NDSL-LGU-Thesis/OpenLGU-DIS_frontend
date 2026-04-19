@@ -7,11 +7,11 @@ import {
   CardTitle,
 } from "@openlguid/ui/components/card"
 
-import type { ResidentProfile } from "../../types/verification"
+import type { IdDetails } from "../features/verification/types/verification.js"
 
 interface ResidentProfileCardProps {
   status: string
-  profile: ResidentProfile
+  profile: IdDetails
 }
 
 export function ResidentProfileCard({ status, profile }: ResidentProfileCardProps) {
@@ -30,7 +30,7 @@ export function ResidentProfileCard({ status, profile }: ResidentProfileCardProp
           </div>
         </div>
         <Badge variant="secondary">
-          {profile.qrType === "NATIONAL_ID" ? "National ID" : "LGU ID"}
+          {profile.issuerType === "NATIONAL" ? "National ID" : "LGU ID"}
         </Badge>
       </CardHeader>
 

@@ -8,11 +8,11 @@ import {
   TabsTrigger,
 } from "@openlguid/ui/components/tabs"
 
-import { FileUploadScanner } from "../components/verification/FileUploadScanner"
-import { ErrorCard } from "../components/verification/ErrorCard"
-import { ResidentProfileCard } from "../components/verification/ResidentProfileCard"
-import { WebcamScanner } from "../components/verification/WebcamScanner"
-import { useQRScanner } from "../hooks/useQRScanner"
+import { FileUploadScanner } from "../features/verification/components/FileUploadScanner.js"
+import { ErrorCard } from "../components/ErrorCard.js"
+import { ResidentProfileCard } from "../components/ResidentProfileCard.js"
+import { WebcamScanner } from "../features/verification/components/WebcamScanner.js"
+import { useQRScanner } from "../features/verification/hooks/useQRScanner.js"
 
 export function VerificationPage() {
   const {
@@ -65,8 +65,8 @@ export function VerificationPage() {
 
       {verificationResult ? (
         <section className="flex flex-col gap-4 pt-2">
-          {verificationResult.result === "success" && verificationResult.profile ? (
-            <ResidentProfileCard profile={verificationResult.profile} status={verificationResult.result} />
+          {verificationResult.result === "success" && verificationResult.idDetails ? (
+            <ResidentProfileCard profile={verificationResult.idDetails} status={verificationResult.result} />
           ) : verificationResult.result === "random_qr" || verificationResult.result === "error_tampered" || verificationResult.result === "error_not_registered" ? (
             <ErrorCard status={verificationResult.result} />
           ) : null}

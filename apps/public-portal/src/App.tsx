@@ -1,8 +1,8 @@
 import { VerificationPage } from "./pages/VerificationPage";
 import ThemeToggle from "./components/ThemeToggle";
 
-import { useEffect, useState } from "react";
-import { pingBackend } from "./services/pingService";
+import { useState } from "react";
+import { pingBackend } from "./api/pingService.js";
 
 function App() {
   const [pingStatus, setPingStatus] = useState<string>("Not tested yet")
