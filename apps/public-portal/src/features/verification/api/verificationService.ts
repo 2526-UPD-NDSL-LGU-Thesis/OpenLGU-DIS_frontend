@@ -5,12 +5,11 @@ import type {
   QRVerifyRequestBody, QRVerifyResponseBody, VerificationResult, IdDetails
 } from "#features/verification/types/verification.js"
 
-interface QRVerifyReturn {
+export interface QRVerifyReturn {
   result?: VerificationResult
   idDetails?: IdDetails,
   message?: string,
 }
-
 
 class HTTPResponseError extends Error {
   response: Response;

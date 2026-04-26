@@ -3,6 +3,7 @@
 export type issuerType = "LGU" | "NATIONAL"
 
 export type VerificationResult =
+  | "idle"
   | "success"
   | "error_not_base45"
   | "error_not_compressed"

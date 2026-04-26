@@ -1,6 +1,13 @@
 import { Loader2 } from "lucide-react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@openlguid/ui/components/button"
+import { 
+  Card,
+  CardHeader,
+  CardTitle, 
+} from "@openlguid/ui/components/card"
+
 import {
   Tabs,
   TabsContent,
@@ -14,29 +21,70 @@ import { ResidentProfileCard } from "../components/ResidentProfileCard.js"
 import { WebcamScanner } from "../features/verification/components/WebcamScanner.js"
 import { useQRScanner } from "../features/verification/hooks/useQRScanner.js"
 
+
+// TODO: Remove Mocking Data
+
+import { verifyQR, type QRVerifyReturn } from "#features/verification/api/verificationService.js"
+
+// await verifyQR("mockedAPIDev")
+
 export function VerificationPage() {
-  const {
-    videoRef,
-    startWebcamScan,
-    stopWebcamScan,
-    isScanning,
-    handleFileUpload,
-    verificationResult,
-    isLoading,
-    reset,
-  } = useQRScanner()
+  const [mockQRData, setMockQRData] = useState<QRVerifyReturn>({ result: "loading" }); 
+
+  useEffect(() => {
+    const loadMockData = async () => {
+      const ret = await verifyQR("mockedAPIDev");
+      console.log(ret);
+      setMockQRData(ret);
+    }
+    loadMockData();
+  }, []);
+
+  // const {
+  //   videoRef,
+  //   startWebcamScan,
+  //   stopWebcamScan,
+  //   isScanning,
+  //   handleFileUpload,
+  //   verificationResult,
+  //   isLoading,
+  //   reset,
+  // } = useQRScanner()
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-6 px-4 py-10 sm:px-6">
-      <header className="space-y-2">
+    <main className="mx-auto min-h-screen w-full max-w-4xl px-4 py-10 sm:px-6 flex flex-col items-center space-y-12">
+      <section className="flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-semibold tracking-tight">
           Verify a Resident&apos;s Identity
         </h1>
         <p className="text-muted-foreground">
           Scan an LGU ID or National ID QR code to verify a resident.
         </p>
-      </header>
-
+        <Button type="button">
+          Start Scanning
+        </Button>
+      </section>
+      <section className="flex flex-col items-center gap-4">
+        <Card>
+          <CardHeader>
+          <CardTitle>
+            {
+            (mockQRData.result === "idle") ?
+              ("Waiting for QR ") :
+            (mockQRData.result === "success") ?
+              ("This ID is Legitimate!" ) :
+              ("Error!")
+            }
+          </CardTitle>
+          </CardHeader>
+        </Card>
+        {
+        (mockQRData.result && mockQRData.idDetails) ? 
+        ( <ResidentProfileCard result={mockQRData.result} profile={mockQRData.idDetails} />): 
+        null
+        }
+      </section>
+{/* 
       <Tabs defaultValue="webcam" className="w-full">
         <TabsList>
           <TabsTrigger value="webcam">Use Webcam</TabsTrigger>
@@ -77,7 +125,17 @@ export function VerificationPage() {
             </Button>
           </div>
         </section>
-      ) : null}
+      ) : null} */}
     </main>
   )
 }
+
+
+/*
+
+<h1>
+<VerifyDialogBox>
+
+</VerifyDialogBox>
+
+*/
