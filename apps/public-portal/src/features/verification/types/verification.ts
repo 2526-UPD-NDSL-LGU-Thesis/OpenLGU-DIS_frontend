@@ -8,8 +8,9 @@ export type VerificationResult =
   | "error_not_compressed"
   | "error_tampered"
   | "error_not_registered"
-  | "random_qr"
-  | "other_error"
+  | "error_response_is_not_declared_json"
+  | "error_random_qr"
+  | "error_other"
 
 /* Backend Dependent */
 

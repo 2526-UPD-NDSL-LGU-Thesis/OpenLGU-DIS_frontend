@@ -12,6 +12,22 @@ interface QRVerifyReturn {
 }
 
 
+class HTTPResponseError extends Error {
+  response: Response;
+
+	constructor(response: Response) {
+		super(`HTTPResponseError: ${response.status} ${response.statusText}`);
+    this.name = "HTTPResponseError";
+		this.response = response;
+	}
+
+  responseBodyEmpty(){
+    
+  }
+}
+
+
+
 export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
   try {
     const apiBase = import.meta.env.VITE_API_BASE_URL;
@@ -20,43 +36,63 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
       qr: rawQRValue 
     }
 
-    const request = {
-      method: "POST",
+    const requestOptions = {
+      method: "POST", // TODO possibly do credentials: "include" for auth https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#including_credentials
       headers: {
-        "Content-Type": "application/json",
+        "content-type": "application/json",
       },
       body: JSON.stringify(requestBody)
     }
 
-    const response = await fetch(`${apiBase}/qr/verify`, request);
+    const response = await fetch(`${apiBase}/qr/verify`, requestOptions);
 
-    if (!response.ok){
-      throw Error(`Verification spectacularly request failed with ${response.status}`);
+
+    // Error Catching
+
+    if (!response.ok) {
+      throw new HTTPResponseError(response);
+    }
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("error_response_is_not_declared_json");
     }
 
     const responseBody = (await response.json()) as QRVerifyResponseBody;
 
-    if (responseBody.error) {
-      return { result: responseBody.error };
+    const idDetails = {
+      ...responseBody.cwt,
+      issuerType: "LGU",
+    } satisfies IdDetails;
+
+    return {
+      result: "success",
+      idDetails
     }
-    else {
+  }
 
-      const idDetails = {
-        ...responseBody.cwt,
-        issuerType: "LGU",
-      } satisfies IdDetails;
+  catch (e) {
+    // Handle expected exceptions
 
-      return {
-        result: "success",
-        idDetails
+    if (e === "error_response_is_not_declared_json"){ // TODO Improve this error handling to be 
+        // Inspirations: https://gist.github.com/odewahn/5a5eeb23279eed6a80d7798fdb47fe91
+        throw Error("API error: did not declare response as json. Fix api.");
+    }
+    else if (e instanceof HTTPResponseError) {
+      const responseBody = (await e.response.json()) as QRVerifyResponseBody;
+
+      if (responseBody.error){
+        return { result: responseBody.error };
+      }
+      else {
+        throw e;
       }
     }
-  }
-
-  catch (error) {
-    return {
-      result: "other_error",
-      message: error instanceof Error ? error.message : "Unknown verification error",
+    else { // Rethrow the unexpected
+      throw e;
     }
   }
+
+
+
+
 }

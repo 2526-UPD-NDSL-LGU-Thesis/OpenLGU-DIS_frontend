@@ -3,6 +3,6 @@
 // This mock handler mirrors real api as best as can for testing purposes
 // TODO BUT WHAT DO WE ACTUALLY DO IF DRIFT HAPPENS?
 
-import { verifyHandlers } from "#/tests/handlers/verify";
+import { qrManagerHandlers } from "#tests/handlers/qrManager.js";
 
-export const handlers = [...verifyHandlers];
+export const handlers = [...qrManagerHandlers];

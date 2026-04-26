@@ -8,7 +8,7 @@ import type { QRVerifyRequestBody, QRVerifyResponseBody } from '#features/verifi
 
 const apiBase = import.meta.env.VITE_API_BASE_URL;
 
-export const verifyHandlers = [
+export const qrManagerHandlers = [
     http.post<any,
     QRVerifyRequestBody,
     any
