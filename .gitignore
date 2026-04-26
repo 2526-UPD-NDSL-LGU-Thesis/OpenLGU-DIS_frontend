@@ -29,6 +29,7 @@ dist-ssr
 node_modules
 npm-debug.log*
 pnpm-debug.log*
+.pnpm-store
 
 ## Tanstack Apps
 
