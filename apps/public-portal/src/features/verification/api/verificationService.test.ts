@@ -16,8 +16,11 @@ describe('verifyQR', () => {
                     local_id: "1000",
                     full_name: "Juan Dela Cruz",
                     dob: "2000-01-01",
+                    gender: "Male",
                     location: "Gubat, Diyan",
-                    face: ";-;", // TODO not face data
+                    email: "juan@example.com",
+                    phone: "09221 924 7284",
+                    face: ";-;", // TODO not the most representative face data
                     issuerType: "LGU"
                 },
             }

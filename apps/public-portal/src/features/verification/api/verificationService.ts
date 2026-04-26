@@ -80,7 +80,7 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
     else if (e instanceof HTTPResponseError) {
       const responseBody = (await e.response.json()) as QRVerifyResponseBody;
 
-      if (responseBody.error){
+      if (responseBody.error){ // TODO Improve by specifically identifying that the errors are the specified of VerificationResult
         return { result: responseBody.error };
       }
       else {

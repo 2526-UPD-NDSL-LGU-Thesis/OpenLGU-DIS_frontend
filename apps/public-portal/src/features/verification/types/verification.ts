@@ -11,6 +11,7 @@ export type VerificationResult =
   | "error_response_is_not_declared_json"
   | "error_random_qr"
   | "error_other"
+// TODO: migrate to https://www.typescriptlang.org/docs/handbook/enums.html
 
 /* Backend Dependent */
 
@@ -18,7 +19,10 @@ export interface IdDetails { // TODO possibly have a better agreed upon set of f
   local_id: string
   full_name: string
   dob: string
+  gender: string
   location: string
+  email: string
+  phone: string
   face: string
   issuerType: issuerType
 }
