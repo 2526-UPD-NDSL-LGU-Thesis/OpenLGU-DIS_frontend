@@ -1,61 +1,62 @@
-/* Handles identity verification api calls */
+/* Handles identity verification api calls and translate the backend */
 
 
 import type {
-  VerificationResult,
+  QRVerifyRequestBody, QRVerifyResponseBody, VerificationResult, IdDetails
 } from "#features/verification/types/verification.js"
 
-interface VerifyQRRequest {
-  qr_data: string
+interface QRVerifyReturn {
+  result?: VerificationResult
+  idDetails?: IdDetails,
+  message?: string,
 }
 
-interface VerifyQRResponse extends Omit<VerificationResult, 'rawQRValue'>{ }
 
-
-export async function verifyQR(rawQRValue: string): Promise<VerificationResult> {
+export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
   try {
-    const payload: VerifyQRRequest = { 
-      qr_data: rawQRValue 
-    }
     const apiBase = import.meta.env.VITE_API_BASE_URL;
-    
 
-    const response = await fetch(`${apiBase}/api/authenticate/`, {
+    const requestBody: QRVerifyRequestBody = {
+      qr: rawQRValue 
+    }
+
+    const request = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
-    })
-    
-    if (!response.ok) {
-      throw new Error(`Verification request failed with ${response.status}`)
+      body: JSON.stringify(requestBody)
     }
 
+    const response = await fetch(`${apiBase}/qr/verify`, request);
 
-    const responseBody = (await response.json()) as VerifyQRResponse;
-    console.log("why are we not here")
+    if (!response.ok){
+      throw Error(`Verification spectacularly request failed with ${response.status}`);
+    }
 
-    return {
-      ...responseBody,
-      rawQRValue,
+    const responseBody = (await response.json()) as QRVerifyResponseBody;
+
+    if (responseBody.error) {
+      return { result: responseBody.error };
+    }
+    else {
+
+      const idDetails = {
+        ...responseBody.cwt,
+        issuerType: "LGU",
+      } satisfies IdDetails;
+
+      return {
+        result: "success",
+        idDetails
+      }
     }
   }
 
-  catch {
-    console.log("we're here for some reason") // TODO properly catch error test cases
-    if (rawQRValue.includes("TAMPERED")) { // TODO Why is this if like this. Also, if the handling is done in the backend, I shouldn't need to make these recognitions. Results, message, and rawQRValue should be modeled in the backend
-      return {
-        result: "error_tampered",
-        message: "This QR has been tampered with!",
-        rawQRValue,
-      }
-    }
-
+  catch (error) {
     return {
-      result: "random_qr",
-      message: "This is not the right kind of QR",
-      rawQRValue,
+      result: "other_error",
+      message: error instanceof Error ? error.message : "Unknown verification error",
     }
   }
 }

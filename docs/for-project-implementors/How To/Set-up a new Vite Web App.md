@@ -13,6 +13,7 @@
 - Tanstack Router says [here](https://tanstack.com/router/latest/docs/installation/with-vite)
 - Vitest and MSW
     - Especially vitest setup files.
+    - https://vitest.dev/guide/mocking/requests.html, https://mswjs.io/docs/quick-start, https://vitest.dev/guide/learn/setup-teardown.html#setup-files
 
 ### Weirdness
 

@@ -1,11 +1,38 @@
-import { it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-it('responds with the user', async () => {
-    const response = await fetch('https://mock.api/user');
-    
-    await expect(response.json()).resolves.toEqual({
-        id: 'abc-123',
-        firstName: 'John',
-        lastName: 'Maverick',
+import { verifyQR } from './verificationService';
+
+
+describe('verifyQR', () => {    
+    it('returns LGUser details for a valid QR', async () => {
+        const rawQRValue = "mockedAPISuccess";
+
+        const ret = await verifyQR(rawQRValue);
+        
+        expect(ret).toEqual(
+            {
+                result: "success",
+                idDetails: {
+                    local_id: "1000",
+                    full_name: "Juan Dela Cruz",
+                    dob: "2000-01-01",
+                    location: "Gubat, Diyan",
+                    face: ";-;", // TODO not face data
+                    issuerType: "LGU"
+                },
+            }
+        );
+    });
+
+    it('returns error for tampered qr', async () => {
+        const rawQRValue = "mockedAPIerror_tampered";
+
+        const ret = await verifyQR(rawQRValue);
+
+        expect(ret).toEqual(
+            {
+                result: "error_tampered"
+            }
+        )
     })
 });
