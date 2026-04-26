@@ -12,6 +12,7 @@
     "module": "ESNext",
     "paths": {
       "#/*": ["./src/*"],
+      "@openlguid/ui/*": ["../../libraries/ui/src/*"],
     },
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
