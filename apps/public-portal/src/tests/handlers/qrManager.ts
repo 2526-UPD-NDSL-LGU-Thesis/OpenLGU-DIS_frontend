@@ -16,7 +16,7 @@ export const qrManagerHandlers = [
     http.post<any,
     QRVerifyRequestBody,
     any
-    >(`${apiBase}/qr/verify`, async ({ request }) => {
+    >(`${apiBase}/qr/verify/`, async ({ request }) => {
 
         const body = await request.json();
 

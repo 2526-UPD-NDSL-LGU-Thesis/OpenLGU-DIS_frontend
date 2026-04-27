@@ -39,8 +39,7 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
       },
       body: JSON.stringify(requestBody),
     }
-
-    const response = await fetch(`${apiBase}/qr/verify`, requestOptions)
+    const response = await fetch(`${apiBase}/qr/verify/`, requestOptions)
 
     if (!response.ok) {
       throw new HTTPResponseError(response)
