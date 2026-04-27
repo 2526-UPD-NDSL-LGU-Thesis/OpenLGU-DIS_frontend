@@ -3,7 +3,7 @@
 import { http, HttpResponse, passthrough } from 'msw';
 import { faker } from '@faker-js/faker';
 
-import type { QRVerifyRequestBody, QRVerifyResponseBody } from '#features/verification/types/verification.ts';
+import type { QRVerifyRequestBody, QRVerifyResponseBody } from '#/features/verification/types/verification.ts';
 
 const apiBase = import.meta.env.VITE_API_BASE_URL;
 

@@ -24,7 +24,7 @@ import { useQRScanner } from "../features/verification/hooks/useQRScanner.js"
 
 // TODO: Remove Mocking Data
 
-import { verifyQR, type QRVerifyReturn } from "#features/verification/api/verificationService.js"
+import { verifyQR, type QRVerifyReturn } from "#/features/verification/api/verificationService.js"
 
 // await verifyQR("mockedAPIDev")
 

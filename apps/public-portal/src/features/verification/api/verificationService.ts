@@ -3,7 +3,7 @@
 
 import type {
   QRVerifyRequestBody, QRVerifyResponseBody, VerificationResult, IdDetails
-} from "#features/verification/types/verification.js"
+} from "#/features/verification/types/verification.js"
 
 export interface QRVerifyReturn {
   result?: VerificationResult
