@@ -7,9 +7,11 @@ import {
 } from "@openlguid/ui/components/sidebar"
 
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/_authenticated')({
+  component: RouteComponent,
+})
 
-function App() {
+function RouteComponent() {
   return (
     <SidebarProvider
       style={

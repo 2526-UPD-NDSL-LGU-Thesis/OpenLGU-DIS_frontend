@@ -7,6 +7,7 @@
     "dev": "tsc --watch",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "test": "vitest run",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
