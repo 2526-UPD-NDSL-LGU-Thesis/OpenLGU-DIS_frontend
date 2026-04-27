@@ -26,6 +26,11 @@ const config = defineConfig({
       },
     }),
   ],
+  server: {
+    host: true,
+    port: 3000,
+    strictPort: true,
+  }
 })
 
 export default config

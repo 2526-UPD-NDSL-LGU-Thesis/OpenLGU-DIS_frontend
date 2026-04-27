@@ -2,19 +2,24 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
+//import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     // Please make sure that '@tanstack/router-plugin' is passed before '@vitejs/plugin-react'
-    tanstackRouter({
-      target: 'react',
-      autoCodeSplitting: true,
-    }),
+    // tanstackRouter({
+    //   target: 'react',
+    //   autoCodeSplitting: true,
+    // }),
     react(),
     tailwindcss(),
   ],
+  server: {
+    host: true,
+    port: 2999,
+    strictPort: true,
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),

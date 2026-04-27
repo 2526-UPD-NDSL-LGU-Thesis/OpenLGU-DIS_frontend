@@ -10,6 +10,10 @@
 
 ### Tooling that needs additional set-up
 
+- If developing inside container, configure Vite to listen(?) on host
+    - https://stackoverflow.com/questions/70012970/running-a-vite-dev-server-inside-a-docker-container
+    - https://vite.dev/config/server-options#server-host
+    - // TODO this is a possible vulnerability in development as it may expose to LAN, especially if not deving inside container
 - Tanstack Router says [here](https://tanstack.com/router/latest/docs/installation/with-vite)
 - Vitest and MSW
     - Especially vitest setup files.
