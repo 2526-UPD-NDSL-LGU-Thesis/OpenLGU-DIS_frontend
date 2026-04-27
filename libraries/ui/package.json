@@ -10,6 +10,8 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@zxing/browser": "catalog:",
+    "@zxing/library": "catalog:",
     "@base-ui/react": "catalog:",
     "@dnd-kit/core": "catalog:",
     "@dnd-kit/modifiers": "catalog:",
@@ -46,13 +48,17 @@
     "globals": "^17.4.0",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:"
+    "typescript-eslint": "catalog:",
+    "vitest": "catalog:"
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
-    "./hooks/*": "./src/hooks/*.ts"
+    "./hooks/*": "./src/hooks/*.ts",
+    "./features/verification/components/VerificationDialog": "./src/features/verification/components/VerificationDialog.tsx",
+    "./features/verification/api/verificationService": "./src/features/verification/api/verificationService.ts",
+    "./features/verification/types/verification": "./src/features/verification/types/verification.ts"
   },
   "imports": {
     "#*": "./src/*"

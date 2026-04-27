@@ -1,3 +1,5 @@
+// TODO need to review this
+
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import {
   BrowserMultiFormatReader,
@@ -5,31 +7,36 @@ import {
 } from "@zxing/browser"
 import { NotFoundException } from "@zxing/library"
 
-import { verifyQR } from "../api/verificationService.js"
-import type { VerificationResult } from "../types/verification.js"
+interface UseQRScannerOptions<TResult> {
+  onDecode: (rawQRValue: string) => Promise<TResult>
+  onScanError?: () => TResult
+}
 
-interface UseQRScannerResult {
+interface UseQRScannerResult<TResult> {
   videoRef: RefObject<HTMLVideoElement | null>
   startWebcamScan: () => void
   stopWebcamScan: () => void
   isScanning: boolean
   handleFileUpload: (file: File) => void
-  verificationResult: VerificationResult | null
+  scanResult: TResult | null
   isLoading: boolean
   reset: () => void
 }
 
-export function useQRScanner(): UseQRScannerResult {
+export function useQRScanner<TResult>({
+  onDecode,
+  onScanError,
+}: UseQRScannerOptions<TResult>): UseQRScannerResult<TResult> {
   const videoRef = useRef<HTMLVideoElement>(null)
   const readerRef = useRef<BrowserMultiFormatReader | null>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
   const isProcessingRef = useRef(false)
+  const isStartingRef = useRef(false)
   const activeObjectUrlRef = useRef<string | null>(null)
 
   const [isScanning, setIsScanning] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [verificationResult, setVerificationResult] =
-    useState<VerificationResult | null>(null)
+  const [scanResult, setScanResult] = useState<TResult | null>(null)
 
   const getReader = useCallback((): BrowserMultiFormatReader => {
     if (!readerRef.current) {
@@ -46,48 +53,64 @@ export function useQRScanner(): UseQRScannerResult {
     }
   }, [])
 
+  const emitScanError = useCallback(() => {
+    if (!onScanError) {
+      return
+    }
+
+    setScanResult(onScanError())
+  }, [onScanError])
+
   const stopWebcamScan = useCallback(() => {
     controlsRef.current?.stop()
     controlsRef.current = null
 
     isProcessingRef.current = false
+    isStartingRef.current = false
     setIsScanning(false)
   }, [])
 
-  const runVerification = useCallback(async (rawQRValue: string) => {
+  const runDecodeAction = useCallback(async (rawQRValue: string) => {
     setIsLoading(true)
 
     try {
-      const result = await verifyQR(rawQRValue)
-      console.log(result)
-      setVerificationResult(result)
+      const result = await onDecode(rawQRValue)
+      setScanResult(result)
+    } catch {
+      emitScanError()
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [emitScanError, onDecode])
 
   const startWebcamScan = useCallback(() => {
-    if (isScanning || isLoading) {
+    if (isScanning || isLoading || isStartingRef.current || controlsRef.current) {
       return
     }
 
-    setVerificationResult(null)
+    if (!videoRef.current) {
+      return
+    }
+
+    setScanResult(null)
     setIsScanning(true)
     isProcessingRef.current = false
+    isStartingRef.current = true
 
     const reader = getReader()
     void reader
       .decodeFromVideoDevice(
         undefined,
-        videoRef.current ?? undefined,
+        videoRef.current,
         (result, error, controls) => {
+          isStartingRef.current = false
           controlsRef.current = controls
 
           if (result && !isProcessingRef.current) {
             isProcessingRef.current = true
 
             void (async () => {
-              await runVerification(result.getText())
+              await runDecodeAction(result.getText())
               stopWebcamScan()
             })()
 
@@ -95,18 +118,17 @@ export function useQRScanner(): UseQRScannerResult {
           }
 
           if (error && !(error instanceof NotFoundException) && !isProcessingRef.current) {
-            // TODO: Refine fallback mapping once backend provides machine-readable error codes.
-            setVerificationResult({ status: "error_tampered" })
+            emitScanError()
             stopWebcamScan()
           }
         }
       )
       .catch(() => {
-        // TODO: Refine fallback mapping once backend provides machine-readable error codes.
-        setVerificationResult({ status: "error_tampered" })
+        isStartingRef.current = false
+        emitScanError()
         stopWebcamScan()
       })
-  }, [getReader, isLoading, isScanning, runVerification, stopWebcamScan])
+  }, [emitScanError, getReader, isLoading, isScanning, runDecodeAction, stopWebcamScan])
 
   const handleFileUpload = useCallback(
     (file: File) => {
@@ -114,7 +136,7 @@ export function useQRScanner(): UseQRScannerResult {
         return
       }
 
-      setVerificationResult(null)
+      setScanResult(null)
       revokeObjectUrl()
 
       const objectUrl = URL.createObjectURL(file)
@@ -126,24 +148,23 @@ export function useQRScanner(): UseQRScannerResult {
       void reader
         .decodeFromImageUrl(objectUrl)
         .then(async (result) => {
-          await runVerification(result.getText())
+          await runDecodeAction(result.getText())
         })
         .catch(() => {
-          // TODO: Refine fallback mapping once backend provides machine-readable error codes.
-          setVerificationResult({ status: "error_tampered" })
+          emitScanError()
         })
         .finally(() => {
           revokeObjectUrl()
           setIsLoading(false)
         })
     },
-    [getReader, isLoading, isScanning, revokeObjectUrl, runVerification]
+    [emitScanError, getReader, isLoading, isScanning, revokeObjectUrl, runDecodeAction]
   )
 
   const reset = useCallback(() => {
     stopWebcamScan()
     revokeObjectUrl()
-    setVerificationResult(null)
+    setScanResult(null)
     setIsLoading(false)
   }, [revokeObjectUrl, stopWebcamScan])
 
@@ -160,7 +181,7 @@ export function useQRScanner(): UseQRScannerResult {
     stopWebcamScan,
     isScanning,
     handleFileUpload,
-    verificationResult,
+    scanResult,
     isLoading,
     reset,
   }

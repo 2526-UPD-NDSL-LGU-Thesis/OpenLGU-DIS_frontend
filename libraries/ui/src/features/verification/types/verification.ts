@@ -1,6 +1,6 @@
-/* Shared types of verification feature */
+// TODO need to review this
 
-export type issuerType = "LGU" | "NATIONAL"
+export type IssuerType = "LGU" | "NATIONAL"
 
 export type VerificationResult =
   | "idle"
@@ -14,9 +14,10 @@ export type VerificationResult =
   | "error_other"
 // TODO: migrate to https://www.typescriptlang.org/docs/handbook/enums.html
 
+
 /* Backend Dependent */
 
-export interface IdDetails { // TODO possibly have a better agreed upon set of fields
+export interface IdDetails {// TODO possibly have a better agreed upon set of fields
   local_id: string
   full_name: string
   dob: string
@@ -25,7 +26,7 @@ export interface IdDetails { // TODO possibly have a better agreed upon set of f
   email: string
   phone: string
   face: string
-  issuerType: issuerType
+  issuerType: IssuerType
 }
 
 export interface QRVerifyRequestBody {
@@ -33,7 +34,7 @@ export interface QRVerifyRequestBody {
 }
 
 export interface QRVerifyResponseBody {
-  error?: VerificationResult,
-  message?: string,
-  cwt: Omit<IdDetails, 'issuerType'>,
+  error?: VerificationResult
+  message?: string
+  cwt: Omit<IdDetails, "issuerType">
 }
