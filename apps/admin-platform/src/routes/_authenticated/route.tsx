@@ -1,6 +1,5 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { AppSidebar } from "#/components/Sidebar/app-sidebar"
-import { SectionCards } from "#/components/section-cards"
 import { SiteHeader } from "#/components/site-header"
 import {
   SidebarInset,
@@ -8,9 +7,11 @@ import {
 } from "@openlguid/ui/components/sidebar"
 
 
-export const Route = createFileRoute('/app')({ component: App })
+export const Route = createFileRoute('/_authenticated')({
+  component: RouteComponent,
+})
 
-function App() {
+function RouteComponent() {
   return (
     <SidebarProvider
       style={

@@ -14,9 +14,9 @@ export function NavMain({
 }: {
   items: {
     title: string
-    url: string
+    to: string
     icon?: React.ReactNode
-  }[]
+  }[] // Enable type checking here https://tanstack.com/router/latest/docs/guide/type-utilities
 }) {
   return (
     <SidebarGroup>
@@ -47,7 +47,7 @@ export function NavMain({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton tooltip={item.title}>
-                <Link to={item.url}>
+                <Link to={item.to}>
                   {item.icon}
                   <span>{item.title}</span>
                 </Link>

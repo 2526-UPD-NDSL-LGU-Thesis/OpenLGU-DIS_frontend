@@ -3,7 +3,7 @@ import { useTheme } from "./theme-provider";
 // Components
 import { Button } from "@openlguid/ui/components/button";
 
-export default function ThemeToggle() {
+export function ThemeToggle() {
     const { theme, setTheme } = useTheme();
 
     return (

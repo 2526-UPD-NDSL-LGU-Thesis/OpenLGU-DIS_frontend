@@ -4,11 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "vite build",
     "check-types": "tsc -b --noEmit",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@openlguid/ui": "workspace:*",
@@ -22,8 +23,9 @@
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
+    "@faker-js/faker": "catalog:",
     "@openlguid/typescript-config": "workspace:*",
-    "@types/node": "^24.12.0",
+    "@types/node": "^24.12.2",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
@@ -33,11 +35,18 @@
     "eslint-plugin-react-refresh": "catalog:",
     "eslint-plugin-react-x": "catalog:",
     "globals": "^16.5.0",
+    "msw": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "imports": {
     "#*": "./src/*"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

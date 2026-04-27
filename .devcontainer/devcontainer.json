@@ -36,7 +36,7 @@
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [6080],
+	"forwardPorts": [6080, 2999, 3000],
 	"portsAttributes": {
 		"6080": {
 			"label": "desktop",
@@ -57,7 +57,11 @@
 				"GitHub.copilot-chat",
 				"ms-toolsai.jupyter",
 				"mads-hartmann.bash-ide-vscode",
-				"ms-azuretools.vscode-containers"
+				"ms-azuretools.vscode-containers",
+				"vitest.explorer",
+				"vivaxy.vscode-conventional-commits",
+				"DavidAnson.vscode-markdownlint",
+				"yzhang.markdown-all-in-one"
 			]
 		}
 	}

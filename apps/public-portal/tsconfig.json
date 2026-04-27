@@ -1,5 +1,11 @@
 {
   "extends": "@openlguid/typescript-config/base.json",
+  "compilerOptions": {
+    "paths": {
+      "#/*": ["./src/*"],
+      "@openlguid/ui/*": ["../../libraries/ui/src/*"]
+    }
+  },
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }

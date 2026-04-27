@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
 } from "@openlguid/ui/components/sidebar"
 import { LayoutDashboardIcon, ListIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
-import { Link } from "@tanstack/react-router"
+import { Link, linkOptions } from "@tanstack/react-router"
 
 const dummyData = {
   user: {
@@ -136,23 +136,23 @@ const dummyData = {
 }
 
 
-const navMainItems = [
+const navMainItems = linkOptions([
     {
       title: "ID Registration",
-      url: "/app/id-registration", // TODO how to have this auto-update?
+      to: "/id-registration", // TODO how to have this auto-update?
       // icon: (
       //   <LayoutDashboardIcon />
       // ),
     },
     {
       title: "Service Claiming",
-      url: "/app/service-claim",
+      to: "/service-claim",
       // icon: (
       //   <ListIcon
       //   />
       // ),
     }
-];
+]);
 
 
 
@@ -165,7 +165,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <Link to="/app"> {/* TODO: fix the styling here to not be block elements + autoupdating links */}
+              <Link to="/"> {/* TODO: fix the styling here to not be block elements + autoupdating links */}
                 <CommandIcon className="size-5!" />
                 <span className="text-base font-semibold">OpenLGUID</span> 
               </Link>

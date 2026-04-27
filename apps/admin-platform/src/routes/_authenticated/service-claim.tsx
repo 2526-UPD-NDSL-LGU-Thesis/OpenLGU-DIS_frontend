@@ -1,9 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/app/service-claim')({
+export const Route = createFileRoute('/_authenticated/service-claim')({
   component: RouteComponent,
 })
 
+
 function RouteComponent() {
-  return <div>Hello "/service-claim"!</div>
+  return (
+  <main>
+    test
+  </main>);
 }
