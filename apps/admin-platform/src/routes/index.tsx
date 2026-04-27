@@ -1,6 +1,5 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { AppSidebar } from "#/components/Sidebar/app-sidebar"
-import { SectionCards } from "#/components/section-cards"
 import { SiteHeader } from "#/components/site-header"
 import {
   SidebarInset,

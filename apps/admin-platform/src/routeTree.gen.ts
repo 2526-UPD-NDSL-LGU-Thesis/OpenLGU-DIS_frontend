@@ -9,11 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AppRouteImport } from './routes/app'
+import { Route as LoginRouteImport } from './routes/(auth)/login.tsx'
+import { Route as AppRouteImport } from './routes/index.tsx'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as AppServiceClaimRouteImport } from './routes/app.service-claim'
-import { Route as AppIdRegistrationRouteImport } from './routes/app.id-registration'
+import { Route as AppServiceClaimRouteImport } from './routes/service-claim.tsx'
+import { Route as AppIdRegistrationRouteImport } from './routes/id-registration.tsx'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
