@@ -9,146 +9,104 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/(auth)/login.tsx'
-import { Route as AppRouteImport } from './routes/index.tsx'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AppServiceClaimRouteImport } from './routes/service-claim.tsx'
-import { Route as AppIdRegistrationRouteImport } from './routes/id-registration.tsx'
+import { Route as ServiceClaimRouteImport } from './routes/service-claim'
+import { Route as IdRegistrationRouteImport } from './routes/id-registration'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as authLoginRouteImport } from './routes/(auth)/login'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
+const ServiceClaimRoute = ServiceClaimRouteImport.update({
+  id: '/service-claim',
+  path: '/service-claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdRegistrationRoute = IdRegistrationRouteImport.update({
+  id: '/id-registration',
+  path: '/id-registration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authLoginRoute = authLoginRouteImport.update({
+  id: '/(auth)/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppServiceClaimRoute = AppServiceClaimRouteImport.update({
-  id: '/service-claim',
-  path: '/service-claim',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppIdRegistrationRoute = AppIdRegistrationRouteImport.update({
-  id: '/id-registration',
-  path: '/id-registration',
-  getParentRoute: () => AppRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
-  '/about': typeof AboutRoute
-  '/app': typeof AppRouteWithChildren
-  '/login': typeof LoginRoute
-  '/app/id-registration': typeof AppIdRegistrationRoute
-  '/app/service-claim': typeof AppServiceClaimRoute
+  '/': typeof IndexRoute
+  '/id-registration': typeof IdRegistrationRoute
+  '/service-claim': typeof ServiceClaimRoute
+  '/login': typeof authLoginRoute
 }
 export interface FileRoutesByTo {
-  '/about': typeof AboutRoute
-  '/app': typeof AppRouteWithChildren
-  '/login': typeof LoginRoute
-  '/app/id-registration': typeof AppIdRegistrationRoute
-  '/app/service-claim': typeof AppServiceClaimRoute
+  '/': typeof IndexRoute
+  '/id-registration': typeof IdRegistrationRoute
+  '/service-claim': typeof ServiceClaimRoute
+  '/login': typeof authLoginRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/about': typeof AboutRoute
-  '/app': typeof AppRouteWithChildren
-  '/login': typeof LoginRoute
-  '/app/id-registration': typeof AppIdRegistrationRoute
-  '/app/service-claim': typeof AppServiceClaimRoute
+  '/': typeof IndexRoute
+  '/id-registration': typeof IdRegistrationRoute
+  '/service-claim': typeof ServiceClaimRoute
+  '/(auth)/login': typeof authLoginRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/about'
-    | '/app'
-    | '/login'
-    | '/app/id-registration'
-    | '/app/service-claim'
+  fullPaths: '/' | '/id-registration' | '/service-claim' | '/login'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/about'
-    | '/app'
-    | '/login'
-    | '/app/id-registration'
-    | '/app/service-claim'
-  id:
-    | '__root__'
-    | '/about'
-    | '/app'
-    | '/login'
-    | '/app/id-registration'
-    | '/app/service-claim'
+  to: '/' | '/id-registration' | '/service-claim' | '/login'
+  id: '__root__' | '/' | '/id-registration' | '/service-claim' | '/(auth)/login'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AboutRoute: typeof AboutRoute
-  AppRoute: typeof AppRouteWithChildren
-  LoginRoute: typeof LoginRoute
+  IndexRoute: typeof IndexRoute
+  IdRegistrationRoute: typeof IdRegistrationRoute
+  ServiceClaimRoute: typeof ServiceClaimRoute
+  authLoginRoute: typeof authLoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
+    '/service-claim': {
+      id: '/service-claim'
+      path: '/service-claim'
+      fullPath: '/service-claim'
+      preLoaderRoute: typeof ServiceClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/id-registration': {
+      id: '/id-registration'
+      path: '/id-registration'
+      fullPath: '/id-registration'
+      preLoaderRoute: typeof IdRegistrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/login': {
+      id: '/(auth)/login'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+      preLoaderRoute: typeof authLoginRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/service-claim': {
-      id: '/app/service-claim'
-      path: '/service-claim'
-      fullPath: '/app/service-claim'
-      preLoaderRoute: typeof AppServiceClaimRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/id-registration': {
-      id: '/app/id-registration'
-      path: '/id-registration'
-      fullPath: '/app/id-registration'
-      preLoaderRoute: typeof AppIdRegistrationRouteImport
-      parentRoute: typeof AppRoute
     }
   }
 }
 
-interface AppRouteChildren {
-  AppIdRegistrationRoute: typeof AppIdRegistrationRoute
-  AppServiceClaimRoute: typeof AppServiceClaimRoute
-}
-
-const AppRouteChildren: AppRouteChildren = {
-  AppIdRegistrationRoute: AppIdRegistrationRoute,
-  AppServiceClaimRoute: AppServiceClaimRoute,
-}
-
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
-  AboutRoute: AboutRoute,
-  AppRoute: AppRouteWithChildren,
-  LoginRoute: LoginRoute,
+  IndexRoute: IndexRoute,
+  IdRegistrationRoute: IdRegistrationRoute,
+  ServiceClaimRoute: ServiceClaimRoute,
+  authLoginRoute: authLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

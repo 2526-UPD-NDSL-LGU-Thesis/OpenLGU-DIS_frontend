@@ -7,7 +7,7 @@ import {
 } from "@openlguid/ui/components/sidebar"
 
 
-export const Route = createFileRoute('/app')({ component: App })
+export const Route = createFileRoute('/')({ component: App })
 
 function App() {
   return (
