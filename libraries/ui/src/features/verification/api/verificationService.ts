@@ -54,12 +54,22 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
     }
 
     const responseBody = (await response.json()) as QRVerifyResponseBody
+    console.log(responseBody);
 
+    const qrDeet = responseBody.id_details;
+    const cwt = qrDeet['169'];
+    // TODO fix the parsing of data
     const idDetails = {
-      ...responseBody.cwt,
+      full_name: cwt['4'],
+      dob: cwt['8'],
+      gender: cwt['9'],
+      email: cwt['11'], 
+      phone: cwt['12'],
+      face: cwt['62'],            
+      local_id: cwt['75'],
       issuerType: "LGU",
     } satisfies IdDetails
-
+    console.log(idDetails);
     return {
       result: "success",
       idDetails,

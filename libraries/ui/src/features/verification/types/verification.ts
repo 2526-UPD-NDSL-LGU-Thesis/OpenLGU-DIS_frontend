@@ -22,7 +22,7 @@ export interface IdDetails {// TODO possibly have a better agreed upon set of fi
   full_name: string
   dob: string
   gender: string
-  location: string
+  //location: string
   email: string
   phone: string
   face: string
@@ -36,5 +36,5 @@ export interface QRVerifyRequestBody {
 export interface QRVerifyResponseBody {
   error?: VerificationResult
   message?: string
-  cwt: Omit<IdDetails, "issuerType">
+  id_details: Omit<IdDetails, "issuerType">
 }

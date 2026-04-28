@@ -26,7 +26,7 @@ export function getMockVerificationResult(
   return {
     result: "success",
     idDetails: {
-      ...responseBody.cwt,
+      ...responseBody.id_details,
       issuerType: "LGU",
     },
     message: "Loaded from local mock data utility.",
@@ -70,7 +70,7 @@ function createRandomSuccessResponseBody(): QRVerifyResponseBody {
   const email = faker.internet.email({ firstName, lastName })
 
   return {
-    cwt: {
+    id_details: {
       local_id: faker.string.numeric(10),
       full_name: faker.person.fullName(),
       dob: faker.date.birthdate().toDateString(),
@@ -85,7 +85,7 @@ function createRandomSuccessResponseBody(): QRVerifyResponseBody {
 
 function createFixedSuccessResponseBody(): QRVerifyResponseBody {
   return {
-    cwt: {
+    id_details: {
       local_id: "1000",
       full_name: "Juan Dela Cruz",
       dob: "2000-01-01",

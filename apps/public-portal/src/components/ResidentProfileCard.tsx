@@ -21,8 +21,8 @@ export function ResidentProfileCard({ result, profile }: ResidentProfileCardProp
         <div className="flex items-center gap-4">
           <img
           // TODO: Mock src here replacing the standard:
-            // src={"data:image/jpg;base64," profile.face}
-            src={"data:image/svg+xml;base64," + profile.face}
+            src={"data:image/jpg;base64," + profile.face}
+            //src={"data:image/svg+xml;base64," + profile.face}
             alt={`${profile.full_name} face photo`}
             className="size-24 rounded-2xl border object-cover"
           />
