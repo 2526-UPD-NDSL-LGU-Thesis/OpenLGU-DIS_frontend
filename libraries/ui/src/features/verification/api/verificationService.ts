@@ -54,7 +54,6 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
     }
 
     const responseBody = (await response.json()) as QRVerifyResponseBody
-    console.log(responseBody);
 
     const qrDeet = responseBody.id_details;
     const cwt = qrDeet['169'];
