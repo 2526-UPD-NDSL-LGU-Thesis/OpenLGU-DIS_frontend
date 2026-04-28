@@ -12,8 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
-import { Route as AuthenticatedServiceClaimRouteImport } from './routes/_authenticated/service-claim'
 import { Route as AuthenticatedIdRegistrationRouteImport } from './routes/_authenticated/id-registration'
+import { Route as AuthenticatedServiceClaimIndexRouteImport } from './routes/_authenticated/service-claim/index'
+import { Route as AuthenticatedServiceClaimServiceNameRouteImport } from './routes/_authenticated/service-claim/$serviceName'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -29,51 +30,71 @@ const PublicLoginRoute = PublicLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedServiceClaimRoute =
-  AuthenticatedServiceClaimRouteImport.update({
-    id: '/service-claim',
-    path: '/service-claim',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedIdRegistrationRoute =
   AuthenticatedIdRegistrationRouteImport.update({
     id: '/id-registration',
     path: '/id-registration',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedServiceClaimIndexRoute =
+  AuthenticatedServiceClaimIndexRouteImport.update({
+    id: '/service-claim/',
+    path: '/service-claim/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedServiceClaimServiceNameRoute =
+  AuthenticatedServiceClaimServiceNameRouteImport.update({
+    id: '/service-claim/$serviceName',
+    path: '/service-claim/$serviceName',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/id-registration': typeof AuthenticatedIdRegistrationRoute
-  '/service-claim': typeof AuthenticatedServiceClaimRoute
   '/login': typeof PublicLoginRoute
+  '/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/service-claim/': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRoutesByTo {
   '/id-registration': typeof AuthenticatedIdRegistrationRoute
-  '/service-claim': typeof AuthenticatedServiceClaimRoute
   '/login': typeof PublicLoginRoute
   '/': typeof AuthenticatedIndexRoute
+  '/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/service-claim': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_authenticated/id-registration': typeof AuthenticatedIdRegistrationRoute
-  '/_authenticated/service-claim': typeof AuthenticatedServiceClaimRoute
   '/_public/login': typeof PublicLoginRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/_authenticated/service-claim/': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/id-registration' | '/service-claim' | '/login'
+  fullPaths:
+    | '/'
+    | '/id-registration'
+    | '/login'
+    | '/service-claim/$serviceName'
+    | '/service-claim/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/id-registration' | '/service-claim' | '/login' | '/'
+  to:
+    | '/id-registration'
+    | '/login'
+    | '/'
+    | '/service-claim/$serviceName'
+    | '/service-claim'
   id:
     | '__root__'
     | '/_authenticated'
     | '/_authenticated/id-registration'
-    | '/_authenticated/service-claim'
     | '/_public/login'
     | '/_authenticated/'
+    | '/_authenticated/service-claim/$serviceName'
+    | '/_authenticated/service-claim/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,13 +125,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/service-claim': {
-      id: '/_authenticated/service-claim'
-      path: '/service-claim'
-      fullPath: '/service-claim'
-      preLoaderRoute: typeof AuthenticatedServiceClaimRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/id-registration': {
       id: '/_authenticated/id-registration'
       path: '/id-registration'
@@ -118,19 +132,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIdRegistrationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/service-claim/': {
+      id: '/_authenticated/service-claim/'
+      path: '/service-claim'
+      fullPath: '/service-claim/'
+      preLoaderRoute: typeof AuthenticatedServiceClaimIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/service-claim/$serviceName': {
+      id: '/_authenticated/service-claim/$serviceName'
+      path: '/service-claim/$serviceName'
+      fullPath: '/service-claim/$serviceName'
+      preLoaderRoute: typeof AuthenticatedServiceClaimServiceNameRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedIdRegistrationRoute: typeof AuthenticatedIdRegistrationRoute
-  AuthenticatedServiceClaimRoute: typeof AuthenticatedServiceClaimRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedServiceClaimServiceNameRoute: typeof AuthenticatedServiceClaimServiceNameRoute
+  AuthenticatedServiceClaimIndexRoute: typeof AuthenticatedServiceClaimIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIdRegistrationRoute: AuthenticatedIdRegistrationRoute,
-  AuthenticatedServiceClaimRoute: AuthenticatedServiceClaimRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedServiceClaimServiceNameRoute:
+    AuthenticatedServiceClaimServiceNameRoute,
+  AuthenticatedServiceClaimIndexRoute: AuthenticatedServiceClaimIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

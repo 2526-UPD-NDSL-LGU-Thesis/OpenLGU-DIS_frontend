@@ -27,6 +27,10 @@ interface VerificationDialogProps {
   open: boolean
   onOpenChange: (nextOpen: boolean) => void
   onVerificationResult: (result: QRVerifyReturn) => void
+  onScanComplete?: (payload: {
+    rawQRValue: string
+    verificationResult: QRVerifyReturn
+  }) => void
   onVerifyingChange?: (isVerifying: boolean) => void
 }
 
@@ -34,11 +38,13 @@ export function VerificationDialog({
   open,
   onOpenChange,
   onVerificationResult,
+  onScanComplete,
   onVerifyingChange,
 }: VerificationDialogProps) {
   const [activeTab, setActiveTab] = useState("webcam")
   const [isDragging, setIsDragging] = useState(false)
   const hasAutoStartedRef = useRef(false)
+  const latestRawQRValueRef = useRef<string | null>(null)
   const fileInputId = useId()
 
   const {
@@ -51,7 +57,10 @@ export function VerificationDialog({
     isLoading,
     reset,
   } = useQRScanner<QRVerifyReturn>({
-    onDecode: verifyQR,
+    onDecode: async (rawQRValue) => {
+      latestRawQRValueRef.current = rawQRValue
+      return verifyQR(rawQRValue)
+    },
     onScanError: () => ({
       result: "error_tampered",
       message: "Unable to decode QR from the provided camera frame or image.",
@@ -91,9 +100,16 @@ export function VerificationDialog({
       return
     }
 
+    if (latestRawQRValueRef.current) {
+      onScanComplete?.({
+        rawQRValue: latestRawQRValueRef.current,
+        verificationResult: scanResult,
+      })
+    }
+
     onVerificationResult(scanResult)
     onOpenChange(false)
-  }, [onOpenChange, onVerificationResult, scanResult])
+  }, [onOpenChange, onScanComplete, onVerificationResult, scanResult])
 
   const handleOpenChange = (nextOpen: boolean) => {
     onOpenChange(nextOpen)
@@ -101,6 +117,7 @@ export function VerificationDialog({
     if (!nextOpen) {
       reset()
       setActiveTab("webcam")
+      latestRawQRValueRef.current = null
       hasAutoStartedRef.current = false
       onVerifyingChange?.(false)
     }
