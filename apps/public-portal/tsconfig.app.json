@@ -1,12 +1,13 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
 
     // Outputs
-    
+    "emitDeclarationOnly": false,
 
     // Environment Set-up
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
 
     // Module System
     "module": "ESNext",

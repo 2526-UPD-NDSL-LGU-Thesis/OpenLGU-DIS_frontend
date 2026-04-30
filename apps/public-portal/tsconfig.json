@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@openlguid/typescript-config/base.json",
   "compilerOptions": {
     "paths": {
@@ -8,6 +9,6 @@
   },
   "references": [
     { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    { "path": "./tsconfig.vite.json" }
   ]
 }
