@@ -5,24 +5,10 @@ import type {
   CreateServicePayload,
   ServiceItem,
 } from "#/features/service-claim/types/serviceClaim"
-
-function getApiBaseUrl(): string {
-  const rawBaseUrl = import.meta.env.VITE_API_BASE_URL ?? ""
-  return rawBaseUrl.replace(/\/$/, "")
-}
-
-function toUrl(path: string): string {
-  const base = getApiBaseUrl()
-
-  if (!base) {
-    return path
-  }
-
-  return `${base}${path}`
-}
+import { authenticatedApiClient } from "#/features/auth/auth"
 
 export async function getServices(): Promise<ServiceItem[]> {
-  const response = await fetch(toUrl("/services/"))
+  const response = await authenticatedApiClient.request("/services/")
 
   if (!response.ok) {
     throw new Error("Failed to fetch services")
@@ -32,8 +18,7 @@ export async function getServices(): Promise<ServiceItem[]> {
 }
 
 export async function createService(payload: CreateServicePayload): Promise<ServiceItem> {
-console.log(payload);
-  const response = await fetch(toUrl("/services/"), {
+  const response = await authenticatedApiClient.request("/services/", {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -50,7 +35,7 @@ console.log(payload);
 
 export async function getClaims(serviceName: string): Promise<ClaimItem[]> {
   const encodedServiceName = encodeURIComponent(serviceName)
-  const response = await fetch(toUrl(`/services/${encodedServiceName}/claims/`))
+  const response = await authenticatedApiClient.request(`/services/${encodedServiceName}/claims/`)
 
   if (!response.ok) {
     throw new Error("Failed to fetch claims")
@@ -61,8 +46,7 @@ export async function getClaims(serviceName: string): Promise<ClaimItem[]> {
 
 export async function createClaim(serviceName: string, rawQRValue: string): Promise<ClaimItem> {
   const encodedServiceName = encodeURIComponent(serviceName)
-  console.log(encodedServiceName);
-  const response = await fetch(toUrl(`/claim/${encodedServiceName}/`), {
+  const response = await authenticatedApiClient.request(`/claim/${encodedServiceName}/`, {
     method: "POST",
     headers: {
       "content-type": "application/json",

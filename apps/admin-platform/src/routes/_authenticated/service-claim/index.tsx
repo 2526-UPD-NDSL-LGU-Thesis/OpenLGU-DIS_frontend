@@ -17,7 +17,7 @@ import { Input } from "@openlguid/ui/components/input"
 import {
   createService,
   getServices,
-} from "#/api/serviceClaimAPI"
+} from "#/features/service-claim/serviceClaimAPI"
 import type {
   ClaimType,
   CreateServicePayload,

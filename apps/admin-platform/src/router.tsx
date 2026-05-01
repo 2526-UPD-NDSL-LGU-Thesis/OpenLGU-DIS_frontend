@@ -3,14 +3,23 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 
-import type { ReactNode } from 'react'
-import { QueryClient } from '@tanstack/react-query'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
-import TanstackQueryProvider, {
-  getContext,
-} from './integrations/tanstack-query/root-provider'
+import { getContext } from './integrations/tanstack-query/root-provider'
 
-export function getRouter() {
+let mockWorkerStarted = false
+
+async function ensureMockWorkerStarted() { // TODO ASK is this really necessary?
+  if (!import.meta.env.DEV || typeof window === 'undefined' || mockWorkerStarted) {
+    return
+  }
+
+  const { worker } = await import('./tests/browser')
+  await worker.start({ onUnhandledRequest: 'bypass' })
+  mockWorkerStarted = true
+}
+
+export async function getRouter() {
+  await ensureMockWorkerStarted()
   const context = getContext()
 
   const router = createTanStackRouter({

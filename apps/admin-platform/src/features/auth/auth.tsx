@@ -1,18 +1,30 @@
-import { create } from 'zustand';
-import type { User } from '#/types/users.tsx';
+import { create } from "zustand"
 
-// TODO connect to authAPI
+import { createAuthenticatedApiClient } from "./authenticated-api-client"
+import { createAuthSessionService } from "./auth-session-service"
+import type { AuthStateSnapshot, LoginResult } from "./auth-session-service"
+import type { LoginCredentials } from "./authAPI"
 
 interface AuthState {
-    user: User | null,
-    isAuthenticated: boolean,
-    //login: (username: string, password: string) => Promise<void>,
-    //logout: () => Promise<void>
+  session: AuthStateSnapshot
+  login: (credentials: LoginCredentials) => Promise<LoginResult>
+  clear: () => void
 }
 
-const useAuthStore = create<AuthState>()((set) => ({
-    user: null,
-    isAuthenticated: false,
-    //login: async (username, password) => set((state) => )
-}));
+export const authSessionService = createAuthSessionService()
+export const authenticatedApiClient = createAuthenticatedApiClient({ authSessionService })
 
+const useAuthStore = create<AuthState>()((set) => ({
+  session: authSessionService.getAuthState(),
+  async login(credentials) {
+    const result = await authSessionService.login(credentials)
+    set({ session: authSessionService.getAuthState() })
+    return result
+  },
+  clear() {
+    authSessionService.clear()
+    set({ session: authSessionService.getAuthState() })
+  },
+}))
+
+export default useAuthStore

@@ -1,9 +1,19 @@
 # Dev Container
 
 ## Place your personal dev container config here
+
 .devcontainer/personal
+
+# A.I.
+
+## Personal
+
 docs/agents
+docs/adr
 AGENTS.md
+.scratch
+CONTEXT.md
+CONTEXT-MAP.md
 
 # Logs
 logs
