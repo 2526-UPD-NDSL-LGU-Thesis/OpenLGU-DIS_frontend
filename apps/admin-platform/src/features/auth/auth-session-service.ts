@@ -62,6 +62,7 @@ export type EnsureAuthenticatedResult = EnsureAuthenticatedSuccess | EnsureAuthe
 export interface AuthSessionService {
   login: (credentials: LoginCredentials) => Promise<LoginResult>
   ensureAuthenticated: (args: { redirectTo: string }) => Promise<EnsureAuthenticatedResult>
+  refreshSession: () => Promise<boolean>
   getAuthState: () => AuthStateSnapshot
   clear: () => void
 }
@@ -112,6 +113,24 @@ export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthA
 
   const clear = () => {
     authState = { ...unauthenticatedState }
+  }
+
+  const refreshAndHydrate = async (): Promise<boolean> => {
+    const tokenPayload = await apiClient.requestRefreshAccessToken()
+    const identityPayload = await apiClient.requestIdentityProfile(tokenPayload.access)
+    const identityProfile = normalizeIdentityProfile(identityPayload)
+
+    if (!identityProfile) {
+      return false
+    }
+
+    authState = {
+      phase: "authenticated",
+      accessToken: tokenPayload.access,
+      identityProfile,
+    }
+
+    return true
   }
 
   return {
@@ -170,26 +189,30 @@ export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthA
         return { ok: true, state: authState }
       }
 
-      try { // Silent refresh if expired
-        const tokenPayload = await apiClient.requestRefreshAccessToken()
-        const identityPayload = await apiClient.requestIdentityProfile(tokenPayload.access)
-        const identityProfile = normalizeIdentityProfile(identityPayload)
-
-        if (!identityProfile) {
+      try {
+        const refreshed = await refreshAndHydrate()
+        if (!refreshed) {
           clear()
           return { ok: false, redirectTo: `/_public/login?redirect=${encodeURIComponent(redirectTo)}` }
         }
-
-        authState = {
-          phase: "authenticated",
-          accessToken: tokenPayload.access,
-          identityProfile,
-        }
-
         return { ok: true, state: authState }
       } catch {
         clear()
         return { ok: false, redirectTo: `/_public/login?redirect=${encodeURIComponent(redirectTo)}` }
+      }
+    },
+
+    async refreshSession() {
+      try {
+        const refreshed = await refreshAndHydrate()
+        if (!refreshed) {
+          clear()
+          return false
+        }
+        return true
+      } catch {
+        clear()
+        return false
       }
     },
 

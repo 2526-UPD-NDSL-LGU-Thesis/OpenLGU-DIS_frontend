@@ -1,5 +1,6 @@
 import { create } from "zustand"
 
+import { createAuthenticatedApiClient } from "./authenticated-api-client"
 import { createAuthSessionService } from "./auth-session-service"
 import type { AuthStateSnapshot, LoginResult } from "./auth-session-service"
 import type { LoginCredentials } from "./authAPI"
@@ -11,6 +12,7 @@ interface AuthState {
 }
 
 export const authSessionService = createAuthSessionService()
+export const authenticatedApiClient = createAuthenticatedApiClient({ authSessionService })
 
 const useAuthStore = create<AuthState>()((set) => ({
   session: authSessionService.getAuthState(),
