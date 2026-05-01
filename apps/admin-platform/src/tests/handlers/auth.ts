@@ -1,24 +1,64 @@
+import { faker } from "@faker-js/faker"
+import { http, HttpResponse } from "msw"
 
-/* MSW handlers for Auth API routes in tests/development. */
+import { authApiBaseUrl } from "#/features/auth/authAPI"
 
+const CANONICAL_ROLES = [
+  "SUPER",
+  "SECTOR_ADMIN",
+  "SERVICE_CLAIM_ADMIN",
+  "SECTOR_EMPLOYEE",
+  "SERVICE_CLAIM_EMPLOYEE",
+  "ID_MANAGEMENT_ADMIN",
+  "ID_MANAGEMENT_EMPLOYEE",
+] as const
 
-import { http, HttpResponse, passthrough } from 'msw';
+type CanonicalRole = (typeof CANONICAL_ROLES)[number]
 
-const apiBase = import.meta.env.VITE_API_BASE_URL;
+export function buildMockAccessToken(): string {
+  return faker.string.alphanumeric(48)
+}
+
+export function buildMockIdentityProfile(overrides?: {
+  username?: string
+  roles?: CanonicalRole[]
+}): {
+  username: string
+  roles: CanonicalRole[]
+} {
+  return {
+    username: overrides?.username ?? faker.internet.username(),
+    roles:
+      overrides?.roles ??
+      faker.helpers.arrayElements(CANONICAL_ROLES, {
+        min: 1,
+        max: Math.min(2, CANONICAL_ROLES.length),
+      }),
+  }
+}
 
 export const authHandlers = [
-    http.post(`${apiBase}/token/`, async ({ request }) => {
+  http.post(`${authApiBaseUrl}/token/`, async ({ request }) => {
+    const payload = (await request.json()) as Partial<{ username: string; password: string }>
 
-        const body = await request.json();
+    if (!payload.username || !payload.password) {
+      return HttpResponse.json({ detail: "Invalid credentials" }, { status: 401 })
+    }
 
-        const mockedResponse = body
+    return HttpResponse.json(
+      {
+        access: buildMockAccessToken(),
+      },
+      { status: 200 }
+    )
+  }),
 
-        if (mockedResponse) {
-            return HttpResponse.json(mockedResponse.body, { status: mockedResponse.status })
-        }
+  http.get(`${authApiBaseUrl}/me/`, ({ request }) => {
+    const authHeader = request.headers.get("authorization")
+    if (!authHeader?.startsWith("Bearer ")) {
+      return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
+    }
 
-
-        return passthrough();
-    }),
-
-];
+    return HttpResponse.json(buildMockIdentityProfile(), { status: 200 })
+  }),
+]

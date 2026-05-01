@@ -1,52 +1,106 @@
 
-interface loginResponseBody {
-  accessToken: string,
+import type { QueryClient } from "@tanstack/react-query"
+
+export const authApiBaseUrl = import.meta.env.VITE_API_BASE_URL
+
+export interface LoginCredentials {
+  username: string
+  password: string
 }
 
-interface loginReturn {
-
+export interface AccessTokenPayload {
+  access: string
 }
 
-class HTTPResponseError extends Error {
-  response: Response
+export interface IdentityProfilePayload {
+  username: string
+  roles: string[]
+}
 
-  constructor(response: Response) {
-    super(`HTTPResponseError: ${response.status} ${response.statusText}`)
-    this.name = "HTTPResponseError"
-    this.response = response
+type AuthApiErrorCode = "invalid_credentials" | "response_not_json" | "missing_access_token" | "identity_profile_failed"
+
+export class AuthApiError extends Error {
+  code: AuthApiErrorCode
+
+  constructor(code: AuthApiErrorCode, message: string) {
+    super(message)
+    this.name = "AuthApiError"
+    this.code = code
   }
 }
 
-export async function login(username: string, password: string): Promise<loginReturn> {
-    const apiBase = import.meta.env.VITE_API_BASE_URL
+export interface AuthApiClient {
+  requestAccessToken: (credentials: LoginCredentials) => Promise<AccessTokenPayload>
+  requestIdentityProfile: (accessToken: string) => Promise<IdentityProfilePayload>
+}
 
-    const requestBody = {
-      username,
-      password 
-    }
+function isJsonResponse(response: Response): boolean {
+  const contentType = response.headers.get("content-type")
+  return contentType !== null && contentType.includes("application/json")
+}
 
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    }
-    const response = await fetch(`${apiBase}/login/`, requestOptions)
+function toUrl(path: string): string {
+  return `${authApiBaseUrl}${path}`
+}
 
-    if (!response.ok) {
-      throw new HTTPResponseError(response)
-    }
+export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
+  return {
+    async requestAccessToken(credentials) {
+      return queryClient.fetchQuery({
+        queryKey: ["auth", "token-exchange", credentials.username],
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+        queryFn: async () => {
+          const response = await fetch(toUrl("/token/"), {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(credentials),
+          })
 
-    const contentType = response.headers.get("content-type")
-    if (!contentType || !contentType.includes("application/json")) {
-      return {
-        result: "error_response_is_not_declared_json",
-        message: "API returned a non-JSON response.",
-      }
-    }
+          if (!response.ok) {
+            throw new AuthApiError("invalid_credentials", "Invalid username or password.")
+          }
 
-    const responseBody = (await response.json()) as loginResponseBody
+          if (!isJsonResponse(response)) {
+            throw new AuthApiError("response_not_json", "Auth server returned non-JSON token response.")
+          }
 
-    return responseBody;
-};
+          const payload = (await response.json()) as Partial<AccessTokenPayload>
+          if (!payload.access) {
+            throw new AuthApiError("missing_access_token", "Auth server response is missing access token.")
+          }
+
+          return { access: payload.access }
+        },
+      })
+    },
+
+    async requestIdentityProfile(accessToken) {
+      return queryClient.fetchQuery({
+        queryKey: ["auth", "identity-profile"],
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+        queryFn: async () => {
+          const response = await fetch(toUrl("/me/"), {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            credentials: "include",
+          })
+
+          if (!response.ok || !isJsonResponse(response)) {
+            throw new AuthApiError("identity_profile_failed", "Unable to load LGU Employee identity profile.")
+          }
+
+          return (await response.json()) as IdentityProfilePayload
+        },
+      })
+    },
+  }
+}
