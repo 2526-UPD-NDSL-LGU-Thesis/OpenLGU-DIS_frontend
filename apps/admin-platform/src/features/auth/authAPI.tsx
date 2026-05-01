@@ -31,6 +31,7 @@ export class AuthApiError extends Error {
 
 export interface AuthApiClient {
   requestAccessToken: (credentials: LoginCredentials) => Promise<AccessTokenPayload>
+  requestRefreshAccessToken: () => Promise<AccessTokenPayload>
   requestIdentityProfile: (accessToken: string) => Promise<IdentityProfilePayload>
 }
 
@@ -99,6 +100,40 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
           }
 
           return (await response.json()) as IdentityProfilePayload
+        },
+      })
+    },
+
+    async requestRefreshAccessToken() {
+      return queryClient.fetchQuery({
+        queryKey: ["auth", "token-refresh"],
+        staleTime: 0,
+        gcTime: 0,
+        retry: false,
+        queryFn: async () => {
+          const response = await fetch(toUrl("/token/refresh/"), {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({}),
+          })
+
+          if (!response.ok) {
+            throw new AuthApiError("invalid_credentials", "Refresh session is invalid.")
+          }
+
+          if (!isJsonResponse(response)) {
+            throw new AuthApiError("response_not_json", "Auth server returned non-JSON refresh response.")
+          }
+
+          const payload = (await response.json()) as Partial<AccessTokenPayload>
+          if (!payload.access) {
+            throw new AuthApiError("missing_access_token", "Auth server refresh response is missing access token.")
+          }
+
+          return { access: payload.access }
         },
       })
     },

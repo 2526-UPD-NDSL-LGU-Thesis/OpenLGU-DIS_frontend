@@ -47,10 +47,29 @@ export interface LoginSuccess {
 
 export type LoginResult = LoginFailure | LoginSuccess
 
+export interface EnsureAuthenticatedSuccess {
+  ok: true
+  state: AuthStateSnapshot
+}
+
+export interface EnsureAuthenticatedRedirect {
+  ok: false
+  redirectTo: string
+}
+
+export type EnsureAuthenticatedResult = EnsureAuthenticatedSuccess | EnsureAuthenticatedRedirect
+
 export interface AuthSessionService {
   login: (credentials: LoginCredentials) => Promise<LoginResult>
+  ensureAuthenticated: (args: { redirectTo: string }) => Promise<EnsureAuthenticatedResult>
   getAuthState: () => AuthStateSnapshot
   clear: () => void
+}
+
+const initialAuthState: AuthStateSnapshot = {
+  phase: "unknown",
+  accessToken: null,
+  identityProfile: null,
 }
 
 const unauthenticatedState: AuthStateSnapshot = {
@@ -89,7 +108,7 @@ const defaultQueryClient = new QueryClient()
 const defaultAuthApiClient = createAuthApiClient(defaultQueryClient)
 
 export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthApiClient): AuthSessionService {
-  let authState: AuthStateSnapshot = { ...unauthenticatedState }
+  let authState: AuthStateSnapshot = { ...initialAuthState }
 
   const clear = () => {
     authState = { ...unauthenticatedState }
@@ -143,6 +162,34 @@ export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthA
             message: "Unable to load LGU Employee identity profile.",
           },
         }
+      }
+    },
+
+    async ensureAuthenticated({ redirectTo }) {
+      if (authState.phase === "authenticated" && authState.accessToken && authState.identityProfile) {
+        return { ok: true, state: authState }
+      }
+
+      try { // Silent refresh if expired
+        const tokenPayload = await apiClient.requestRefreshAccessToken()
+        const identityPayload = await apiClient.requestIdentityProfile(tokenPayload.access)
+        const identityProfile = normalizeIdentityProfile(identityPayload)
+
+        if (!identityProfile) {
+          clear()
+          return { ok: false, redirectTo: `/_public/login?redirect=${encodeURIComponent(redirectTo)}` }
+        }
+
+        authState = {
+          phase: "authenticated",
+          accessToken: tokenPayload.access,
+          identityProfile,
+        }
+
+        return { ok: true, state: authState }
+      } catch {
+        clear()
+        return { ok: false, redirectTo: `/_public/login?redirect=${encodeURIComponent(redirectTo)}` }
       }
     },
 

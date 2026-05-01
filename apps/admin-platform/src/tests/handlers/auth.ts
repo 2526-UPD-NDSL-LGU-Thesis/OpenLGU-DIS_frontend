@@ -53,6 +53,15 @@ export const authHandlers = [
     )
   }),
 
+  http.post(`${authApiBaseUrl}/token/refresh/`, () => {
+    return HttpResponse.json(
+      {
+        access: buildMockAccessToken(),
+      },
+      { status: 200 }
+    )
+  }),
+
   http.get(`${authApiBaseUrl}/me/`, ({ request }) => {
     const authHeader = request.headers.get("authorization")
     if (!authHeader?.startsWith("Bearer ")) {
