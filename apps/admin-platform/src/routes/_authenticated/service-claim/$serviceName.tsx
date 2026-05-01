@@ -15,7 +15,7 @@ import type {
 import {
   createClaim,
   getClaims,
-} from "#/features/service-claim/api/serviceClaimApi"
+} from "#/api/serviceClaimAPI"
 import type { ClaimItem } from "#/features/service-claim/types/serviceClaim"
 
 export const Route = createFileRoute("/_authenticated/service-claim/$serviceName")({
