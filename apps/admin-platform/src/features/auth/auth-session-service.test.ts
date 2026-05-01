@@ -153,7 +153,12 @@ describe("createAuthSessionService", () => {
 
     expect(result).toEqual({
       ok: false,
-      redirectTo: "/_public/login?redirect=%2F_authenticated%2Fid-registration%3Ftab%3D1",
+      redirect: {
+        to: "/_public/login",
+        search: {
+          redirect: "/_authenticated/id-registration?tab=1",
+        },
+      },
     })
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",

@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query"
+import { linkOptions } from "@tanstack/react-router"
 
 import { AuthApiError, createAuthApiClient } from "./authAPI"
 import type { AuthApiClient, LoginCredentials } from "./authAPI"
@@ -54,7 +55,12 @@ export interface EnsureAuthenticatedSuccess {
 
 export interface EnsureAuthenticatedRedirect {
   ok: false
-  redirectTo: string
+  redirect: {
+    to: "/_public/login"
+    search: {
+      redirect: string
+    }
+  }
 }
 
 export type EnsureAuthenticatedResult = EnsureAuthenticatedSuccess | EnsureAuthenticatedRedirect
@@ -107,6 +113,15 @@ function normalizeIdentityProfile(raw: unknown): IdentityProfile | null {
 
 const defaultQueryClient = new QueryClient()
 const defaultAuthApiClient = createAuthApiClient(defaultQueryClient)
+
+function buildPublicLoginRedirect(redirectTo: string) {
+  return linkOptions({
+    to: "/_public/login",
+    search: {
+      redirect: redirectTo,
+    },
+  })
+}
 
 export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthApiClient): AuthSessionService {
   let authState: AuthStateSnapshot = { ...initialAuthState }
@@ -193,12 +208,18 @@ export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthA
         const refreshed = await refreshAndHydrate()
         if (!refreshed) {
           clear()
-          return { ok: false, redirectTo: `/_public/login?redirect=${encodeURIComponent(redirectTo)}` }
+          return {
+            ok: false,
+            redirect: buildPublicLoginRedirect(redirectTo),
+          }
         }
         return { ok: true, state: authState }
       } catch {
         clear()
-        return { ok: false, redirectTo: `/_public/login?redirect=${encodeURIComponent(redirectTo)}` }
+        return {
+          ok: false,
+          redirect: buildPublicLoginRedirect(redirectTo),
+        }
       }
     },
 

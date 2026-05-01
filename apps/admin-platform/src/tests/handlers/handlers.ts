@@ -4,5 +4,6 @@
 // TODO BUT WHAT DO WE ACTUALLY DO IF DRIFT HAPPENS?
 
 import { authHandlers } from "#/tests/handlers/auth.ts";
+import { serviceClaimHandlers } from "#/tests/handlers/service-claim.ts";
 
-export const handlers = [...authHandlers];
+export const handlers = [...authHandlers, ...serviceClaimHandlers];
