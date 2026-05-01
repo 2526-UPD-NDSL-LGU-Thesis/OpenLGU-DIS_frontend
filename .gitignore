@@ -1,3 +1,10 @@
+# Dev Container
+
+## Place your personal dev container config here
+.devcontainer/personal
+docs/agents
+AGENTS.md
+
 # Logs
 logs
 *.log
