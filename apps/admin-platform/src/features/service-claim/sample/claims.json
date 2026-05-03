@@ -1,0 +1,38 @@
+[
+  {
+    "transaction_id": "34091861989692899300",
+    "amount": 1,
+    "claimed_at": "2026-05-02T23:05:33+08:00",
+    "notes": null,
+    "user": 4,
+    "service": "SERVICE22048350",
+    "claimed_by": 3
+  },
+  {
+    "transaction_id": "61546429921280541134",
+    "amount": 1,
+    "claimed_at": "2026-05-02T23:04:28+08:00",
+    "notes": null,
+    "user": 4,
+    "service": "SERVICE77688855",
+    "claimed_by": 3
+  },
+  {
+    "transaction_id": "86593905633487584895",
+    "amount": 1,
+    "claimed_at": "2026-05-02T23:01:35+08:00",
+    "notes": null,
+    "user": 3,
+    "service": "SERVICE23903124",
+    "claimed_by": 3
+  },
+  {
+    "transaction_id": "70330230582449245206",
+    "amount": 1,
+    "claimed_at": "2026-05-02T21:58:17+08:00",
+    "notes": null,
+    "user": 8,
+    "service": "SERVICE55474581",
+    "claimed_by": 3
+  }
+]

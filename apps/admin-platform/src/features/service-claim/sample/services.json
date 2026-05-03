@@ -1,0 +1,100 @@
+[
+  {
+    "id": "SERVICE19451444",
+    "name": "Jollibee Discount",
+    "description": "",
+    "max_claims_per_user": 3,
+    "claim_type": "periodic",
+    "refresh_interval": "daily",
+    "stocks_type": "unlimited",
+    "stocks": null,
+    "active": true,
+    "recipient_sectors": [
+      "SECTOR7639"
+    ],
+    "allowed_groups": [
+      2
+    ]
+  },
+  {
+    "id": "SERVICE22048350",
+    "name": "Fortune 500",
+    "description": "",
+    "max_claims_per_user": 1,
+    "claim_type": "onetime",
+    "refresh_interval": null,
+    "stocks_type": "limited",
+    "stocks": 500,
+    "active": true,
+    "recipient_sectors": [
+      "SECTOR1085",
+      "SECTOR1763",
+      "SECTOR3389",
+      "SECTOR5664",
+      "SECTOR6271",
+      "SECTOR7639",
+      "SECTOR7751",
+      "SECTOR8374",
+      "SECTOR9139",
+      "SECTOR9628",
+      "SECTOR9899"
+    ],
+    "allowed_groups": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "SERVICE55474581",
+    "name": "Ayuda Para Sa Jeepney Drivers",
+    "description": "",
+    "max_claims_per_user": 1,
+    "claim_type": "onetime",
+    "refresh_interval": null,
+    "stocks_type": "limited",
+    "stocks": 1000,
+    "active": true,
+    "recipient_sectors": [
+      "SECTOR3389"
+    ],
+    "allowed_groups": [
+      3
+    ]
+  },
+  {
+    "id": "SERVICE77688855",
+    "name": "Christmas Package",
+    "description": "",
+    "max_claims_per_user": 1,
+    "claim_type": "periodic",
+    "refresh_interval": "yearly",
+    "stocks_type": "unlimited",
+    "stocks": null,
+    "active": true,
+    "recipient_sectors": [
+      "SECTOR7639"
+    ],
+    "allowed_groups": [
+      3
+    ]
+  },
+  {
+    "id": "SERVICE23903124",
+    "name": "Bagong Residente",
+    "description": "",
+    "max_claims_per_user": 1,
+    "claim_type": "onetime",
+    "refresh_interval": null,
+    "stocks_type": "unlimited",
+    "stocks": null,
+    "active": true,
+    "recipient_sectors": [
+      "SECTOR7639"
+    ],
+    "allowed_groups": [
+      1,
+      3
+    ]
+  }
+]

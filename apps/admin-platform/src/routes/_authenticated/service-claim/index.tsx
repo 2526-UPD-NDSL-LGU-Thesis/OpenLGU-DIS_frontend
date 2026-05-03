@@ -30,17 +30,17 @@ export const Route = createFileRoute("/_authenticated/service-claim/")({
 })
 
 const defaultFormState = {
+  id: "",
   name: "",
-  verbose_name: "",
   description: "",
   max_claims_per_user: 1,
   claim_type: "onetime" as ClaimType,
-  refresh_interval: "",
+  refresh_interval: null,
   stocks_type: "unlimited" as StocksType,
   stocks: 1,
   active: true,
-  recepient_sectors: "",
-  allowed_groups: "",
+  recepient_sectors: [],
+  allowed_groups: [],
 }
 
 function RouteComponent() {
@@ -151,8 +151,10 @@ function RouteComponent() {
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
                     <th className="pb-3">Name</th>
-                    <th className="pb-3">Verbose Name</th>
                     <th className="pb-3">Claim Type</th>
+                    <th className="pb-3">Stocks Type</th>
+                    <th className="pb-3">Refresh Interval</th>
+                    <th className="pb-3">Max Claims Per User</th>
                     <th className="pb-3">Stocks</th>
                     <th className="pb-3">Status</th>
                   </tr>
@@ -169,12 +171,18 @@ function RouteComponent() {
                           {service.name}
                         </Link>
                       </td>
-                      <td className="py-3 pr-4">{service.verbose_name}</td>
-                      <td className="py-3 pr-4">{service.claim_type}</td>
                       <td className="py-3 pr-4">
-                        {service.stocks_type === "unlimited" ? "Unlimited" : service.stocks}
+                        { service.claim_type === "onetime" ? "One-time" : "Periodic" }
                       </td>
-                      <td className="py-3 pr-4">{service.active ? "Active" : "Inactive"}</td>
+                      <td className="py-3 pr-4">
+                        { service.stocks_type === "unlimited" ? "Unlimited" : "Limited" }
+                      </td>
+                      <td className="py-3 pr-4">{ service.refresh_interval }</td>
+                      <td className="py-3 pr-4">{ service.max_claims_per_user }</td>
+                      <td className="py-3 pr-4">{ service.stocks }</td>
+                      <td className="py-3 pr-4">
+                        { service.active ? "Active" : "Inactive" }
+                      </td>
                     </tr>
                   ))}
                 </tbody>

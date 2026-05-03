@@ -1,5 +1,7 @@
 /* API helpers for LGU service creation and service claiming flows. */
 
+import services from "./sample/services.json"
+
 import type {
   ClaimItem,
   CreateServicePayload,
@@ -8,13 +10,14 @@ import type {
 import { authenticatedApiClient } from "#/features/auth/auth"
 
 export async function getServices(): Promise<ServiceItem[]> {
-  const response = await authenticatedApiClient.request("/services/")
+  const response = await authenticatedApiClient.request("/services/");
 
   if (!response.ok) {
-    throw new Error("Failed to fetch services")
+    throw new Error("Failed to fetch services");
   }
 
-  return (await response.json()) as ServiceItem[]
+  // return (await response.json()) as ServiceItem[];
+  return services as ServiceItem[]
 }
 
 export async function createService(payload: CreateServicePayload): Promise<ServiceItem> {

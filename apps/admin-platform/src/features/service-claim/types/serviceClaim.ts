@@ -1,19 +1,20 @@
 /* Types for service claiming dashboard and claim operations. */
 
-export type ClaimType = "onetime" | "repeatable"
+export type ClaimType = "onetime" | "periodic"
+export type RefreshInterval = "daily" | "weekly" | "monthly" | "quarterly" | "yearly"
 export type StocksType = "unlimited" | "limited"
 
 export interface ServiceItem {
+  id: string
   name: string
-  verbose_name: string
   description: string
   max_claims_per_user: number
   claim_type: ClaimType
-  refresh_interval: string | null
+  refresh_interval: RefreshInterval | null
   stocks_type: StocksType
-  stocks: number
+  stocks: number | null
   active: boolean
-  recepient_sectors: string[]
+  recipient_sectors: string[]
   allowed_groups: number[]
 }
 
