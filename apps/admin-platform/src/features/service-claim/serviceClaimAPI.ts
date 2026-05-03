@@ -1,7 +1,5 @@
 /* API helpers for LGU service creation and service claiming flows. */
 
-import services from "./sample/services.json"
-
 import type {
   ClaimItem,
   CreateServicePayload,
@@ -16,8 +14,7 @@ export async function getServices(): Promise<ServiceItem[]> {
     throw new Error("Failed to fetch services");
   }
 
-  // return (await response.json()) as ServiceItem[];
-  return services as ServiceItem[]
+  return (await response.json()) as ServiceItem[]
 }
 
 export async function createService(payload: CreateServicePayload): Promise<ServiceItem> {

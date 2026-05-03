@@ -1,7 +1,7 @@
 /* Service-specific claim route with claim list and QR-based claim creation. */
 
 import { useEffect, useState } from "react"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, linkOptions, redirect } from "@tanstack/react-router"
 
 import { Button } from "@openlguid/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
@@ -17,8 +17,23 @@ import {
   getClaims,
 } from "#/features/service-claim/serviceClaimAPI"
 import type { ClaimItem } from "#/features/service-claim/types/serviceClaim"
+import { authSessionService } from "#/features/auth/auth"
+import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
+
+const insufficientPermissionsRedirect = linkOptions({
+  to: "/_authenticated/",
+  search: {
+    notice: "insufficient-permissions",
+  },
+})
 
 export const Route = createFileRoute("/_authenticated/service-claim/$serviceName")({
+  beforeLoad: () => {
+    const authState = authSessionService.getAuthState()
+    if (!canAccessServiceClaim(authState)) {
+      throw redirect(insufficientPermissionsRedirect)
+    }
+  },
   component: RouteComponent,
 })
 

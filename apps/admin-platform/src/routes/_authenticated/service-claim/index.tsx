@@ -1,7 +1,7 @@
 /* Service claim dashboard route with service creation and service listing. */
 
 import { useEffect, useMemo, useState } from "react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, linkOptions, redirect } from "@tanstack/react-router"
 
 import { Button } from "@openlguid/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
@@ -24,14 +24,30 @@ import type {
   ServiceItem,
   StocksType,
 } from "#/features/service-claim/types/serviceClaim"
+import { authSessionService } from "#/features/auth/auth"
+import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
+
+const insufficientPermissionsRedirect = linkOptions({
+  to: "/_authenticated/",
+  search: {
+    notice: "insufficient-permissions",
+  },
+})
 
 export const Route = createFileRoute("/_authenticated/service-claim/")({
+  beforeLoad: () => {
+    const authState = authSessionService.getAuthState()
+    if (!canAccessServiceClaim(authState)) {
+      throw redirect(insufficientPermissionsRedirect)
+    }
+  },
   component: RouteComponent,
 })
 
 const defaultFormState = {
   id: "",
   name: "",
+  verbose_name: "",
   description: "",
   max_claims_per_user: 1,
   claim_type: "onetime" as ClaimType,
