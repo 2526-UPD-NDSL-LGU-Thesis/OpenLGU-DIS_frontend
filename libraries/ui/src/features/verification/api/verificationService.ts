@@ -24,6 +24,10 @@ class HTTPResponseError extends Error {
   }
 }
 
+import { authenticatedApiClient } from "../../../../../../apps/admin-platform/src/features/auth/auth.tsx"
+import { DoorClosed } from "lucide-react"
+// TODO REPLACE
+
 export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
   try {
     const apiBase = import.meta.env.VITE_API_BASE_URL
@@ -39,22 +43,43 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
       },
       body: JSON.stringify(requestBody),
     }
-    const response = await fetch(`${apiBase}/qr/verify/`, requestOptions)
+    // const response = await fetch(`${apiBase}/qr/verify/`, requestOptions)
+    // const response = await authenticatedApiClient.request("/qr/verify/", requestOptions);
 
-    if (!response.ok) {
-      throw new HTTPResponseError(response)
+    // if (!response.ok) {
+    //   throw new HTTPResponseError(response)
+    // }
+
+    // const contentType = response.headers.get("content-type")
+    // if (!contentType || !contentType.includes("application/json")) {
+    //   return {
+    //     result: "error_response_is_not_declared_json",
+    //     message: "API returned a non-JSON response.",
+    //   }
+    // }
+
+    // const responseBody = (await response.json()) as QRVerifyResponseBody
+
+    const responseBody = {
+            "id_details": {
+              "1": "DCS",
+              "2": 1777877324,
+              "169": {
+                "1": "6149804723",
+                "2": 1.0,
+                "3": "eng",
+                "4": "James Ernest T. Geraldo",
+                "8": "2001/09/15",
+                "9": "Male",
+                "62": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////wAALCAAtAC0BAREA/8QAGQAAAwEBAQAAAAAAAAAAAAAAAgMEAAEF/8QAHxAAAgICAwADAAAAAAAAAAAAAREAAgMhEjFBBDJR/9oACAEBAAA/ACoBTGHOG9T7OQbWA7MHmD7F3qeRltwE05PkHGy4iGarGDFIJpmCg+owFSnxwDUGzM2T6qJQMyAnDKzoqAQi4u5JBD7iwf2YmNwYhkBb1KMg24mwNrDaAgZCOuUSRvudct+PXjiD7O4ywBqXJxE5jtRfk1bKwKa2p6NLcqC3TDn/2Q==",
+                "75": "3481217724",
+                "76": [
+                  "STUDENT",
+                  "RESIDENT"
+                ]
+              }
+            }
     }
-
-    const contentType = response.headers.get("content-type")
-    if (!contentType || !contentType.includes("application/json")) {
-      return {
-        result: "error_response_is_not_declared_json",
-        message: "API returned a non-JSON response.",
-      }
-    }
-
-    const responseBody = (await response.json()) as QRVerifyResponseBody
-
     const qrDeet = responseBody.id_details;
     const cwt = qrDeet['169'];
     // TODO fix the parsing of data

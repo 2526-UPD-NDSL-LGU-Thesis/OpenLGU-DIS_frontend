@@ -15,7 +15,7 @@ export async function getServices(): Promise<ServiceItem[]> {
   }
   
   const responseBody: ServiceItem[] = await response.json();
-  console.log(responseBody);
+  //console.log(responseBody);
   return responseBody;
 }
 
