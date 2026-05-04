@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useRouter } from "@tanstack/react-router"
 
 import { NavDocuments } from "#/components/Sidebar/nav-documents"
 import { NavMain } from "#/components/Sidebar/nav-main"
@@ -15,6 +16,8 @@ import {
 } from "@openlguid/ui/components/sidebar"
 import { LayoutDashboardIcon, ListIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
 import { Link, linkOptions } from "@tanstack/react-router"
+
+import useAuthStore from "#/features/auth/auth"
 
 const dummyData = {
   user: {
@@ -157,6 +160,23 @@ const navMainItems = linkOptions([
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter()
+  const { session, logout } = useAuthStore()
+
+  // Map IdentityProfile to NavUser user data
+  const userData = session.identityProfile
+    ? {
+        name: session.identityProfile.username,
+        email: `${session.identityProfile.username}@openlguid.local`,
+        avatar: "/avatars/shadcn.jpg",
+      }
+    : dummyData.user
+
+  const handleLogout = async () => {
+    await logout()
+    await router.navigate({ to: "/_public/login" })
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -180,7 +200,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={dummyData.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={dummyData.user} />
+        <NavUser user={userData} onLogout={handleLogout} />
       </SidebarFooter>
     </Sidebar>
   )
