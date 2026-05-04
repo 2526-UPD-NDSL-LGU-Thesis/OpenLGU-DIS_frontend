@@ -1,3 +1,0 @@
-# Adopt refresh-cookie sessions, /me-authoritative identity, and guarded authenticated routes
-
-The admin platform will use short-lived access tokens for API authorization and a long-lived server-managed refresh session to recover access without forcing frequent re-login. We chose this over storing both tokens in browser storage because it reduces token exposure and cleanly supports silent session recovery on protected-route access. Role authorization is sourced from `/me` (not token claims), with an explicit `unknown` auth phase before route checks; unauthenticated access to protected routes redirects to login with a return target, while authenticated-but-unauthorized users are redirected to the authenticated landing route with an insufficient-permissions notice.
