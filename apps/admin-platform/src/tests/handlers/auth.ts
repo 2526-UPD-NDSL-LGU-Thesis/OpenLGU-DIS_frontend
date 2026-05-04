@@ -70,4 +70,8 @@ export const authHandlers = [
 
     return HttpResponse.json(buildMockIdentityProfile(), { status: 200 })
   }),
+
+  http.post(`${authApiBaseUrl}/logout/`, () => {
+    return HttpResponse.json({ detail: "Logged out" }, { status: 200 })
+  }),
 ]

@@ -9,6 +9,7 @@ interface AuthState {
   session: AuthStateSnapshot
   login: (credentials: LoginCredentials) => Promise<LoginResult>
   clear: () => void
+  logout: () => Promise<void>
 }
 
 export const authSessionService = createAuthSessionService()
@@ -23,6 +24,10 @@ const useAuthStore = create<AuthState>()((set) => ({
   },
   clear() {
     authSessionService.clear()
+    set({ session: authSessionService.getAuthState() })
+  },
+  async logout() {
+    await authSessionService.logout()
     set({ session: authSessionService.getAuthState() })
   },
 }))

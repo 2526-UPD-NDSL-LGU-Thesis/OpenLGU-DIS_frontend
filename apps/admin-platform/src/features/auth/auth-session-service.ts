@@ -71,6 +71,7 @@ export interface AuthSessionService {
   refreshSession: () => Promise<boolean>
   getAuthState: () => AuthStateSnapshot
   clear: () => void
+  logout: () => Promise<void>
 }
 
 const initialAuthState: AuthStateSnapshot = {
@@ -123,7 +124,10 @@ function buildPublicLoginRedirect(redirectTo: string) {
   })
 }
 
-export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthApiClient): AuthSessionService {
+export function createAuthSessionService(
+  apiClient: AuthApiClient = defaultAuthApiClient,
+  queryClient: QueryClient = defaultQueryClient
+): AuthSessionService {
   let authState: AuthStateSnapshot = { ...initialAuthState }
 
   const clear = () => {
@@ -242,5 +246,14 @@ export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthA
     },
 
     clear,
+
+    async logout() {
+      // Call backend logout endpoint (graceful bypass if fails)
+      await apiClient.requestLogout()
+      // Clear TanStack Query cache before session state
+      queryClient.clear()
+      // Clear local session state
+      clear()
+    },
   }
 }

@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { http, HttpResponse } from "msw"
 
 import { server } from "#/tests/node"
 import { buildMockAccessToken } from "#/tests/handlers/auth"
 
-import { authApiBaseUrl } from "./authAPI"
+import { authApiBaseUrl, createAuthApiClient } from "./authAPI"
 import { createAuthSessionService } from "./auth-session-service"
 
 const CANONICAL_ROLES = new Set([
@@ -160,6 +160,85 @@ describe("createAuthSessionService", () => {
         },
       },
     })
+    expect(service.getAuthState()).toEqual({
+      phase: "unauthenticated",
+      accessToken: null,
+      identityProfile: null,
+    })
+  })
+
+  it("logout transitions authenticated employee to unauthenticated state", async () => {
+    const service = createAuthSessionService()
+
+    // Setup: login first
+    await service.login({ username: "employee-1", password: "password" })
+    expect(service.getAuthState().phase).toBe("authenticated")
+
+    // Action: logout
+    await service.logout()
+
+    // Assertion: verify unauthenticated state
+    expect(service.getAuthState()).toEqual({
+      phase: "unauthenticated",
+      accessToken: null,
+      identityProfile: null,
+    })
+  })
+
+  it("logout clears TanStack Query cache before clearing session state", async () => {
+    const queryClient = new (await import("@tanstack/react-query")).QueryClient()
+    const queryClearSpy = vi.spyOn(queryClient, "clear")
+    const apiClient = createAuthApiClient(queryClient)
+    const service = createAuthSessionService(apiClient, queryClient)
+
+    // Setup: login and add some cached data
+    await service.login({ username: "employee-1", password: "password" })
+    expect(queryClient.getQueryData(["test"])).toBeUndefined()
+
+    // Action: logout
+    await service.logout()
+
+    // Assertion: verify queryClient.clear was called
+    expect(queryClearSpy).toHaveBeenCalled()
+  })
+
+  it("logout attempts POST /logout to backend and gracefully continues on failure", async () => {
+    server.use(
+      http.post(`${authApiBaseUrl}/logout/`, () => {
+        return HttpResponse.json({ detail: "Logged out" }, { status: 200 })
+      })
+    )
+
+    const service = createAuthSessionService()
+
+    // Setup: login first
+    await service.login({ username: "employee-1", password: "password" })
+    expect(service.getAuthState().phase).toBe("authenticated")
+
+    // Action: logout (with successful backend call)
+    await service.logout()
+
+    // Assertion: verify logout succeeded despite backend call
+    expect(service.getAuthState().phase).toBe("unauthenticated")
+  })
+
+  it("logout clears session state even if POST /logout fails on backend", async () => {
+    server.use(
+      http.post(`${authApiBaseUrl}/logout/`, () => {
+        return HttpResponse.json({ detail: "Server error" }, { status: 500 })
+      })
+    )
+
+    const service = createAuthSessionService()
+
+    // Setup: login first
+    await service.login({ username: "employee-1", password: "password" })
+    expect(service.getAuthState().phase).toBe("authenticated")
+
+    // Action: logout (with failed backend call)
+    await service.logout()
+
+    // Assertion: verify logout succeeded and session cleared despite backend failure
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,

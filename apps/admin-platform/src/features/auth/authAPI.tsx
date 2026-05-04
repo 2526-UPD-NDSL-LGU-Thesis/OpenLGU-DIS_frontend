@@ -33,6 +33,7 @@ export interface AuthApiClient {
   requestAccessToken: (credentials: LoginCredentials) => Promise<AccessTokenPayload>
   requestRefreshAccessToken: () => Promise<AccessTokenPayload>
   requestIdentityProfile: (accessToken: string) => Promise<IdentityProfilePayload>
+  requestLogout: () => Promise<void>
 }
 
 function isJsonResponse(response: Response): boolean {
@@ -136,6 +137,21 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
           return { access: payload.access }
         },
       })
+    },
+
+    async requestLogout() {
+      try {
+        await fetch(toUrl("/logout/"), {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          credentials: "include",
+        })
+      } catch {
+        // Gracefully ignore logout endpoint failures
+        // Session is cleared locally regardless of backend response
+      }
     },
   }
 }
