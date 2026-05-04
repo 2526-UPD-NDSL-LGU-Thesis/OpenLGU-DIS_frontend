@@ -72,6 +72,7 @@ export interface AuthSessionService {
   getAuthState: () => AuthStateSnapshot
   clear: () => void
   logout: () => Promise<void>
+  _setAuthenticatedClient: (client: { request: (path: string, init?: RequestInit) => Promise<Response> }) => void
 }
 
 const initialAuthState: AuthStateSnapshot = {
@@ -129,6 +130,7 @@ export function createAuthSessionService(
   queryClient: QueryClient = defaultQueryClient
 ): AuthSessionService {
   let authState: AuthStateSnapshot = { ...initialAuthState }
+  let authenticatedApiClient: { request: (path: string, init?: RequestInit) => Promise<Response> } | null = null
 
   const clear = () => {
     authState = { ...unauthenticatedState }
@@ -248,12 +250,23 @@ export function createAuthSessionService(
     clear,
 
     async logout() {
-      // Call backend logout endpoint (graceful bypass if fails)
-      await apiClient.requestLogout()
+      // Try to call backend logout endpoint through authenticated client (graceful bypass if fails)
+      if (authenticatedApiClient) {
+        try {
+          await authenticatedApiClient.request("/logout/", { method: "POST" })
+        } catch {
+          // Gracefully ignore logout endpoint failures
+          // Session is cleared locally regardless of backend response
+        }
+      }
       // Clear TanStack Query cache before session state
       queryClient.clear()
       // Clear local session state
       clear()
+    },
+
+    _setAuthenticatedClient(client) {
+      authenticatedApiClient = client
     },
   }
 }

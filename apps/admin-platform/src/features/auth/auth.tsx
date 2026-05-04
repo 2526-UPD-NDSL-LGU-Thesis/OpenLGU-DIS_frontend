@@ -15,6 +15,9 @@ interface AuthState {
 export const authSessionService = createAuthSessionService()
 export const authenticatedApiClient = createAuthenticatedApiClient({ authSessionService })
 
+// Wire authenticated client back into session service for logout flow
+authSessionService._setAuthenticatedClient(authenticatedApiClient)
+
 const useAuthStore = create<AuthState>()((set) => ({
   session: authSessionService.getAuthState(),
   async login(credentials) {
