@@ -28,7 +28,7 @@ import { authSessionService } from "#/features/auth/auth"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 
 const insufficientPermissionsRedirect = linkOptions({
-  to: "/_authenticated/",
+  to: "/_authenticated",
   search: {
     notice: "insufficient-permissions",
   },
@@ -177,12 +177,12 @@ function RouteComponent() {
                 </thead>
                 <tbody>
                   {services.map((service) => (
-                    <tr key={service.name} className="border-b last:border-b-0 hover:bg-muted/50">
+                    <tr key={service.id} className="border-b last:border-b-0 hover:bg-muted/50">
                       <td className="py-3 pr-4">
                         <Link
                           className="font-medium text-primary hover:underline"
-                          to="/service-claim/$serviceName"
-                          params={ { serviceName: service.name } }
+                          to="/service-claim/$serviceID"
+                          params={ { serviceID: service.id } }
                         >
                           {service.name}
                         </Link>

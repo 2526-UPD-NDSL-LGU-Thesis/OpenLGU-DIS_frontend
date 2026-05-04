@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker"
-import { http, HttpResponse } from "msw"
+import { http, HttpResponse, passthrough } from "msw"
 
 import { authApiBaseUrl } from "#/features/auth/authAPI"
 import type { ClaimItem, ServiceItem } from "#/features/service-claim/types/serviceClaim"
@@ -51,15 +51,19 @@ function isAuthorized(request: Request): boolean {
 
 export const serviceClaimHandlers = [
   http.get(`${authApiBaseUrl}/services/`, ({ request }) => {
+    return passthrough();
+
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
 
-    ensureSeedData()
-    return HttpResponse.json(Array.from(services.values()), { status: 200 })
+    // ensureSeedData()
+    // return HttpResponse.json(Array.from(services.values()), { status: 200 })
   }),
 
   http.post(`${authApiBaseUrl}/services/`, async ({ request }) => {
+    return passthrough();
+
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
@@ -81,6 +85,8 @@ export const serviceClaimHandlers = [
   }),
 
   http.get(`${authApiBaseUrl}/services/:serviceName/claims/`, ({ request, params }) => {
+    return passthrough();
+
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
@@ -92,6 +98,8 @@ export const serviceClaimHandlers = [
   }),
 
   http.post(`${authApiBaseUrl}/claim/:serviceName/`, async ({ request, params }) => {
+    return passthrough();
+
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }

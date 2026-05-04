@@ -13,8 +13,10 @@ export async function getServices(): Promise<ServiceItem[]> {
   if (!response.ok) {
     throw new Error("Failed to fetch services");
   }
-
-  return (await response.json()) as ServiceItem[]
+  
+  const responseBody: ServiceItem[] = await response.json();
+  console.log(responseBody);
+  return responseBody;
 }
 
 export async function createService(payload: CreateServicePayload): Promise<ServiceItem> {
@@ -33,9 +35,9 @@ export async function createService(payload: CreateServicePayload): Promise<Serv
   return (await response.json()) as ServiceItem
 }
 
-export async function getClaims(serviceName: string): Promise<ClaimItem[]> {
-  const encodedServiceName = encodeURIComponent(serviceName)
-  const response = await authenticatedApiClient.request(`/services/${encodedServiceName}/claims/`)
+export async function getClaims(serviceID: string): Promise<ClaimItem[]> {
+  const encodedServiceID = encodeURIComponent(serviceID)
+  const response = await authenticatedApiClient.request(`/services/${encodedServiceID}/claims/`)
 
   if (!response.ok) {
     throw new Error("Failed to fetch claims")

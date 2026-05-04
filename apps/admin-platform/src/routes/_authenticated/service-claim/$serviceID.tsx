@@ -27,7 +27,7 @@ const insufficientPermissionsRedirect = linkOptions({
   },
 })
 
-export const Route = createFileRoute("/_authenticated/service-claim/$serviceName")({
+export const Route = createFileRoute("/_authenticated/service-claim/$serviceID")({
   beforeLoad: () => {
     const authState = authSessionService.getAuthState()
     if (!canAccessServiceClaim(authState)) {
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_authenticated/service-claim/$serviceName
 })
 
 function RouteComponent() {
-  const { serviceName } = Route.useParams()
+  const { serviceID } = Route.useParams()
 
   const [claims, setClaims] = useState<ClaimItem[]>([])
   const [isLoadingClaims, setIsLoadingClaims] = useState(true)
@@ -51,7 +51,7 @@ function RouteComponent() {
     setMessage(null)
 
     try {
-      const response = await getClaims(serviceName)
+      const response = await getClaims(serviceID)
       setClaims(response)
     } catch {
       setMessage("Unable to load claims for this service.")
@@ -62,7 +62,7 @@ function RouteComponent() {
 
   useEffect(() => {
     void loadClaims()
-  }, [serviceName])
+  }, [serviceID])
 
   const handleVerificationResult = (result: QRVerifyReturn) => {
     if (result.result !== "success") {
@@ -79,7 +79,7 @@ function RouteComponent() {
     }
 
     try {
-      await createClaim(serviceName, payload.rawQRValue)
+      await createClaim(serviceID, payload.rawQRValue)
       await loadClaims()
       setMessage("Claim created successfully.")
     } catch {
@@ -94,7 +94,7 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle>Service Name</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold">{serviceName}</CardContent>
+          <CardContent className="text-2xl font-semibold">{serviceID}</CardContent>
         </Card>
         <Card>
           <CardHeader>

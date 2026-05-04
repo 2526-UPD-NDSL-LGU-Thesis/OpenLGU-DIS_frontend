@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker"
-import { http, HttpResponse } from "msw"
+import { http, HttpResponse, passthrough } from "msw"
 
 import { authApiBaseUrl } from "#/features/auth/authAPI"
 
@@ -28,17 +28,20 @@ export function buildMockIdentityProfile(overrides?: {
 } {
   return {
     username: overrides?.username ?? faker.internet.username(),
-    roles:
-      overrides?.roles ??
-      faker.helpers.arrayElements(CANONICAL_ROLES, {
-        min: 1,
-        max: Math.min(2, CANONICAL_ROLES.length),
-      }),
+    roles: ["SERVICE_CLAIM_ADMIN"]
+    // roles:
+    //   overrides?.roles ??
+    //   faker.helpers.arrayElements(CANONICAL_ROLES, {
+    //     min: 1,
+    //     max: Math.min(2, CANONICAL_ROLES.length),
+    //  }),
   }
 }
 
 export const authHandlers = [
   http.post(`${authApiBaseUrl}/token/`, async ({ request }) => {
+    return passthrough();
+
     const payload = (await request.json()) as Partial<{ username: string; password: string }>
 
     if (!payload.username || !payload.password) {
@@ -54,6 +57,8 @@ export const authHandlers = [
   }),
 
   http.post(`${authApiBaseUrl}/token/refresh/`, () => {
+    return passthrough();
+
     return HttpResponse.json(
       {
         access: buildMockAccessToken(),
@@ -63,6 +68,8 @@ export const authHandlers = [
   }),
 
   http.get(`${authApiBaseUrl}/me/`, ({ request }) => {
+
+
     const authHeader = request.headers.get("authorization")
     if (!authHeader?.startsWith("Bearer ")) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })

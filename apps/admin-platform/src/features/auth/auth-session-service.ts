@@ -56,7 +56,7 @@ export interface EnsureAuthenticatedSuccess {
 export interface EnsureAuthenticatedRedirect {
   ok: false
   redirect: {
-    to: "/_public/login"
+    to: "/login"
     search: {
       redirect: string
     }
@@ -118,7 +118,7 @@ const defaultAuthApiClient = createAuthApiClient(defaultQueryClient)
 
 function buildPublicLoginRedirect(redirectTo: string) {
   return linkOptions({
-    to: "/_public/login",
+    to: "/login",
     search: {
       redirect: redirectTo,
     },

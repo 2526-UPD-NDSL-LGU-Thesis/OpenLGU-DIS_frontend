@@ -14,7 +14,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as AuthenticatedIdRegistrationRouteImport } from './routes/_authenticated/id-registration'
 import { Route as AuthenticatedServiceClaimIndexRouteImport } from './routes/_authenticated/service-claim/index'
-import { Route as AuthenticatedServiceClaimServiceNameRouteImport } from './routes/_authenticated/service-claim/$serviceName'
+import { Route as AuthenticatedServiceClaimServiceIDRouteImport } from './routes/_authenticated/service-claim/$serviceID'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -42,10 +42,10 @@ const AuthenticatedServiceClaimIndexRoute =
     path: '/service-claim/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedServiceClaimServiceNameRoute =
-  AuthenticatedServiceClaimServiceNameRouteImport.update({
-    id: '/service-claim/$serviceName',
-    path: '/service-claim/$serviceName',
+const AuthenticatedServiceClaimServiceIDRoute =
+  AuthenticatedServiceClaimServiceIDRouteImport.update({
+    id: '/service-claim/$serviceID',
+    path: '/service-claim/$serviceID',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -53,14 +53,14 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/login': typeof PublicLoginRoute
-  '/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
   '/service-claim/': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRoutesByTo {
   '/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/login': typeof PublicLoginRoute
   '/': typeof AuthenticatedIndexRoute
-  '/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
   '/service-claim': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRoutesById {
@@ -69,7 +69,7 @@ export interface FileRoutesById {
   '/_authenticated/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/_public/login': typeof PublicLoginRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/_authenticated/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
   '/_authenticated/service-claim/': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRouteTypes {
@@ -78,14 +78,14 @@ export interface FileRouteTypes {
     | '/'
     | '/id-registration'
     | '/login'
-    | '/service-claim/$serviceName'
+    | '/service-claim/$serviceID'
     | '/service-claim/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/id-registration'
     | '/login'
     | '/'
-    | '/service-claim/$serviceName'
+    | '/service-claim/$serviceID'
     | '/service-claim'
   id:
     | '__root__'
@@ -93,7 +93,7 @@ export interface FileRouteTypes {
     | '/_authenticated/id-registration'
     | '/_public/login'
     | '/_authenticated/'
-    | '/_authenticated/service-claim/$serviceName'
+    | '/_authenticated/service-claim/$serviceID'
     | '/_authenticated/service-claim/'
   fileRoutesById: FileRoutesById
 }
@@ -139,11 +139,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedServiceClaimIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/service-claim/$serviceName': {
-      id: '/_authenticated/service-claim/$serviceName'
-      path: '/service-claim/$serviceName'
-      fullPath: '/service-claim/$serviceName'
-      preLoaderRoute: typeof AuthenticatedServiceClaimServiceNameRouteImport
+    '/_authenticated/service-claim/$serviceID': {
+      id: '/_authenticated/service-claim/$serviceID'
+      path: '/service-claim/$serviceID'
+      fullPath: '/service-claim/$serviceID'
+      preLoaderRoute: typeof AuthenticatedServiceClaimServiceIDRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -152,15 +152,15 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedIdRegistrationRoute: typeof AuthenticatedIdRegistrationRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedServiceClaimServiceNameRoute: typeof AuthenticatedServiceClaimServiceNameRoute
+  AuthenticatedServiceClaimServiceIDRoute: typeof AuthenticatedServiceClaimServiceIDRoute
   AuthenticatedServiceClaimIndexRoute: typeof AuthenticatedServiceClaimIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIdRegistrationRoute: AuthenticatedIdRegistrationRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedServiceClaimServiceNameRoute:
-    AuthenticatedServiceClaimServiceNameRoute,
+  AuthenticatedServiceClaimServiceIDRoute:
+    AuthenticatedServiceClaimServiceIDRoute,
   AuthenticatedServiceClaimIndexRoute: AuthenticatedServiceClaimIndexRoute,
 }
 
