@@ -19,6 +19,7 @@ import {
   useSidebar,
 } from "@openlguid/ui/components/sidebar"
 import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import { useState } from "react"
 
 export function NavUser({
   user,
@@ -32,10 +33,16 @@ export function NavUser({
   onLogout?: () => Promise<void>
 }) {
   const { isMobile } = useSidebar()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   
   const handleLogout = async () => {
     if (onLogout) {
-      await onLogout()
+      setIsLoggingOut(true)
+      try {
+        await onLogout()
+      } finally {
+        setIsLoggingOut(false)
+      }
     }
   }
   
@@ -101,7 +108,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
               <LogOutIcon
               />
               Log out
