@@ -174,7 +174,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleLogout = async () => {
     await logout()
-    await router.navigate({ to: "/_public/login" })
+    await router.navigate({ to: "/login" })
   }
 
   return (
