@@ -22,14 +22,23 @@ import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, Lo
 
 export function NavUser({
   user,
+  onLogout,
 }: {
   user: {
     name: string
     email: string
     avatar: string
   }
+  onLogout?: () => Promise<void>
 }) {
   const { isMobile } = useSidebar()
+  
+  const handleLogout = async () => {
+    if (onLogout) {
+      await onLogout()
+    }
+  }
+  
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -92,7 +101,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon
               />
               Log out
