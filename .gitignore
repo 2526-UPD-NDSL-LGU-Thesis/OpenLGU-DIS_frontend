@@ -9,7 +9,7 @@
 ## Personal
 
 docs/agents
-docs/adr
+**/docs/adr
 AGENTS.md
 .scratch
 CONTEXT.md
