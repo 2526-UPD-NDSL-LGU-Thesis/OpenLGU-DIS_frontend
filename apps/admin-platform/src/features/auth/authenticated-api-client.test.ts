@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw"
 
 import { server } from "#/tests/node"
 
-import { authApiBaseUrl } from "./authAPI"
+import { authApiBaseUrl } from "./api/authAPI"
 import { AuthenticatedApiError, createAuthenticatedApiClient } from "./authenticated-api-client"
 import { createAuthSessionService } from "./auth-session-service"
 

@@ -1,4 +1,4 @@
-import { authApiBaseUrl } from "./authAPI"
+import { authApiBaseUrl } from "./api/authAPI"
 import type { AuthSessionService } from "./auth-session-service"
 
 export class AuthenticatedApiError extends Error {

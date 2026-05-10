@@ -1,8 +1,8 @@
 import { QueryClient } from "@tanstack/react-query"
 import { linkOptions } from "@tanstack/react-router"
 
-import { AuthApiError, createAuthApiClient } from "./authAPI"
-import type { AuthApiClient, LoginCredentials } from "./authAPI"
+import { AuthApiError, createAuthApiClient } from "./api/authAPI"
+import type { AuthApiClient, LoginCredentials } from "./api/authAPI"
 
 const CANONICAL_ROLES = [
   "SUPER",

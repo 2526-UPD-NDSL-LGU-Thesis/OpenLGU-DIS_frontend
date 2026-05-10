@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw"
 import { server } from "#/tests/node"
 import { buildMockAccessToken } from "#/tests/handlers/auth"
 
-import { authApiBaseUrl, createAuthApiClient } from "./authAPI"
+import { authApiBaseUrl, createAuthApiClient } from "./api/authAPI"
 import { createAuthSessionService } from "./auth-session-service"
 
 const CANONICAL_ROLES = new Set([

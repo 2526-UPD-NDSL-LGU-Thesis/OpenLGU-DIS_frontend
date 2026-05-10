@@ -3,7 +3,7 @@ import { create } from "zustand"
 import { createAuthenticatedApiClient } from "./authenticated-api-client"
 import { createAuthSessionService } from "./auth-session-service"
 import type { AuthStateSnapshot, LoginResult } from "./auth-session-service"
-import type { LoginCredentials } from "./authAPI"
+import type { LoginCredentials } from "./api/authAPI"
 
 interface AuthState {
   session: AuthStateSnapshot

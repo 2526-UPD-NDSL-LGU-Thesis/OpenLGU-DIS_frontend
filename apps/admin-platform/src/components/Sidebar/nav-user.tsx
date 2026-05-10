@@ -2,7 +2,8 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@openlguid/ui/components/avatar"
+} from "@openlguid/ui/components/avatar";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,26 +12,26 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@openlguid/ui/components/dropdown-menu"
+} from "@openlguid/ui/components/dropdown-menu";
+
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@openlguid/ui/components/sidebar"
-import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
-import { useState } from "react"
+} from "@openlguid/ui/components/sidebar";
 
-export function NavUser({
-  user,
-  onLogout,
-}: {
+import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react";
+import { useState } from "react";
+
+export function NavUser({ user, onLogout,}: 
+{
   user: {
     name: string
     email: string
     avatar: string
   }
-  onLogout?: () => Promise<void>
+  onLogout: () => Promise<void>
 }) {
   const { isMobile } = useSidebar()
   const [isLoggingOut, setIsLoggingOut] = useState(false)

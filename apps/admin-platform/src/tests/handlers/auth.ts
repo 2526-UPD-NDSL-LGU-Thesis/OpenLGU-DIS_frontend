@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker"
 import { http, HttpResponse, passthrough } from "msw"
 
-import { authApiBaseUrl } from "#/features/auth/authAPI"
+import { authApiBaseUrl } from "#/features/auth/api/authAPI"
 
 const CANONICAL_ROLES = [
   "SUPER",
