@@ -46,9 +46,10 @@ export async function getClaims(serviceID: string): Promise<ClaimItem[]> {
   return (await response.json()) as ClaimItem[]
 }
 
-export async function createClaim(serviceName: string, rawQRValue: string): Promise<ClaimItem> {
-  const encodedServiceName = encodeURIComponent(serviceName)
-  const response = await authenticatedApiClient.request(`/claim/${encodedServiceName}/`, {
+export async function createClaim(serviceID: string, rawQRValue: string): Promise<ClaimItem> {
+  const encodedServiceID = encodeURIComponent(serviceID)
+
+  const response = await authenticatedApiClient.request(`/claim/${encodedServiceID}/`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
