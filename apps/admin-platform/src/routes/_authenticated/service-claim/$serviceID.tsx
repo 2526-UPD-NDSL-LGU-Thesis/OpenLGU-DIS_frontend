@@ -20,8 +20,10 @@ import type { ClaimItem } from "#/features/service-claim/types/serviceClaim"
 import { authSessionService } from "#/features/auth/auth"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 
+import { z } from 'zod';
+
 const insufficientPermissionsRedirect = linkOptions({
-  to: "/_authenticated/",
+  to: "/",
   search: {
     notice: "insufficient-permissions",
   },
@@ -34,11 +36,13 @@ export const Route = createFileRoute("/_authenticated/service-claim/$serviceID")
       throw redirect(insufficientPermissionsRedirect)
     }
   },
+  validateSearch: z.object({ serviceName: z.string() }),
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { serviceID } = Route.useParams()
+  const { serviceID } = Route.useParams();
+  const { serviceName } = Route.useSearch();
 
   const [claims, setClaims] = useState<ClaimItem[]>([])
   const [isLoadingClaims, setIsLoadingClaims] = useState(true)
@@ -77,7 +81,7 @@ function RouteComponent() {
     if (payload.verificationResult.result !== "success") {
       return
     }
-
+    
     try {
       await createClaim(serviceID, payload.rawQRValue)
       await loadClaims()
@@ -94,7 +98,7 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle>Service Name</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold">{serviceID}</CardContent>
+          <CardContent className="text-2xl font-semibold">{serviceName}</CardContent>
         </Card>
         <Card>
           <CardHeader>
@@ -102,12 +106,12 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="text-3xl font-semibold">{claims.length}</CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Claim Trends</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground">Graph placeholder</CardContent>
-        </Card>
+        </Card> */}
       </section>
 
       <section className="space-y-4">
@@ -136,7 +140,6 @@ function RouteComponent() {
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
                     <th className="pb-3">Claimed By</th>
-                    <th className="pb-3">Service</th>
                     <th className="pb-3">Admin User</th>
                     <th className="pb-3">Claimed At</th>
                   </tr>
@@ -145,7 +148,6 @@ function RouteComponent() {
                   {claims.map((claim, index) => (
                     <tr key={`${claim.claimed_by}-${claim.claimed_at}-${index}`} className="border-b last:border-b-0">
                       <td className="py-3 pr-4">{claim.claimed_by}</td>
-                      <td className="py-3 pr-4">{claim.service}</td>
                       <td className="py-3 pr-4">{claim.user}</td>
                       <td className="py-3 pr-4">{new Date(claim.claimed_at).toLocaleString()}</td>
                     </tr>

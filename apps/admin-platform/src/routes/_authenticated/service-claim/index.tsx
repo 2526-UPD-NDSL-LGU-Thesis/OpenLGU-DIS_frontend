@@ -183,6 +183,7 @@ function RouteComponent() {
                           className="font-medium text-primary hover:underline"
                           to="/service-claim/$serviceID"
                           params={ { serviceID: service.id } }
+                          search={ { serviceName: service.name } }
                         >
                           {service.name}
                         </Link>
