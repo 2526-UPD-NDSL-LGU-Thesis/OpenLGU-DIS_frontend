@@ -8,10 +8,13 @@
 
 ## Personal
 
+.github/skills
+.github/agents
 docs/agents
 **/docs/adr
 AGENTS.md
 .scratch
+**/contexts
 CONTEXT.md
 CONTEXT-MAP.md
 
