@@ -16,9 +16,11 @@ import {
 } from "@openlguid/ui/components/field"
 import { Input } from "@openlguid/ui/components/input"
 import { useState } from "react"
-import { useRouter } from "@tanstack/react-router"
+import { redirect, useNavigate } from "@tanstack/react-router"
 
 import useAuthStore from "#/features/auth/auth"
+
+// TODO: Make TanStack Form
 
 export function LoginForm({
   className,
@@ -28,8 +30,8 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate();
 
-  const router = useRouter()
   const { login } = useAuthStore()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,11 +40,11 @@ export function LoginForm({
     setIsLoggingIn(true)
 
     try {
-      const result = await login({ username, password })
+      const result = await login({ username, password });
 
       if (result.ok) {
         // Navigate to authenticated area on success
-        await router.navigate({ to: "/" })
+        await navigate({ to: "/" , search: { notice: "nothing" }});
       } else {
         // Show error message
         setError(result.error.message)
