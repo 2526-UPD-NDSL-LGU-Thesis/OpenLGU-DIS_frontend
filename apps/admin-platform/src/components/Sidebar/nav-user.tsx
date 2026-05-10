@@ -37,13 +37,11 @@ export function NavUser({ user, onLogout,}:
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   
   const handleLogout = async () => {
-    if (onLogout) {
-      setIsLoggingOut(true)
-      try {
-        await onLogout()
-      } finally {
-        setIsLoggingOut(false)
-      }
+    setIsLoggingOut(true)
+    try {
+      await onLogout()
+    } finally {
+      setIsLoggingOut(false)
     }
   }
   

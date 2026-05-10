@@ -1,7 +1,7 @@
 /* Service-specific claim route with claim list and QR-based claim creation. */
 
 import { useEffect, useState } from "react"
-import { createFileRoute, linkOptions, redirect } from "@tanstack/react-router"
+import { createFileRoute, linkOptions, redirect, useRouter } from "@tanstack/react-router"
 
 import { Button } from "@openlguid/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
@@ -12,12 +12,8 @@ import type {
   QRVerifyReturn,
 } from "@openlguid/ui/features/verification/api/verificationService"
 
-import {
-  createClaim,
-  getClaims,
-} from "#/features/service-claim/serviceClaimAPI"
+import { createClaim, getClaims } from "#/features/service-claim/serviceClaimAPI"
 import type { ClaimItem } from "#/features/service-claim/types/serviceClaim"
-import { authSessionService } from "#/features/auth/auth"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 
 import { z } from 'zod';
@@ -30,8 +26,8 @@ const insufficientPermissionsRedirect = linkOptions({
 })
 
 export const Route = createFileRoute("/_authenticated/service-claim/$serviceID")({
-  beforeLoad: () => {
-    const authState = authSessionService.getAuthState()
+  beforeLoad: ({ context }) => {
+    const authState = context.auth.sessionService.getAuthState()
     if (!canAccessServiceClaim(authState)) {
       throw redirect(insufficientPermissionsRedirect)
     }
@@ -41,6 +37,9 @@ export const Route = createFileRoute("/_authenticated/service-claim/$serviceID")
 })
 
 function RouteComponent() {
+  const router = useRouter()
+  const apiClient = router.options.context.auth.authenticatedApiClient
+
   const { serviceID } = Route.useParams();
   const { serviceName } = Route.useSearch();
 
@@ -55,7 +54,7 @@ function RouteComponent() {
     setMessage(null)
 
     try {
-      const response = await getClaims(serviceID)
+      const response = await getClaims(apiClient, serviceID)
       setClaims(response)
     } catch {
       setMessage("Unable to load claims for this service.")
@@ -83,7 +82,7 @@ function RouteComponent() {
     }
     
     try {
-      await createClaim(serviceID, payload.rawQRValue)
+      await createClaim(apiClient, serviceID, payload.rawQRValue)
       await loadClaims()
       setMessage("Claim created successfully.")
     } catch {

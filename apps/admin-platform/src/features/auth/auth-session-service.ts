@@ -63,16 +63,33 @@ export interface EnsureAuthenticatedRedirect {
   }
 }
 
-export type EnsureAuthenticatedResult = EnsureAuthenticatedSuccess | EnsureAuthenticatedRedirect
+export type EnsureAuthenticatedResult =
+  | EnsureAuthenticatedSuccess
+  | EnsureAuthenticatedRedirect
 
 export interface AuthSessionService {
   login: (credentials: LoginCredentials) => Promise<LoginResult>
-  ensureAuthenticated: (args: { redirectTo: string }) => Promise<EnsureAuthenticatedResult>
+  ensureAuthenticated: (args: {
+    redirectTo: string
+  }) => Promise<EnsureAuthenticatedResult>
   refreshSession: () => Promise<boolean>
   getAuthState: () => AuthStateSnapshot
   clear: () => void
   logout: () => Promise<void>
-  _setAuthenticatedClient: (client: { request: (path: string, init?: RequestInit) => Promise<Response> }) => void
+  _setAuthenticatedClient: (client: {
+    request: (path: string, init?: RequestInit) => Promise<Response>
+  }) => void
+}
+
+/**
+ * Minimal state-store contract.
+ *
+ * In runtime, this is typically backed by a Zustand vanilla store.
+ * In tests, you can use the in-memory default store.
+ */
+export interface AuthStateStore {
+  getState: () => AuthStateSnapshot
+  setState: (next: AuthStateSnapshot) => void
 }
 
 const initialAuthState: AuthStateSnapshot = {
@@ -85,6 +102,19 @@ const unauthenticatedState: AuthStateSnapshot = {
   phase: "unauthenticated",
   accessToken: null,
   identityProfile: null,
+}
+
+function createInMemoryAuthStateStore(
+  initial: AuthStateSnapshot = initialAuthState
+): AuthStateStore {
+  let state: AuthStateSnapshot = { ...initial }
+
+  return {
+    getState: () => state,
+    setState: (next) => {
+      state = { ...next }
+    },
+  }
 }
 
 function normalizeIdentityProfile(raw: unknown): IdentityProfile | null {
@@ -100,7 +130,10 @@ function normalizeIdentityProfile(raw: unknown): IdentityProfile | null {
   }
 
   const canonicalRoles = maybeRoles.filter((role): role is CanonicalRole => {
-    return typeof role === "string" && CANONICAL_ROLES.includes(role as CanonicalRole)
+    return (
+      typeof role === "string" &&
+      CANONICAL_ROLES.includes(role as CanonicalRole)
+    )
   })
 
   if (canonicalRoles.length === 0) {
@@ -127,30 +160,42 @@ function buildPublicLoginRedirect(redirectTo: string) {
 
 export function createAuthSessionService(
   apiClient: AuthApiClient = defaultAuthApiClient,
-  queryClient: QueryClient = defaultQueryClient
+  queryClient: QueryClient = defaultQueryClient,
+  stateStore: AuthStateStore = createInMemoryAuthStateStore()
 ): AuthSessionService {
-  let authState: AuthStateSnapshot = { ...initialAuthState }
-  let authenticatedApiClient: { request: (path: string, init?: RequestInit) => Promise<Response> } | null = null
+  let authenticatedApiClient: {
+    request: (path: string, init?: RequestInit) => Promise<Response>
+  } | null = null
+
+  const getAuthState = () => stateStore.getState()
 
   const clear = () => {
-    authState = { ...unauthenticatedState }
+    stateStore.setState({ ...unauthenticatedState })
+  }
+
+  const setAuthenticated = (next: {
+    accessToken: string
+    identityProfile: IdentityProfile
+  }) => {
+    stateStore.setState({
+      phase: "authenticated",
+      accessToken: next.accessToken,
+      identityProfile: next.identityProfile,
+    })
   }
 
   const refreshAndHydrate = async (): Promise<boolean> => {
     const tokenPayload = await apiClient.requestRefreshAccessToken()
-    const identityPayload = await apiClient.requestIdentityProfile(tokenPayload.access)
+    const identityPayload = await apiClient.requestIdentityProfile(
+      tokenPayload.access
+    )
     const identityProfile = normalizeIdentityProfile(identityPayload)
 
     if (!identityProfile) {
       return false
     }
 
-    authState = {
-      phase: "authenticated",
-      accessToken: tokenPayload.access,
-      identityProfile,
-    }
-
+    setAuthenticated({ accessToken: tokenPayload.access, identityProfile })
     return true
   }
 
@@ -158,7 +203,9 @@ export function createAuthSessionService(
     async login(credentials) {
       try {
         const tokenPayload = await apiClient.requestAccessToken(credentials)
-        const identityPayload = await apiClient.requestIdentityProfile(tokenPayload.access)
+        const identityPayload = await apiClient.requestIdentityProfile(
+          tokenPayload.access
+        )
         const identityProfile = normalizeIdentityProfile(identityPayload)
 
         if (!identityProfile) {
@@ -172,15 +219,11 @@ export function createAuthSessionService(
           }
         }
 
-        authState = {
-          phase: "authenticated",
-          accessToken: tokenPayload.access,
-          identityProfile,
-        }
+        setAuthenticated({ accessToken: tokenPayload.access, identityProfile })
 
         return {
           ok: true,
-          state: authState,
+          state: getAuthState(),
         }
       } catch (error) {
         clear()
@@ -206,8 +249,13 @@ export function createAuthSessionService(
     },
 
     async ensureAuthenticated({ redirectTo }) {
-      if (authState.phase === "authenticated" && authState.accessToken && authState.identityProfile) {
-        return { ok: true, state: authState }
+      const current = getAuthState()
+      if (
+        current.phase === "authenticated" &&
+        current.accessToken &&
+        current.identityProfile
+      ) {
+        return { ok: true, state: current }
       }
 
       try {
@@ -219,7 +267,7 @@ export function createAuthSessionService(
             redirect: buildPublicLoginRedirect(redirectTo),
           }
         }
-        return { ok: true, state: authState }
+        return { ok: true, state: getAuthState() }
       } catch {
         clear()
         return {
@@ -243,9 +291,7 @@ export function createAuthSessionService(
       }
     },
 
-    getAuthState() {
-      return authState
-    },
+    getAuthState,
 
     clear,
 

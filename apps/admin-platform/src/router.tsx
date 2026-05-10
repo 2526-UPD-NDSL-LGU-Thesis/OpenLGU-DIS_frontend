@@ -5,6 +5,7 @@ import { routeTree } from './routeTree.gen'
 
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { getContext } from './integrations/tanstack-query/root-provider'
+import { createAuthRuntime } from './features/auth/auth'
 
 let mockWorkerStarted = false
 
@@ -21,10 +22,11 @@ async function ensureMockWorkerStarted() { // TODO ASK is this really necessary?
 export async function getRouter() {
   await ensureMockWorkerStarted()
   const context = getContext()
+  const auth = createAuthRuntime({ queryClient: context.queryClient })
 
   const router = createTanStackRouter({
     routeTree,
-    context,
+    context: { ...context, auth },
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,

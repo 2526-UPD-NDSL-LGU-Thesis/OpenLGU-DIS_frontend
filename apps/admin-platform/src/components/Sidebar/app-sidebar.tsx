@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useRouter } from "@tanstack/react-router"
+import { Link, linkOptions, useRouter } from "@tanstack/react-router"
 
 import { NavDocuments } from "#/components/Sidebar/nav-documents"
 import { NavMain } from "#/components/Sidebar/nav-main"
@@ -15,7 +15,6 @@ import {
   SidebarMenuItem,
 } from "@openlguid/ui/components/sidebar"
 import { LayoutDashboardIcon, ListIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
-import { Link, linkOptions } from "@tanstack/react-router"
 
 import useAuthStore from "#/features/auth/auth"
 
