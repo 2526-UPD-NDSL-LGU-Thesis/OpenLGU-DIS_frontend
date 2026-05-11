@@ -17,34 +17,40 @@ type CanonicalRole = (typeof CANONICAL_ROLES)[number]
 
 const IS_VITEST = Boolean(process.env.VITEST)
 const MOCK_USERNAME_PREFIX = "mock:"
-const MOCK_COOKIE_NAME = "openlguid_mock"
-const MOCK_USER_COOKIE_NAME = "openlguid_mock_user"
+
+// NOTE: You cannot reliably set HttpOnly cookies from MSW-mocked responses in the browser.
+// For dev-only "mock mode" persistence across reloads, we use localStorage.
+const MOCK_STORAGE_KEY = "openlguid:msw-mock-username"
 
 let lastMockUsername: string | null = IS_VITEST ? "employee-1" : null
 
-function readCookieValue(cookieHeader: string | null, name: string): string | null {
-  if (!cookieHeader) return null
-
-  const parts = cookieHeader.split(";")
-  for (const part of parts) {
-    const [k, ...vRest] = part.trim().split("=")
-    if (k === name) {
-      const raw = vRest.join("=")
-      try {
-        return decodeURIComponent(raw)
-      } catch {
-        return raw
-      }
-    }
+function readPersistedMockUsername(): string | null {
+  if (typeof window === "undefined") return null
+  try {
+    return window.localStorage.getItem(MOCK_STORAGE_KEY)
+  } catch {
+    return null
   }
-  return null
 }
 
-export function isMockModeRequest(request: Request): boolean {
+function persistMockUsername(username: string | null) {
+  if (typeof window === "undefined") return
+  try {
+    if (username) {
+      window.localStorage.setItem(MOCK_STORAGE_KEY, username)
+    } else {
+      window.localStorage.removeItem(MOCK_STORAGE_KEY)
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export function isMockModeRequest(_request: Request): boolean {
   if (IS_VITEST) return true
 
-  const cookie = request.headers.get("cookie")
-  return readCookieValue(cookie, MOCK_COOKIE_NAME) === "1"
+  const persisted = readPersistedMockUsername()
+  return persisted !== null || lastMockUsername !== null
 }
 
 export function buildMockAccessToken(): string {
@@ -72,22 +78,6 @@ export function buildMockIdentityProfile(overrides?: {
   }
 }
 
-function setMockCookies(args: { username: string }): Headers {
-  const headers = new Headers()
-  headers.append("set-cookie", `${MOCK_COOKIE_NAME}=1; Path=/; SameSite=Lax`)
-  headers.append(
-    "set-cookie",
-    `${MOCK_USER_COOKIE_NAME}=${encodeURIComponent(args.username)}; Path=/; SameSite=Lax`
-  )
-  return headers
-}
-
-function clearMockCookies(): Headers {
-  const headers = new Headers()
-  headers.append("set-cookie", `${MOCK_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`)
-  headers.append("set-cookie", `${MOCK_USER_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`)
-  return headers
-}
 
 export const authHandlers = [
   http.post(`${authApiBaseUrl}/token/`, async ({ request }) => {
@@ -107,6 +97,7 @@ export const authHandlers = [
       : payload.username
 
     lastMockUsername = actualUsername || "employee-1"
+    persistMockUsername(lastMockUsername)
 
     return HttpResponse.json(
       {
@@ -114,7 +105,6 @@ export const authHandlers = [
       },
       {
         status: 200,
-        headers: setMockCookies({ username: lastMockUsername }),
       }
     )
   }),
@@ -142,9 +132,7 @@ export const authHandlers = [
       return passthrough()
     }
 
-    const cookie = request.headers.get("cookie")
-    const cookieUsername = readCookieValue(cookie, MOCK_USER_COOKIE_NAME)
-    const username = cookieUsername ?? lastMockUsername ?? "employee-1"
+    const username = readPersistedMockUsername() ?? lastMockUsername ?? "employee-1"
 
     return HttpResponse.json(buildMockIdentityProfile({ username }), { status: 200 })
   }),
@@ -155,13 +143,8 @@ export const authHandlers = [
     }
 
     lastMockUsername = null
+    persistMockUsername(null)
 
-    return HttpResponse.json(
-      { detail: "Logged out" },
-      {
-        status: 200,
-        headers: clearMockCookies(),
-      }
-    )
+    return HttpResponse.json({ detail: "Logged out" }, { status: 200 })
   }),
 ]
