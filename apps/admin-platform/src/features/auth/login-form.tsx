@@ -24,8 +24,11 @@ import useAuthStore from "#/features/auth/auth"
 
 export function LoginForm({
   className,
+  redirectTo,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & {
+  redirectTo?: string
+}) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoggingIn, setIsLoggingIn] = useState(false)
@@ -43,8 +46,15 @@ export function LoginForm({
       const result = await login({ username, password });
 
       if (result.ok) {
-        // Navigate to authenticated area on success
-        await navigate({ to: "/" , search: { notice: "nothing" }});
+        const target =
+          typeof redirectTo === "string" &&
+          redirectTo.startsWith("/") &&
+          !redirectTo.startsWith("//")
+            ? redirectTo
+            : "/"
+
+        // Navigate to the original requested route (or authenticated landing) on success.
+        await navigate({ to: target })
       } else {
         // Show error message
         setError(result.error.message)

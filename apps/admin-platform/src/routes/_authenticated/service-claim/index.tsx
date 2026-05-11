@@ -33,7 +33,7 @@ import type {
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 
 const insufficientPermissionsRedirect = linkOptions({
-  to: "/_authenticated",
+  to: "/",
   search: {
     notice: "insufficient-permissions",
   },

@@ -53,14 +53,19 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
         gcTime: 0,
         retry: false,
         queryFn: async () => {
-          const response = await fetch(toUrl("/token/"), {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify(credentials),
-          })
+          let response: Response
+          try {
+            response = await fetch(toUrl("/token/"), {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify(credentials),
+            })
+          } catch {
+            throw new AuthApiError("identity_profile_failed", "Unable to reach auth server.")
+          }
 
           if (!response.ok) {
             throw new AuthApiError("invalid_credentials", "Invalid username or password.")
@@ -87,13 +92,18 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
         gcTime: 0,
         retry: false,
         queryFn: async () => {
-          const response = await fetch(toUrl("/me/"), {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-            credentials: "include",
-          })
+          let response: Response
+          try {
+            response = await fetch(toUrl("/me/"), {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+              credentials: "include",
+            })
+          } catch {
+            throw new AuthApiError("identity_profile_failed", "Unable to reach auth server.")
+          }
 
           if (!response.ok || !isJsonResponse(response)) {
             throw new AuthApiError("identity_profile_failed", "Unable to load LGU Employee identity profile.")
@@ -111,14 +121,19 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
         gcTime: 0,
         retry: false,
         queryFn: async () => {
-          const response = await fetch(toUrl("/token/refresh/"), {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({}),
-          })
+          let response: Response
+          try {
+            response = await fetch(toUrl("/token/refresh/"), {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({}),
+            })
+          } catch {
+            throw new AuthApiError("identity_profile_failed", "Unable to reach auth server.")
+          }
 
           if (!response.ok) {
             throw new AuthApiError("invalid_credentials", "Refresh session is invalid.")

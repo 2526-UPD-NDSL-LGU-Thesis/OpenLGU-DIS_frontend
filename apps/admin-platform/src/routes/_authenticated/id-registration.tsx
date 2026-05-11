@@ -2,7 +2,7 @@ import { createFileRoute, linkOptions, redirect } from '@tanstack/react-router'
 import { canAccessIdRegistration } from "#/features/auth/id-registration-access-policy"
 
 const insufficientPermissionsRedirect = linkOptions({
-  to: "/_authenticated/",
+  to: "/",
   search: {
     notice: "insufficient-permissions",
   },

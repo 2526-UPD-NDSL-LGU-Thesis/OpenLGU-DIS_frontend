@@ -129,7 +129,7 @@ describe("createAuthSessionService", () => {
     const service = createAuthSessionService()
 
     const result = await service.ensureAuthenticated({
-      redirectTo: "/_authenticated/service-claim",
+      redirectTo: "/service-claim",
     })
 
     expect(result.ok).toBe(true)
