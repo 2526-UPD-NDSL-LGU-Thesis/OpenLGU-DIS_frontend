@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { createFileRoute, linkOptions, redirect, useRouter } from "@tanstack/react-router"
+import type { ColumnDef } from "@tanstack/react-table"
 
 import { Button } from "@openlguid/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
@@ -16,6 +17,7 @@ import { createClaim, getClaims } from "#/features/service-claim/serviceClaimAPI
 import { createClaimSubmissionGuard } from "#/features/service-claim/claim-submission-guard"
 import type { ClaimItem } from "#/features/service-claim/types/serviceClaim"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
+import { DataTable } from "#/features/service-claim/components/data-table"
 
 import { z } from 'zod';
 
@@ -50,6 +52,24 @@ function RouteComponent() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const claimSubmissionGuard = useMemo(() => createClaimSubmissionGuard(), [])
+  const claimColumns = useMemo<ColumnDef<ClaimItem>[]>(
+    () => [
+      {
+        accessorKey: "claimed_by",
+        header: "Claimed By",
+      },
+      {
+        accessorKey: "user",
+        header: "Admin User",
+      },
+      {
+        id: "claimed_at",
+        header: "Claimed At",
+        cell: ({ row }) => new Date(row.original.claimed_at).toLocaleString(),
+      },
+    ],
+    []
+  )
   const hasValidServiceID = serviceID && serviceID !== "undefined"
 
   const loadClaims = useCallback(async () => {
@@ -146,7 +166,7 @@ function RouteComponent() {
         {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
 
         <Card>
-          <CardContent className="overflow-x-auto pt-6">
+          <CardContent className="pt-6">
             {isLoadingClaims ? (
               <p className="text-sm text-muted-foreground">Loading claims...</p>
             ) : claims.length === 0 ? (
@@ -154,24 +174,11 @@ function RouteComponent() {
                 No claims yet for this service.
               </p>
             ) : (
-              <table className="w-full min-w-170 text-sm">
-                <thead>
-                  <tr className="border-b text-left text-muted-foreground">
-                    <th className="pb-3">Claimed By</th>
-                    <th className="pb-3">Admin User</th>
-                    <th className="pb-3">Claimed At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {claims.map((claim, index) => (
-                    <tr key={`${claim.claimed_by}-${claim.claimed_at}-${index}`} className="border-b last:border-b-0">
-                      <td className="py-3 pr-4">{claim.claimed_by}</td>
-                      <td className="py-3 pr-4">{claim.user}</td>
-                      <td className="py-3 pr-4">{new Date(claim.claimed_at).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataTable
+                columns={claimColumns}
+                data={claims}
+                emptyMessage="No claims yet for this service."
+              />
             )}
           </CardContent>
         </Card>

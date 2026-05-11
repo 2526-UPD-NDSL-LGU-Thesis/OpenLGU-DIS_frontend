@@ -15,12 +15,12 @@ import {
   FieldSeparator,
 } from "@openlguid/ui/components/field"
 import { Input } from "@openlguid/ui/components/input"
+import { Loader2Icon } from "lucide-react"
 import { useState } from "react"
-import { redirect, useNavigate } from "@tanstack/react-router"
+import { useForm } from "@tanstack/react-form"
+import { useNavigate } from "@tanstack/react-router"
 
 import useAuthStore from "#/features/auth/auth"
-
-// TODO: Make TanStack Form
 
 export function LoginForm({
   className,
@@ -29,42 +29,43 @@ export function LoginForm({
 }: React.ComponentProps<"div"> & {
   redirectTo?: string
 }) {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const { login } = useAuthStore()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setIsLoggingIn(true)
+  const form = useForm({
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+    onSubmit: async ({ value }) => {
+      setError(null)
+      try {
+        const result = await login({
+          username: value.username.trim(),
+          password: value.password,
+        })
 
-    try {
-      const result = await login({ username, password });
+        if (result.ok) {
+          const target =
+            typeof redirectTo === "string" &&
+            redirectTo.startsWith("/") &&
+            !redirectTo.startsWith("//")
+              ? redirectTo
+              : "/"
 
-      if (result.ok) {
-        const target =
-          typeof redirectTo === "string" &&
-          redirectTo.startsWith("/") &&
-          !redirectTo.startsWith("//")
-            ? redirectTo
-            : "/"
+          await navigate({ to: target })
+          return
+        }
 
-        // Navigate to the original requested route (or authenticated landing) on success.
-        await navigate({ to: target })
-      } else {
-        // Show error message
         setError(result.error.message)
+      } catch {
+        setError("An unexpected error occurred. Please try again.")
       }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.")
-    } finally {
-      setIsLoggingIn(false)
-    }
-  }
+    },
+  })
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -75,43 +76,91 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              void form.handleSubmit()
+            }}
+          >
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="username">Username</FieldLabel>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="super"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isLoggingIn}
-                />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoggingIn}
-                />
-              </Field>
+              <form.Field
+                name="username"
+                validators={{
+                  onSubmit: ({ value }) =>
+                    value.trim().length === 0 ? "Username is required." : undefined,
+                }}
+              >
+                {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>Username</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="text"
+                      placeholder="super"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      disabled={form.state.isSubmitting}
+                    />
+                    {field.state.meta.errors[0] ? (
+                      <FieldDescription className="text-destructive">
+                        {field.state.meta.errors[0]}
+                      </FieldDescription>
+                    ) : null}
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field
+                name="password"
+                validators={{
+                  onSubmit: ({ value }) =>
+                    value.trim().length === 0 ? "Password is required." : undefined,
+                }}
+              >
+                {(field) => (
+                  <Field>
+                    <div className="flex items-center">
+                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    </div>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="password"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      disabled={form.state.isSubmitting}
+                    />
+                    {field.state.meta.errors[0] ? (
+                      <FieldDescription className="text-destructive">
+                        {field.state.meta.errors[0]}
+                      </FieldDescription>
+                    ) : null}
+                  </Field>
+                )}
+              </form.Field>
               {error && (
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                   {error}
                 </div>
               )}
               <Field>
-                <Button type="submit" disabled={isLoggingIn}>
-                  {isLoggingIn ? "Logging in..." : "Login"}
+                <Button type="submit" disabled={form.state.isSubmitting}>
+                  {form.state.isSubmitting ? (
+                    <>
+                      <Loader2Icon
+                        className="size-4 animate-spin"
+                        data-testid="login-spinner"
+                        aria-hidden="true"
+                      />
+                      Logging in...
+                    </>
+                  ) : (
+                    "Login"
+                  )}
                 </Button>
-
               </Field>
             </FieldGroup>
           </form>

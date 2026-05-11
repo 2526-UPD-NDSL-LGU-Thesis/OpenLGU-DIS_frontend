@@ -8,6 +8,7 @@ import {
   redirect,
   useRouter,
 } from "@tanstack/react-router"
+import type { ColumnDef } from "@tanstack/react-table"
 
 import { Button } from "@openlguid/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
@@ -31,6 +32,7 @@ import type {
   StocksType,
 } from "#/features/service-claim/types/serviceClaim"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
+import { DataTable } from "#/features/service-claim/components/data-table"
 
 const insufficientPermissionsRedirect = linkOptions({
   to: "/",
@@ -76,6 +78,57 @@ function RouteComponent() {
   const activeServices = useMemo(
     () => services.filter((service) => service.active).length,
     [services]
+  )
+  const serviceColumns = useMemo<ColumnDef<ServiceItem>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => {
+          const service = row.original
+          return (
+            <Link
+              className="font-medium text-primary hover:underline"
+              to="/service-claim/$serviceID"
+              params={{ serviceID: service.id || service.name }}
+              search={{ serviceName: service.name }}
+            >
+              {service.name}
+            </Link>
+          )
+        },
+      },
+      {
+        id: "claim_type",
+        header: "Claim Type",
+        cell: ({ row }) =>
+          row.original.claim_type === "onetime" ? "One-time" : "Periodic",
+      },
+      {
+        id: "stocks_type",
+        header: "Stocks Type",
+        cell: ({ row }) =>
+          row.original.stocks_type === "unlimited" ? "Unlimited" : "Limited",
+      },
+      {
+        accessorKey: "refresh_interval",
+        header: "Refresh Interval",
+      },
+      {
+        accessorKey: "max_claims_per_user",
+        header: "Max Claims Per User",
+      },
+      {
+        accessorKey: "stocks",
+        header: "Stocks",
+      },
+      {
+        id: "active",
+        header: "Status",
+        cell: ({ row }) => (row.original.active ? "Active" : "Inactive"),
+      },
+    ],
+    []
   )
 
   const router = useRouter()
@@ -165,56 +218,17 @@ function RouteComponent() {
         {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
 
         <Card>
-          <CardContent className="overflow-x-auto pt-6">
+          <CardContent className="pt-6">
             {isLoading ? (
               <p className="text-sm text-muted-foreground">Loading services...</p>
             ) : services.length === 0 ? (
               <p className="text-sm text-muted-foreground">No services yet. Create your first one.</p>
             ) : (
-              <table className="w-full min-w-175 text-sm">
-                <thead>
-                  <tr className="border-b text-left text-muted-foreground">
-                    <th className="pb-3">Name</th>
-                    <th className="pb-3">Claim Type</th>
-                    <th className="pb-3">Stocks Type</th>
-                    <th className="pb-3">Refresh Interval</th>
-                    <th className="pb-3">Max Claims Per User</th>
-                    <th className="pb-3">Stocks</th>
-                    <th className="pb-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {services.map((service) => (
-                    <tr
-                      key={service.id || service.name}
-                      className="border-b last:border-b-0 hover:bg-muted/50"
-                    >
-                      <td className="py-3 pr-4">
-                        <Link
-                          className="font-medium text-primary hover:underline"
-                          to="/service-claim/$serviceID"
-                          params={{ serviceID: service.id || service.name }}
-                          search={{ serviceName: service.name }}
-                        >
-                          {service.name}
-                        </Link>
-                      </td>
-                      <td className="py-3 pr-4">
-                        { service.claim_type === "onetime" ? "One-time" : "Periodic" }
-                      </td>
-                      <td className="py-3 pr-4">
-                        { service.stocks_type === "unlimited" ? "Unlimited" : "Limited" }
-                      </td>
-                      <td className="py-3 pr-4">{ service.refresh_interval }</td>
-                      <td className="py-3 pr-4">{ service.max_claims_per_user }</td>
-                      <td className="py-3 pr-4">{ service.stocks }</td>
-                      <td className="py-3 pr-4">
-                        { service.active ? "Active" : "Inactive" }
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataTable
+                columns={serviceColumns}
+                data={services}
+                emptyMessage="No services yet. Create your first one."
+              />
             )}
           </CardContent>
         </Card>
