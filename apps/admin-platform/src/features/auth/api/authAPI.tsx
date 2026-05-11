@@ -94,7 +94,7 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
         queryFn: async () => {
           let response: Response
           try {
-            response = await fetch(toUrl("/me/"), {
+            response = await fetch(toUrl("/users/me/"), {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${accessToken}`,

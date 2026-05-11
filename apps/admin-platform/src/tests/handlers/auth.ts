@@ -122,7 +122,7 @@ export const authHandlers = [
     )
   }),
 
-  http.get(`${authApiBaseUrl}/me/`, ({ request }) => {
+  http.get(`${authApiBaseUrl}/users/me/`, ({ request }) => {
     const authHeader = request.headers.get("authorization")
     if (!authHeader?.startsWith("Bearer ")) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
