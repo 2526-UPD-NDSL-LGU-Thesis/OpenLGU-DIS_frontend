@@ -58,10 +58,11 @@ export function buildMockAccessToken(): string {
 }
 
 function rolesForMockUser(username: string): CanonicalRole[] {
-  // Simple, deterministic roles for dev: tweak later if you want mock users with varying RBAC.
   if (username.toLowerCase().includes("super")) return ["SUPER"]
   if (username.toLowerCase().includes("id")) return ["ID_MANAGEMENT_ADMIN"]
-  return ["SERVICE_CLAIM_ADMIN"]
+  if (username.toLowerCase().includes("service")) return ["SERVICE_CLAIM_ADMIN"]
+
+  return ["SUPER"] // Simple, deterministic roles for dev: tweak later if you want mock users with varying RBAC.
 }
 
 export function buildMockIdentityProfile(overrides?: {
@@ -128,9 +129,9 @@ export const authHandlers = [
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
 
-    if (!isMockModeRequest(request)) {
-      return passthrough()
-    }
+    // if (!isMockModeRequest(request)) { TODO Re-enable once Role Based Access Control is fixed
+    //   return passthrough()
+    // }
 
     const username = readPersistedMockUsername() ?? lastMockUsername ?? "employee-1"
 

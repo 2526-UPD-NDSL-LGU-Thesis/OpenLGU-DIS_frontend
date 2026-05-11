@@ -5,5 +5,6 @@
 
 import { authHandlers } from "#/tests/handlers/auth.ts";
 import { serviceClaimHandlers } from "#/tests/handlers/service-claim.ts";
+import { sectorHandlers } from "#/tests/handlers/sector-management.ts";
 
-export const handlers = [...authHandlers, ...serviceClaimHandlers];
+export const handlers = [...authHandlers, ...serviceClaimHandlers, ...sectorHandlers];
