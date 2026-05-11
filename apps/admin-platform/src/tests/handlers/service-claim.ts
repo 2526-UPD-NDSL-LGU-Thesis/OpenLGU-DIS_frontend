@@ -3,6 +3,7 @@ import { http, HttpResponse, passthrough } from "msw"
 
 import { authApiBaseUrl } from "#/features/auth/api/authAPI"
 import type { ClaimItem, ServiceItem } from "#/features/service-claim/types/serviceClaim"
+import { isMockModeRequest } from "#/tests/handlers/auth"
 
 const services = new Map<string, ServiceItem>()
 const claimsByService = new Map<string, ClaimItem[]>()
@@ -51,18 +52,22 @@ function isAuthorized(request: Request): boolean {
 
 export const serviceClaimHandlers = [
   http.get(`${authApiBaseUrl}/services/`, ({ request }) => {
-    return passthrough();
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
 
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
 
-    // ensureSeedData()
-    // return HttpResponse.json(Array.from(services.values()), { status: 200 })
+    ensureSeedData()
+    return HttpResponse.json(Array.from(services.values()), { status: 200 })
   }),
 
   http.post(`${authApiBaseUrl}/services/`, async ({ request }) => {
-    return passthrough();
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
 
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
@@ -85,7 +90,9 @@ export const serviceClaimHandlers = [
   }),
 
   http.get(`${authApiBaseUrl}/services/:serviceName/claims/`, ({ request, params }) => {
-    return passthrough();
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
 
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
@@ -98,7 +105,9 @@ export const serviceClaimHandlers = [
   }),
 
   http.post(`${authApiBaseUrl}/claim/:serviceName/`, async ({ request, params }) => {
-    return passthrough();
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
 
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
