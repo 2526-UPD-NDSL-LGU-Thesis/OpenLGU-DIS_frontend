@@ -98,12 +98,12 @@ describe("createAuthSessionService", () => {
     })
   })
 
-  it("returns identity_profile_failed and clears session when /me hydration fails", async () => {
+  it("returns identity_profile_failed and clears session when /users/me hydration fails", async () => {
     server.use(
       http.post(`${authApiBaseUrl}/token/`, () => {
         return HttpResponse.json({ access: buildMockAccessToken() }, { status: 200 })
       }),
-      http.get(`${authApiBaseUrl}/me/`, () => {
+      http.get(`${authApiBaseUrl}/users/me/`, () => {
         return HttpResponse.json({ detail: "Server error" }, { status: 500 })
       })
     )

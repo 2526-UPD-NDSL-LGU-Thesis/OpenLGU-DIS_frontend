@@ -7,10 +7,12 @@ import { isMockModeRequest } from "#/tests/handlers/auth"
 
 const services = new Map<string, ServiceItem>()
 const claimsByService = new Map<string, ClaimItem[]>()
+const claimByServiceAndQR = new Map<string, ClaimItem>()
 
 function buildMockService(name?: string): ServiceItem {
   const serviceName = name ?? faker.helpers.slugify(faker.commerce.productName()).toLowerCase()
   return {
+    id: serviceName,
     name: serviceName,
     verbose_name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
@@ -119,9 +121,16 @@ export const serviceClaimHandlers = [
       return HttpResponse.json({ detail: "Missing QR value" }, { status: 400 })
     }
 
+    const dedupeKey = `${serviceName}::${body.qr}`
+    const existing = claimByServiceAndQR.get(dedupeKey)
+    if (existing) {
+      return HttpResponse.json(existing, { status: 201 })
+    }
+
     const claim = buildMockClaim(serviceName)
     const currentClaims = claimsByService.get(serviceName) ?? []
     claimsByService.set(serviceName, [claim, ...currentClaims])
+    claimByServiceAndQR.set(dedupeKey, claim)
     return HttpResponse.json(claim, { status: 201 })
   }),
 ]

@@ -44,6 +44,7 @@ export function VerificationDialog({
   const [activeTab, setActiveTab] = useState("webcam")
   const [isDragging, setIsDragging] = useState(false)
   const hasAutoStartedRef = useRef(false)
+  const hasEmittedResultRef = useRef(false)
   const latestRawQRValueRef = useRef<string | null>(null)
   const fileInputId = useId()
 
@@ -74,6 +75,7 @@ export function VerificationDialog({
   useEffect(() => {
     if (!open) {
       hasAutoStartedRef.current = false
+      hasEmittedResultRef.current = false
       return
     }
 
@@ -96,9 +98,10 @@ export function VerificationDialog({
   }, [activeTab, isLoading, isScanning, open, startWebcamScan, stopWebcamScan])
 
   useEffect(() => {
-    if (!scanResult) {
+    if (!open || !scanResult || hasEmittedResultRef.current) {
       return
     }
+    hasEmittedResultRef.current = true
 
     if (latestRawQRValueRef.current) {
       onScanComplete?.({
@@ -109,7 +112,11 @@ export function VerificationDialog({
 
     onVerificationResult(scanResult)
     onOpenChange(false)
-  }, [onOpenChange, onScanComplete, onVerificationResult, scanResult])
+    reset()
+    latestRawQRValueRef.current = null
+    hasAutoStartedRef.current = false
+    onVerifyingChange?.(false)
+  }, [onOpenChange, onScanComplete, onVerificationResult, onVerifyingChange, open, reset, scanResult])
 
   const handleOpenChange = (nextOpen: boolean) => {
     onOpenChange(nextOpen)
@@ -119,7 +126,10 @@ export function VerificationDialog({
       setActiveTab("webcam")
       latestRawQRValueRef.current = null
       hasAutoStartedRef.current = false
+      hasEmittedResultRef.current = false
       onVerifyingChange?.(false)
+    } else {
+      hasEmittedResultRef.current = false
     }
   }
 

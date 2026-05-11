@@ -97,4 +97,43 @@ describe("createAuthenticatedApiClient", () => {
       identityProfile: null,
     })
   })
+
+  it("does not auto-retry mutating POST claim requests after 401", async () => {
+    const expiredAccessToken = "expired-access-token"
+    let refreshCalls = 0
+    let claimCalls = 0
+
+    server.use(
+      http.post(`${authApiBaseUrl}/token/`, () => {
+        return HttpResponse.json({ access: expiredAccessToken }, { status: 200 })
+      }),
+      http.post(`${authApiBaseUrl}/token/refresh/`, () => {
+        refreshCalls += 1
+        return HttpResponse.json({ access: "refreshed-token" }, { status: 200 })
+      }),
+      http.get(`${authApiBaseUrl}/me/`, () => {
+        return HttpResponse.json({ username: "employee-1", roles: ["SUPER"] }, { status: 200 })
+      }),
+      http.post(`${authApiBaseUrl}/claim/:serviceName/`, () => {
+        claimCalls += 1
+        return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
+      })
+    )
+
+    const authSessionService = createAuthSessionService()
+    await authSessionService.login({ username: "employee-1", password: "password" })
+    const apiClient = createAuthenticatedApiClient({ authSessionService })
+
+    const response = await apiClient.request("/claim/medical-assistance/", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ qr: "mock-qr" }),
+    })
+
+    expect(response.status).toBe(401)
+    expect(refreshCalls).toBe(0)
+    expect(claimCalls).toBe(1)
+  })
 })

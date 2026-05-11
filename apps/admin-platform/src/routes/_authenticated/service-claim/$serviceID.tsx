@@ -1,6 +1,6 @@
 /* Service-specific claim route with claim list and QR-based claim creation. */
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { createFileRoute, linkOptions, redirect, useRouter } from "@tanstack/react-router"
 
 import { Button } from "@openlguid/ui/components/button"
@@ -13,6 +13,7 @@ import type {
 } from "@openlguid/ui/features/verification/api/verificationService"
 
 import { createClaim, getClaims } from "#/features/service-claim/serviceClaimAPI"
+import { createClaimSubmissionGuard } from "#/features/service-claim/claim-submission-guard"
 import type { ClaimItem } from "#/features/service-claim/types/serviceClaim"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 
@@ -48,8 +49,16 @@ function RouteComponent() {
   const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const claimSubmissionGuard = useMemo(() => createClaimSubmissionGuard(), [])
+  const hasValidServiceID = serviceID && serviceID !== "undefined"
 
-  const loadClaims = async () => {
+  const loadClaims = useCallback(async () => {
+    if (!hasValidServiceID) {
+      setMessage("Invalid service route. Please select a valid service from the list.")
+      setIsLoadingClaims(false)
+      return
+    }
+
     setIsLoadingClaims(true)
     setMessage(null)
 
@@ -61,34 +70,44 @@ function RouteComponent() {
     } finally {
       setIsLoadingClaims(false)
     }
-  }
+  }, [apiClient, hasValidServiceID, serviceID])
 
   useEffect(() => {
     void loadClaims()
-  }, [serviceID])
+  }, [loadClaims])
 
-  const handleVerificationResult = (result: QRVerifyReturn) => {
+  const handleVerificationResult = useCallback((result: QRVerifyReturn) => {
     if (result.result !== "success") {
       setMessage(result.message ?? "Claim aborted because QR verification failed.")
     }
-  }
+  }, [])
 
-  const handleScanComplete = async (payload: {
+  const handleScanComplete = useCallback(async (payload: {
     rawQRValue: string
     verificationResult: QRVerifyReturn
   }) => {
     if (payload.verificationResult.result !== "success") {
       return
     }
+
+    if (!hasValidServiceID) {
+      setMessage("Invalid service route. Please return to the service list.")
+      return
+    }
     
     try {
-      await createClaim(apiClient, serviceID, payload.rawQRValue)
-      await loadClaims()
-      setMessage("Claim created successfully.")
+      const handled = await claimSubmissionGuard.run(async () => {
+        await createClaim(apiClient, serviceID, payload.rawQRValue)
+        await loadClaims()
+        setMessage("Claim created successfully.")
+      })
+      if (handled === null) {
+        return
+      }
     } catch {
       setMessage("Failed to create claim for this service.")
     }
-  }
+  }, [apiClient, claimSubmissionGuard, hasValidServiceID, loadClaims, serviceID])
 
   return (
     <main className="space-y-6 px-4">
