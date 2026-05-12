@@ -18,7 +18,7 @@ import type {
   QRVerifyReturn,
 } from "@openlguid/ui/features/verification/api/verificationService"
 
-import { ResidentProfileCard } from "#/components/ResidentProfileCard.js"
+import { ResidentProfileCard } from "@openlguid/ui/features/verification/components/ResidentProfileCard"
 import { getMockVerificationResult } from "#/tests/utility/mockVerificationData.ts"
 
 // TODO: Remove Mocking Data

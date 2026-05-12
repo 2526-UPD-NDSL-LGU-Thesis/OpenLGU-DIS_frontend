@@ -81,12 +81,12 @@ export async function enlistResidentToSector(
   sectorID: string,
   rawQRValue: string
 ): Promise<EnlistResponse> {
-  const response = await apiClient.request(`/ids/enlist/`, {
+  const response = await apiClient.request(`/sectors/${sectorPath(sectorID)}/enlist/`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
     },
-    body: JSON.stringify({ qr: rawQRValue, sector: [sectorPath(sectorID)] }),
+    body: JSON.stringify({ qr: rawQRValue }),
   })
 
   await assertOk(response, "Failed to enlist resident to sector.")

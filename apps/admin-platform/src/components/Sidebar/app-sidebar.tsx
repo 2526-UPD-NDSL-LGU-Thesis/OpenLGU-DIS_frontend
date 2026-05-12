@@ -153,6 +153,11 @@ const navMainItems = linkOptions([
       //   <ListIcon
       //   />
       // ),
+    },
+    {
+      title: "Sector Management",
+      to: "/sector-management",
+      // icon: <LayoutDashboardIcon />,
     }
 ]);
 

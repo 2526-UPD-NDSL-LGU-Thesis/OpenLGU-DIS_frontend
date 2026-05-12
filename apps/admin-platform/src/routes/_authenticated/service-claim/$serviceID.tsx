@@ -55,12 +55,12 @@ function RouteComponent() {
   const claimColumns = useMemo<ColumnDef<ClaimItem>[]>(
     () => [
       {
-        accessorKey: "claimed_by",
-        header: "Claimed By",
+        accessorKey: "user",
+        header: "Claimed By (Resident ID)",
       },
       {
-        accessorKey: "user",
-        header: "Admin User",
+        accessorKey: "claimed_by",
+        header: "Facilitated By (Employee)",
       },
       {
         id: "claimed_at",
@@ -84,7 +84,7 @@ function RouteComponent() {
 
     try {
       const response = await getClaims(apiClient, serviceID)
-      setClaims(response)
+      setClaims(response);
     } catch {
       setMessage("Unable to load claims for this service.")
     } finally {

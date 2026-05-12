@@ -58,6 +58,7 @@
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
     "./features/verification/components/VerificationDialog": "./src/features/verification/components/VerificationDialog.tsx",
+    "./features/verification/components/ResidentProfileCard": "./src/features/verification/components/ResidentProfileCard.tsx",
     "./features/verification/api/verificationService": "./src/features/verification/api/verificationService.ts",
     "./features/verification/types/verification": "./src/features/verification/types/verification.ts"
   },

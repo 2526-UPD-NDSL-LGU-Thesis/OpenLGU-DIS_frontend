@@ -31,7 +31,7 @@ function buildMockResident(qr: string): IdDetails {
     gender: faker.helpers.arrayElement(["Male", "Female"]),
     email: `${qr.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "resident"}@openlguid.local`,
     phone: faker.phone.number(),
-    face: faker.image.avatar(),
+    face: "ZmFrZS1mYWNlLWltYWdl",
     issuerType: "LGU",
   }
 }
@@ -131,59 +131,62 @@ export const sectorHandlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
-  // http.post(`${authApiBaseUrl}/sectors/:sectorID/enlist/`, async ({ request, params }) => {
-  //   if (!isMockModeRequest(request)) {
-  //     return passthrough()
-  //   }
+  http.post(`${authApiBaseUrl}/sectors/:sectorID/enlist/`, async ({ request, params }) => {
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
 
-  //   if (!isAuthorized(request)) {
-  //     return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
-  //   }
+    if (!isAuthorized(request)) {
+      return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
+    }
 
-  //   const sectorID = String(params.sectorID)
-  //   if (!sectors.has(sectorID)) {
-  //     return HttpResponse.json({ message: "Sector not found." }, { status: 404 })
-  //   }
+    const sectorID = String(params.sectorID)
+    if (!sectors.has(sectorID)) {
+      return HttpResponse.json({ message: "Sector not found." }, { status: 404 })
+    }
 
-  //   const body = (await readJsonBody<{ qr?: string }>(request))
-  //   if (!body.qr?.trim()) {
-  //     return HttpResponse.json({ message: "QR value is required." }, { status: 400 })
-  //   }
+    const body = (await readJsonBody<{ qr?: string }>(request))
+    if (!body.qr?.trim()) {
+      return HttpResponse.json({ message: "QR value is required." }, { status: 400 })
+    }
 
-  //   if (body.qr.startsWith("error:")) {
-  //     return HttpResponse.json({ message: body.qr.slice("error:".length) || "Unable to enlist resident." }, { status: 400 })
-  //   }
+    if (body.qr.startsWith("error:")) {
+      return HttpResponse.json(
+        { message: body.qr.slice("error:".length) || "Unable to enlist resident." },
+        { status: 400 }
+      )
+    }
 
-  //   const dedupeKey = `${sectorID}::${body.qr}`
-  //   const existing = enlistmentsBySectorAndQR.get(dedupeKey)
-  //   if (existing) {
-  //     return HttpResponse.json(
-  //       {
-  //         ok: true,
-  //         resident: existing,
-  //         message: "Resident already enlisted in this sector.",
-  //       },
-  //       { status: 200 }
-  //     )
-  //   }
+    const dedupeKey = `${sectorID}::${body.qr}`
+    const existing = enlistmentsBySectorAndQR.get(dedupeKey)
+    if (existing) {
+      return HttpResponse.json(
+        {
+          ok: true,
+          resident: existing,
+          message: "Resident already enlisted in this sector.",
+        },
+        { status: 200 }
+      )
+    }
 
-  //   const resident = buildMockResident(body.qr)
-  //   enlistmentsBySectorAndQR.set(dedupeKey, resident)
-  //   const currentSector = sectors.get(sectorID)
-  //   if (currentSector) {
-  //     sectors.set(sectorID, {
-  //       ...currentSector,
-  //       resident_count: currentSector.resident_count + 1,
-  //     })
-  //   }
+    const resident = buildMockResident(body.qr)
+    enlistmentsBySectorAndQR.set(dedupeKey, resident)
+    const currentSector = sectors.get(sectorID)
+    if (currentSector) {
+      sectors.set(sectorID, {
+        ...currentSector,
+        resident_count: currentSector.resident_count + 1,
+      })
+    }
 
-  //   return HttpResponse.json(
-  //     {
-  //       ok: true,
-  //       resident,
-  //       message: "Resident enlisted in this sector.",
-  //     },
-  //     { status: 200 }
-  //   )
-  // }), TODO not yet reflective of current api call
+    return HttpResponse.json(
+      {
+        ok: true,
+        resident,
+        message: "Resident enlisted in this sector.",
+      },
+      { status: 200 }
+    )
+  }),
 ]

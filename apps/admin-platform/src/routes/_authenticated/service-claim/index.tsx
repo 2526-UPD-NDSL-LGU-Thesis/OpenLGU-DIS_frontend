@@ -33,6 +33,13 @@ import type {
 } from "#/features/service-claim/types/serviceClaim"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 import { DataTable } from "#/features/service-claim/components/data-table"
+import {
+  getSectors
+} from "#/features/sector-management/sectorAPI"
+import type {
+  SectorItem,
+} from "#/features/sector-management/types"
+
 
 const insufficientPermissionsRedirect = linkOptions({
   to: "/",
@@ -67,6 +74,7 @@ const defaultFormState = {
 }
 
 function RouteComponent() {
+  const [sectors, setSectors] = useState<SectorItem[]>([]) // TODO REMOVE THIS
   const [services, setServices] = useState<ServiceItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -140,7 +148,9 @@ function RouteComponent() {
 
     try {
       const response = await getServices(apiClient)
+      const otherResponse = await getSectors(apiClient); // TODO REMOVE THIS
       setServices(response)
+      setSectors(otherResponse);
     } catch {
       setErrorMessage("Unable to load services right now.")
     } finally {
@@ -165,8 +175,9 @@ function RouteComponent() {
       stocks_type: formState.stocks_type,
       stocks: Number(formState.stocks),
       active: formState.active,
-      recepient_sectors: splitCommaSeparatedValues(formState.recepient_sectors),
-      allowed_groups: splitCommaSeparatedValues(formState.allowed_groups).map((groupId) => Number(groupId)),
+      recipient_sectors: [formState.recepient_sectors], // TODO FIX
+      allowed_groups: [1, 2, 3] // TODO REMOVE
+        // splitCommaSeparatedValues(formState.allowed_groups).map((groupId) => Number(groupId)),
     }
 
     setIsSubmitting(true)
@@ -256,7 +267,7 @@ function RouteComponent() {
                 />
               </label>
 
-              <label className="space-y-1 text-sm">
+              {/* <label className="space-y-1 text-sm">
                 <span>Verbose Name</span>
                 <Input
                   required
@@ -265,7 +276,7 @@ function RouteComponent() {
                     setFormState((previous) => ({ ...previous, verbose_name: event.target.value }))
                   }
                 />
-              </label>
+              </label> */}
 
               <label className="space-y-1 text-sm md:col-span-2">
                 <span>Description</span>
@@ -323,7 +334,7 @@ function RouteComponent() {
                   }
                 >
                   <option value="onetime">onetime</option>
-                  <option value="repeatable">repeatable</option>
+                  <option value="periodic">periodic</option>
                 </select>
               </label>
 
@@ -360,7 +371,7 @@ function RouteComponent() {
 
               <label className="space-y-1 text-sm md:col-span-2">
                 <span>Recipient Sectors (comma-separated)</span>
-                <Input
+                {/* <Input
                   placeholder="4PS, RESIDENT, SENIOR"
                   value={formState.recepient_sectors}
                   onChange={(event) =>
@@ -369,22 +380,36 @@ function RouteComponent() {
                       recepient_sectors: event.target.value,
                     }))
                   }
-                />
-              </label>
-
-              <label className="space-y-1 text-sm md:col-span-2">
-                <span>Allowed Groups (comma-separated group ids)</span>
-                <Input
-                  placeholder="1, 2"
-                  value={formState.allowed_groups}
+                /> */}
+                <select
+                  className="h-9 w-full rounded-md border bg-background px-3"
+                  value={formState.recepient_sectors}
                   onChange={(event) =>
                     setFormState((previous) => ({
                       ...previous,
-                      allowed_groups: event.target.value,
+                      recepient_sectors: event.target.value,
                     }))
                   }
-                />
+                >
+                  {sectors.map((sector) => (
+                    <option value={sector.id}>{sector.name}</option>
+                  ))}
+                </select>
               </label>
+
+                {/* <label className="space-y-1 text-sm md:col-span-2">
+                  <span>Allowed Groups (comma-separated group ids)</span>
+                  <Input
+                    placeholder="1, 2"
+                    value={formState.allowed_groups}
+                    onChange={(event) =>
+                      setFormState((previous) => ({
+                        ...previous,
+                        allowed_groups: event.target.value,
+                      }))
+                    }
+                  />
+                </label> */}
 
               <label className="inline-flex items-center gap-2 text-sm">
                 <input
