@@ -8,7 +8,7 @@ const insufficientPermissionsRedirect = linkOptions({
   },
 })
 
-export const Route = createFileRoute('/_authenticated/id-registration')({
+export const Route = createFileRoute('/_authenticated/id-management/')({
   beforeLoad: ({ context }) => {
     const authState = context.auth.sessionService.getAuthState()
     if (!canAccessIdRegistration(authState)) {

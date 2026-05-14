@@ -12,9 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
-import { Route as AuthenticatedIdRegistrationRouteImport } from './routes/_authenticated/id-registration'
 import { Route as AuthenticatedServiceClaimIndexRouteImport } from './routes/_authenticated/service-claim/index'
 import { Route as AuthenticatedSectorManagementIndexRouteImport } from './routes/_authenticated/sector-management/index'
+import { Route as AuthenticatedIdManagementIndexRouteImport } from './routes/_authenticated/id-management/index'
 import { Route as AuthenticatedServiceClaimServiceIDRouteImport } from './routes/_authenticated/service-claim/$serviceID'
 import { Route as AuthenticatedSectorManagementSectorIDRouteImport } from './routes/_authenticated/sector-management/$sectorID'
 
@@ -32,12 +32,6 @@ const PublicLoginRoute = PublicLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIdRegistrationRoute =
-  AuthenticatedIdRegistrationRouteImport.update({
-    id: '/id-registration',
-    path: '/id-registration',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedServiceClaimIndexRoute =
   AuthenticatedServiceClaimIndexRouteImport.update({
     id: '/service-claim/',
@@ -48,6 +42,12 @@ const AuthenticatedSectorManagementIndexRoute =
   AuthenticatedSectorManagementIndexRouteImport.update({
     id: '/sector-management/',
     path: '/sector-management/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIdManagementIndexRoute =
+  AuthenticatedIdManagementIndexRouteImport.update({
+    id: '/id-management/',
+    path: '/id-management/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedServiceClaimServiceIDRoute =
@@ -65,30 +65,30 @@ const AuthenticatedSectorManagementSectorIDRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
-  '/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/login': typeof PublicLoginRoute
   '/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
+  '/id-management/': typeof AuthenticatedIdManagementIndexRoute
   '/sector-management/': typeof AuthenticatedSectorManagementIndexRoute
   '/service-claim/': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRoutesByTo {
-  '/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/login': typeof PublicLoginRoute
   '/': typeof AuthenticatedIndexRoute
   '/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
+  '/id-management': typeof AuthenticatedIdManagementIndexRoute
   '/sector-management': typeof AuthenticatedSectorManagementIndexRoute
   '/service-claim': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/_authenticated/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/_public/login': typeof PublicLoginRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/_authenticated/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
+  '/_authenticated/id-management/': typeof AuthenticatedIdManagementIndexRoute
   '/_authenticated/sector-management/': typeof AuthenticatedSectorManagementIndexRoute
   '/_authenticated/service-claim/': typeof AuthenticatedServiceClaimIndexRoute
 }
@@ -96,29 +96,29 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/id-registration'
     | '/login'
     | '/sector-management/$sectorID'
     | '/service-claim/$serviceID'
+    | '/id-management/'
     | '/sector-management/'
     | '/service-claim/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/id-registration'
     | '/login'
     | '/'
     | '/sector-management/$sectorID'
     | '/service-claim/$serviceID'
+    | '/id-management'
     | '/sector-management'
     | '/service-claim'
   id:
     | '__root__'
     | '/_authenticated'
-    | '/_authenticated/id-registration'
     | '/_public/login'
     | '/_authenticated/'
     | '/_authenticated/sector-management/$sectorID'
     | '/_authenticated/service-claim/$serviceID'
+    | '/_authenticated/id-management/'
     | '/_authenticated/sector-management/'
     | '/_authenticated/service-claim/'
   fileRoutesById: FileRoutesById
@@ -151,13 +151,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/id-registration': {
-      id: '/_authenticated/id-registration'
-      path: '/id-registration'
-      fullPath: '/id-registration'
-      preLoaderRoute: typeof AuthenticatedIdRegistrationRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/service-claim/': {
       id: '/_authenticated/service-claim/'
       path: '/service-claim'
@@ -170,6 +163,13 @@ declare module '@tanstack/react-router' {
       path: '/sector-management'
       fullPath: '/sector-management/'
       preLoaderRoute: typeof AuthenticatedSectorManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/id-management/': {
+      id: '/_authenticated/id-management/'
+      path: '/id-management'
+      fullPath: '/id-management/'
+      preLoaderRoute: typeof AuthenticatedIdManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/service-claim/$serviceID': {
@@ -190,21 +190,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedIdRegistrationRoute: typeof AuthenticatedIdRegistrationRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedSectorManagementSectorIDRoute: typeof AuthenticatedSectorManagementSectorIDRoute
   AuthenticatedServiceClaimServiceIDRoute: typeof AuthenticatedServiceClaimServiceIDRoute
+  AuthenticatedIdManagementIndexRoute: typeof AuthenticatedIdManagementIndexRoute
   AuthenticatedSectorManagementIndexRoute: typeof AuthenticatedSectorManagementIndexRoute
   AuthenticatedServiceClaimIndexRoute: typeof AuthenticatedServiceClaimIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedIdRegistrationRoute: AuthenticatedIdRegistrationRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedSectorManagementSectorIDRoute:
     AuthenticatedSectorManagementSectorIDRoute,
   AuthenticatedServiceClaimServiceIDRoute:
     AuthenticatedServiceClaimServiceIDRoute,
+  AuthenticatedIdManagementIndexRoute: AuthenticatedIdManagementIndexRoute,
   AuthenticatedSectorManagementIndexRoute:
     AuthenticatedSectorManagementIndexRoute,
   AuthenticatedServiceClaimIndexRoute: AuthenticatedServiceClaimIndexRoute,
