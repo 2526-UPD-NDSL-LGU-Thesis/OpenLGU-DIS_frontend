@@ -78,6 +78,11 @@ describe("AppSidebar", () => {
     const { auth, router } = await renderSidebarFlow()
     const user = userEvent.setup()
 
+    expect(screen.getByRole("link", { name: "ID Management" })).toHaveAttribute(
+      "href",
+      "/id-management"
+    )
+
     await user.click(screen.getByRole("button", { name: /employee-1/i }))
     await user.click(await screen.findByText("Log out"))
 

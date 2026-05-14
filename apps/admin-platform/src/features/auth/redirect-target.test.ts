@@ -6,10 +6,10 @@ describe("getRedirectTarget", () => {
   it("uses href directly when available", () => {
     expect(
       getRedirectTarget({
-        href: "/id-registration?tab=1",
-        pathname: "/id-registration",
+        href: "/id-management?tab=1",
+        pathname: "/id-management",
       })
-    ).toBe("/id-registration?tab=1")
+    ).toBe("/id-management?tab=1")
   })
 
   it("falls back to pathname + searchStr + hash when href is missing", () => {

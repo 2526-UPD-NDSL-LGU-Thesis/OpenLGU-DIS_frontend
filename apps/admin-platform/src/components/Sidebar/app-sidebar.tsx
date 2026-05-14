@@ -140,8 +140,8 @@ const dummyData = {
 
 const navMainItems = linkOptions([
     {
-      title: "ID Registration",
-      to: "/id-registration", // TODO how to have this auto-update?
+      title: "ID Management",
+      to: "/id-management",
       // icon: (
       //   <LayoutDashboardIcon />
       // ),

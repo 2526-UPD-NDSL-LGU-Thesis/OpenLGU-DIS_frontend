@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { canAccessIdRegistration } from "./id-registration-access-policy"
+import { canAccessIdManagement } from "./id-management-access-policy"
 import type { AuthStateSnapshot } from "./auth-session-service"
 
-describe("canAccessIdRegistration", () => {
+describe("canAccessIdManagement", () => {
   it("allows SUPER role in Authenticated Area", () => {
     const authState: AuthStateSnapshot = {
       phase: "authenticated",
@@ -14,7 +14,7 @@ describe("canAccessIdRegistration", () => {
       },
     }
 
-    expect(canAccessIdRegistration(authState)).toBe(true)
+    expect(canAccessIdManagement(authState)).toBe(true)
   })
 
   it("allows ID Management roles in Authenticated Area", () => {
@@ -27,7 +27,7 @@ describe("canAccessIdRegistration", () => {
       },
     }
 
-    expect(canAccessIdRegistration(authState)).toBe(true)
+    expect(canAccessIdManagement(authState)).toBe(true)
   })
 
   it("denies non-ID-management roles and unauthenticated state", () => {
@@ -46,7 +46,7 @@ describe("canAccessIdRegistration", () => {
       identityProfile: null,
     }
 
-    expect(canAccessIdRegistration(unauthorizedRoleState)).toBe(false)
-    expect(canAccessIdRegistration(unauthenticatedState)).toBe(false)
+    expect(canAccessIdManagement(unauthorizedRoleState)).toBe(false)
+    expect(canAccessIdManagement(unauthenticatedState)).toBe(false)
   })
 })

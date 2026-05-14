@@ -148,7 +148,7 @@ describe("createAuthSessionService", () => {
 
     const service = createAuthSessionService()
     const result = await service.ensureAuthenticated({
-      redirectTo: "/id-registration?tab=1",
+      redirectTo: "/id-management?tab=1",
     })
 
     expect(result).toEqual({
@@ -156,7 +156,7 @@ describe("createAuthSessionService", () => {
       redirect: {
         to: "/login",
         search: {
-          redirect: "/id-registration?tab=1",
+          redirect: "/id-management?tab=1",
         },
       },
     })

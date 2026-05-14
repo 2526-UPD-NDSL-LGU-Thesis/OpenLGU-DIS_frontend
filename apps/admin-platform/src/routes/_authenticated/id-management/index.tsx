@@ -1,5 +1,5 @@
 import { createFileRoute, linkOptions, redirect } from '@tanstack/react-router'
-import { canAccessIdRegistration } from "#/features/auth/id-registration-access-policy"
+import { canAccessIdManagement } from "#/features/auth/id-management-access-policy"
 
 const insufficientPermissionsRedirect = linkOptions({
   to: "/",
@@ -11,7 +11,7 @@ const insufficientPermissionsRedirect = linkOptions({
 export const Route = createFileRoute('/_authenticated/id-management/')({
   beforeLoad: ({ context }) => {
     const authState = context.auth.sessionService.getAuthState()
-    if (!canAccessIdRegistration(authState)) {
+    if (!canAccessIdManagement(authState)) {
       throw redirect(insufficientPermissionsRedirect)
     }
   },
@@ -19,5 +19,5 @@ export const Route = createFileRoute('/_authenticated/id-management/')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/id-registration"!</div>
+  return <div>Hello "ID Management"!</div>
 }
