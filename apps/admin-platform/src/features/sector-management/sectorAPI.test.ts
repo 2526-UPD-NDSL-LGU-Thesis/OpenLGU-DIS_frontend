@@ -73,15 +73,40 @@ describe("sectorAPI", () => {
     expect(sector.id).toBe("sector-2")
   })
 
-  it("throws backend messages for enlist failures", async () => {
-    const request = vi.fn(async () =>
-      jsonResponse({ message: "Resident already enlisted." }, { status: 400 })
-    )
+  it("enlists a resident through the ids endpoint with qr and sector list", async () => {
+    const request = vi.fn(async (path: string, init?: RequestInit) => {
+      expect(path).toBe("/ids/enlist/")
+      expect(init?.method).toBe("POST")
+      expect(init?.headers).toEqual(
+        expect.objectContaining({ "content-type": "application/json" })
+      )
+      expect(JSON.parse(String(init?.body))).toEqual({
+        qr: "bad-qr",
+        sector: ["sector-1"],
+      })
+
+      return jsonResponse({
+        ok: true,
+        pcn: "pcn-1",
+        uin: "uin-1",
+        issued_at: "2026-05-11T00:00:00.000Z",
+        active: true,
+        email: "resident@example.com",
+        phone_number: "09171234567",
+        sector: ["sector-1"],
+      })
+    })
     const apiClient: AuthenticatedApiClient = { request }
 
-    await expect(
-      enlistResidentToSector(apiClient, "sector-1", "bad-qr")
-    ).rejects.toThrow("Resident already enlisted.")
+    const response = await enlistResidentToSector(apiClient, ["sector-1"], "bad-qr")
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        ok: true,
+        uin: "uin-1",
+        sector: ["sector-1"],
+      })
+    )
   })
 
   it("deletes a sector using an encoded sector ID", async () => {

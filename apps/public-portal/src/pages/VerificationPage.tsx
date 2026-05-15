@@ -1,5 +1,6 @@
 /* Verification page for resident ID scanning and status display. */
 
+import React from "react"
 import { AlertTriangle, CheckCircle2, Clock3, Loader2, XCircle } from "lucide-react"
 import { useState } from "react"
 
@@ -12,11 +13,10 @@ import {
   CardTitle, 
 } from "@openlguid/ui/components/card"
 import {
-  VerificationDialog,
-} from "@openlguid/ui/features/verification/components/VerificationDialog"
-import type {
-  QRVerifyReturn,
-} from "@openlguid/ui/features/verification/api/verificationService"
+  IdentifierCaptureDialog,
+} from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
+import { verifyQR } from "@openlguid/ui/features/verification/api/verificationService"
+import type { QRVerifyReturn } from "@openlguid/ui/features/verification/api/verificationService"
 
 import { ResidentProfileCard } from "@openlguid/ui/features/verification/components/ResidentProfileCard"
 import { getMockVerificationResult } from "#/tests/utility/mockVerificationData.ts"
@@ -121,11 +121,19 @@ export function VerificationPage() {
             Load Mock Success
           </Button>
         ) : null}
-        <VerificationDialog
+        <IdentifierCaptureDialog
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
-          onVerificationResult={setVerificationData}
-          onVerifyingChange={setIsVerifying}
+          allowManualCapture={false}
+          onSubmittingChange={setIsVerifying}
+          onSubmit={async (request) => {
+            if (request.kind !== "qr") {
+              throw new Error("Manual entry is not supported here.")
+            }
+
+            const result = await verifyQR(request.rawQRValue)
+            setVerificationData(result)
+          }}
         />
       </section>
       <section className="flex w-full max-w-2xl flex-col gap-4">

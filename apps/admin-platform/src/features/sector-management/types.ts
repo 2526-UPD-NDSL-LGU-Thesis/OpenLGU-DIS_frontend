@@ -1,5 +1,3 @@
-import type { IdDetails } from "@openlguid/ui/features/verification/types/verification"
-
 export interface SectorItem {
   id: string
   name: string
@@ -16,6 +14,12 @@ export interface CreateSectorPayload {
 
 export interface EnlistResponse {
   ok: true
-  resident: IdDetails
+  pcn: string
+  uin: string
+  issued_at: string
+  active: boolean
+  email: string
+  phone_number: string
+  sector: string[]
   message?: string
 }

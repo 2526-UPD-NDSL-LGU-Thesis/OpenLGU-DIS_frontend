@@ -8,16 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@openlguid/ui/components/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@openlguid/ui/components/dialog"
-import { VerificationDialog } from "@openlguid/ui/features/verification/components/VerificationDialog"
-import type { QRVerifyReturn } from "@openlguid/ui/features/verification/api/verificationService"
-import { ResidentProfileCard } from "@openlguid/ui/features/verification/components/ResidentProfileCard"
+import type { IdentifierCaptureRequest } from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
+import { IdentifierCaptureDialog } from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
 
 import { DataTable } from "#/features/service-claim/components/data-table"
 import { canAccessSectorManagement } from "#/features/sector-management/sector-access-policy"
@@ -26,6 +18,7 @@ import {
   getSectors,
 } from "#/features/sector-management/sectorAPI"
 import type { SectorItem } from "#/features/sector-management/types"
+import { submitIdentifierCapture } from "#/features/identifier-capture/identifier-capture-submit"
 
 const insufficientPermissionsRedirect = linkOptions({
   to: "/",
@@ -54,11 +47,6 @@ function SectorDetailRoute() {
   const [isLoading, setIsLoading] = useState(true)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [isVerificationDialogOpen, setIsVerificationDialogOpen] = useState(false)
-  const [residentDialogOpen, setResidentDialogOpen] = useState(false)
-  const [residentResult, setResidentResult] = useState<{
-    result: QRVerifyReturn["result"]
-    profile: NonNullable<QRVerifyReturn["idDetails"]>
-  } | null>(null)
 
   const loadSectors = useCallback(async () => {
     setIsLoading(true)
@@ -80,34 +68,21 @@ function SectorDetailRoute() {
     [sectorID, sectors]
   )
 
-  const handleVerificationResult = useCallback((result: QRVerifyReturn) => {
-    if (result.result !== "success") {
-      setStatusMessage(result.message ?? "Resident verification failed.")
-    }
-  }, [])
-
-  const handleScanComplete = useCallback(
-    async (payload: { rawQRValue: string; verificationResult: QRVerifyReturn }) => {
-      if (payload.verificationResult.result !== "success" || !payload.verificationResult.idDetails) {
-        return
-      }
-
-      setResidentResult({
-        result: payload.verificationResult.result,
-        profile: payload.verificationResult.idDetails,
-      })
-      setResidentDialogOpen(true)
-
+  const handleCaptureSubmit = useCallback(
+    async (request: IdentifierCaptureRequest) => {
       try {
-        const response = await enlistResidentToSector(
-          apiClient,
-          sectorID,
-          payload.rawQRValue
-        )
+        const response = await submitIdentifierCapture(request, {
+          qr: async (rawQRValue) => enlistResidentToSector(apiClient, [sectorID], rawQRValue),
+          manual: async () => {
+            setStatusMessage("Manual identifier capture is not implemented yet.")
+            throw new Error("Manual identifier capture is not implemented yet.")
+          },
+        })
         setStatusMessage(response.message ?? "Resident enlisted in this sector.")
         await loadSectors()
       } catch (error) {
         setStatusMessage(error instanceof Error ? error.message : "Failed to enlist resident.")
+        throw error
       }
     },
     [apiClient, loadSectors, sectorID]
@@ -188,36 +163,11 @@ function SectorDetailRoute() {
         </Card>
       </section>
 
-      <VerificationDialog
+      <IdentifierCaptureDialog
         open={isVerificationDialogOpen}
         onOpenChange={setIsVerificationDialogOpen}
-        onVerificationResult={handleVerificationResult}
-        onScanComplete={handleScanComplete}
+        onSubmit={handleCaptureSubmit}
       />
-
-      <Dialog open={residentDialogOpen} onOpenChange={setResidentDialogOpen}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Resident profile</DialogTitle>
-            <DialogDescription>
-              The resident profile remains visible regardless of the enlist result.
-            </DialogDescription>
-          </DialogHeader>
-
-          {statusMessage ? (
-            <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-              {statusMessage}
-            </p>
-          ) : null}
-
-          {residentResult?.profile ? (
-            <ResidentProfileCard
-              result={residentResult.result ?? "success"}
-              profile={residentResult.profile}
-            />
-          ) : null}
-        </DialogContent>
-      </Dialog>
     </main>
   )
 }

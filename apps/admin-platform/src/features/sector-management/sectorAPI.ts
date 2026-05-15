@@ -78,15 +78,15 @@ export async function deleteSector(
 
 export async function enlistResidentToSector(
   apiClient: AuthenticatedApiClient,
-  sectorID: string,
+  sectorIDs: string[],
   rawQRValue: string
 ): Promise<EnlistResponse> {
-  const response = await apiClient.request(`/sectors/${sectorPath(sectorID)}/enlist/`, {
+  const response = await apiClient.request("/ids/enlist/", {
     method: "POST",
     headers: {
       "content-type": "application/json",
     },
-    body: JSON.stringify({ qr: rawQRValue }),
+    body: JSON.stringify({ qr: rawQRValue, sector: sectorIDs }),
   })
 
   await assertOk(response, "Failed to enlist resident to sector.")

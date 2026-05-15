@@ -39,6 +39,8 @@
     "@openlguid/typescript-config": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@turbo/gen": "catalog:",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "catalog:",
     "@types/node": "^25.5.0",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -57,7 +59,7 @@
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
-    "./features/verification/components/VerificationDialog": "./src/features/verification/components/VerificationDialog.tsx",
+    "./features/verification/components/IdentifierCaptureDialog": "./src/features/verification/components/IdentifierCaptureDialog.tsx",
     "./features/verification/components/ResidentProfileCard": "./src/features/verification/components/ResidentProfileCard.tsx",
     "./features/verification/api/verificationService": "./src/features/verification/api/verificationService.ts",
     "./features/verification/types/verification": "./src/features/verification/types/verification.ts"

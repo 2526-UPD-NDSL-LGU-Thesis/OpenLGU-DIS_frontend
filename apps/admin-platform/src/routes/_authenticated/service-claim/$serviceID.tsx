@@ -6,18 +6,17 @@ import type { ColumnDef } from "@tanstack/react-table"
 
 import { Button } from "@openlguid/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
+import type { IdentifierCaptureRequest } from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
 import {
-  VerificationDialog,
-} from "@openlguid/ui/features/verification/components/VerificationDialog"
-import type {
-  QRVerifyReturn,
-} from "@openlguid/ui/features/verification/api/verificationService"
+  IdentifierCaptureDialog,
+} from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
 
 import { createClaim, getClaims } from "#/features/service-claim/serviceClaimAPI"
 import { createClaimSubmissionGuard } from "#/features/service-claim/claim-submission-guard"
 import type { ClaimItem } from "#/features/service-claim/types/serviceClaim"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 import { DataTable } from "#/features/service-claim/components/data-table"
+import { submitIdentifierCapture } from "#/features/identifier-capture/identifier-capture-submit"
 
 import { z } from 'zod';
 
@@ -96,38 +95,36 @@ function RouteComponent() {
     void loadClaims()
   }, [loadClaims])
 
-  const handleVerificationResult = useCallback((result: QRVerifyReturn) => {
-    if (result.result !== "success") {
-      setMessage(result.message ?? "Claim aborted because QR verification failed.")
-    }
-  }, [])
-
-  const handleScanComplete = useCallback(async (payload: {
-    rawQRValue: string
-    verificationResult: QRVerifyReturn
-  }) => {
-    if (payload.verificationResult.result !== "success") {
-      return
-    }
-
-    if (!hasValidServiceID) {
-      setMessage("Invalid service route. Please return to the service list.")
-      return
-    }
-    
-    try {
-      const handled = await claimSubmissionGuard.run(async () => {
-        await createClaim(apiClient, serviceID, payload.rawQRValue)
-        await loadClaims()
-        setMessage("Claim created successfully.")
-      })
-      if (handled === null) {
-        return
+  const handleCaptureSubmit = useCallback(
+    async (request: IdentifierCaptureRequest) => {
+      if (!hasValidServiceID) {
+        throw new Error("Invalid service route. Please select a valid service from the list.")
       }
-    } catch {
-      setMessage("Failed to create claim for this service.")
-    }
-  }, [apiClient, claimSubmissionGuard, hasValidServiceID, loadClaims, serviceID])
+
+      try {
+        const handled = await claimSubmissionGuard.run(async () => {
+          await submitIdentifierCapture(request, {
+            qr: async (rawQRValue) => {
+              await createClaim(apiClient, serviceID, rawQRValue)
+            },
+            manual: async () => {
+              setMessage("Manual identifier capture is not implemented yet.")
+              throw new Error("Manual identifier capture is not implemented yet.")
+            },
+          })
+          await loadClaims()
+          setMessage("Claim created successfully.") // TODO this can be improved by creating a UI instead for successes and errors. Maybe a dialog box suffices? (Instrusive though for successes unless there's an auto wipe)
+        })
+        if (handled === null) {
+          return
+        }
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Failed to create claim for this service.")
+        throw error
+      }
+    },
+    [apiClient, claimSubmissionGuard, hasValidServiceID, loadClaims, serviceID]
+  )
 
   return (
     <main className="space-y-6 px-4">
@@ -184,12 +181,11 @@ function RouteComponent() {
         </Card>
       </section>
 
-      <VerificationDialog
+      <IdentifierCaptureDialog
         open={isClaimDialogOpen}
         onOpenChange={setIsClaimDialogOpen}
-        onVerificationResult={handleVerificationResult}
-        onScanComplete={handleScanComplete}
-        onVerifyingChange={setIsVerifying}
+        onSubmit={handleCaptureSubmit}
+        onSubmittingChange={setIsVerifying}
       />
     </main>
   )

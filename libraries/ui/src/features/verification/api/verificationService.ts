@@ -60,40 +60,37 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
 
     // const responseBody = (await response.json()) as QRVerifyResponseBody
 
-    const responseBody = {
-            "id_details": {
-              "1": "DCS",
-              "2": 1777877324,
-              "169": {
-                "1": "6149804723",
-                "2": 1.0,
-                "3": "eng",
-                "4": "James Ernest T. Geraldo",
-                "8": "2001/09/15",
-                "9": "Male",
-                "62": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////wAALCAAtAC0BAREA/8QAGQAAAwEBAQAAAAAAAAAAAAAAAgMEAAEF/8QAHxAAAgICAwADAAAAAAAAAAAAAREAAgMhEjFBBDJR/9oACAEBAAA/ACoBTGHOG9T7OQbWA7MHmD7F3qeRltwE05PkHGy4iGarGDFIJpmCg+owFSnxwDUGzM2T6qJQMyAnDKzoqAQi4u5JBD7iwf2YmNwYhkBb1KMg24mwNrDaAgZCOuUSRvudct+PXjiD7O4ywBqXJxE5jtRfk1bKwKa2p6NLcqC3TDn/2Q==",
-                "75": "3481217724",
-                "76": [
-                  "STUDENT",
-                  "RESIDENT"
-                ]
-              }
-            }
+    const response = await fetch(`${apiBase}/qr/verify`, requestOptions)
+
+    if (!response.ok) {
+      throw new HTTPResponseError(response)
     }
-    const qrDeet = responseBody.id_details;
-    const cwt = qrDeet['169'];
-    // TODO fix the parsing of data
+
+    const contentType = response.headers.get("content-type")
+    if (!contentType || !contentType.includes("application/json")) {
+      return {
+        result: "error_response_is_not_declared_json",
+        message: "API returned a non-JSON response.",
+      }
+    }
+
+    const responseBody = (await response.json()) as QRVerifyResponseBody
+
+    // Support multiple backend shapes: { cwt: {...} } or { id_details: { '169': {...} } }
+    const cwt = (responseBody as any).cwt ?? (responseBody as any).id_details?.['169'] ?? (responseBody as any).id_details
+
     const idDetails = {
-      full_name: cwt['4'],
-      dob: cwt['8'],
-      gender: cwt['9'],
-      email: cwt['11'], 
-      phone: cwt['12'],
-      face: cwt['62'],            
-      local_id: cwt['75'],
+      full_name: cwt?.full_name ?? cwt?.['4'],
+      dob: cwt?.dob ?? cwt?.['8'],
+      gender: cwt?.gender ?? cwt?.['9'],
+      location: cwt?.location ?? cwt?.['7'],
+      email: cwt?.email ?? cwt?.['11'],
+      phone: cwt?.phone ?? cwt?.['12'],
+      face: cwt?.face ?? cwt?.['62'],
+      local_id: cwt?.local_id ?? cwt?.['75'] ?? (cwt?.['2'] ? String(cwt['2']) : undefined),
       issuerType: "LGU",
     } satisfies IdDetails
-    console.log(idDetails);
+
     return {
       result: "success",
       idDetails,
