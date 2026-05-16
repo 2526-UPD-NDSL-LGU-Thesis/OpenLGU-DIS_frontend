@@ -14,6 +14,9 @@ catalog:
   "@eslint/js": ^9.39.4
   '@faker-js/faker': ^10.4.0
   "@fontsource-variable/noto-sans": ^5.2.10
+  "@pdfme/common": ^6.1.2
+  "@pdfme/generator": ^6.1.2
+  "@pdfme/schemas": ^6.1.2
   "@next/eslint-plugin-next": ^16.2.0
   "@tailwindcss/vite": ^4.2.4
   '@tanstack/react-form': ^1.32.0

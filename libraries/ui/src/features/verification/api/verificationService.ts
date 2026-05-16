@@ -28,10 +28,23 @@ export type VerificationRequestClient = (
   init?: RequestInit
 ) => Promise<Response>
 
+// Use an authenticated API client when available to ensure requests include
+// auth/session context (cookies, authorization headers) and centralized retry
+// handling. Admin and other authenticated apps should register their client
+// (e.g., via globalThis.__OPENLGU_AUTH_CLIENT or by calling
+// setVerificationRequestClient) during app initialization.
 function defaultVerificationRequestClient(path: string, init?: RequestInit): Promise<Response> {
   const apiBase =
     (import.meta as ImportMeta & { env: { VITE_API_BASE_URL?: string } }).env.VITE_API_BASE_URL ??
     ""
+
+  const authClient = (globalThis as any).__OPENLGU_AUTH_CLIENT
+  if (authClient && typeof authClient.request === "function") {
+    // Delegate to the authenticated client's request method so authentication
+    ///session handling is centralized in the app layer.
+    return authClient.request(`${apiBase}${path}`, init)
+  }
+
   return fetch(`${apiBase}${path}`, {
     ...init,
     credentials: "include",
@@ -68,7 +81,7 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
       credentials: "include" as RequestCredentials,
     }
 
-    const response = await verificationRequestClient("/verify/qr/", requestOptions)
+    const response = await verificationRequestClient("/qr/verify", requestOptions)
 
     if (!response.ok) {
       throw new HTTPResponseError(response)
