@@ -35,8 +35,12 @@ export function ResidentProfileCard({ result, profile }: ResidentProfileCardProp
 
       <CardContent className="grid gap-3 sm:grid-cols-2">
         <p>
-          <span className="font-medium">LGU ID number: </span>
-          <span>{profile.local_id}</span>
+          <span className="font-medium">UIN: </span>
+          <span>{profile.uin}</span>
+        </p>
+        <p>
+          <span className="font-medium">PCN: </span>
+          <span>{profile.pcn ?? "—"}</span>
         </p>
         <p>
           <span className="font-medium">Birthday: </span>

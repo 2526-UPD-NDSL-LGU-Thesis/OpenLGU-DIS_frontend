@@ -8,15 +8,15 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
   verifyQR: vi.fn(async () => ({
     result: "success" as const,
+    qr_type: "OpenLGUQR",
     idDetails: {
-      local_id: "1000",
+      uin: "1000",
       full_name: "Juan Dela Cruz",
       dob: "2000-01-01",
       gender: "Male",
       email: "juan@example.com",
       phone: "09221 924 7284",
       face: ";-;",
-      issuerType: "LGU" as const,
     },
     message: "Loaded from local mock data utility.",
   })),

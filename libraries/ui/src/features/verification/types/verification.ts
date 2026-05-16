@@ -1,7 +1,3 @@
-// TODO need to review this
-
-export type IssuerType = "LGU" | "NATIONAL"
-
 export type VerificationResult =
   | "idle"
   | "success"
@@ -18,15 +14,28 @@ export type VerificationResult =
 /* Backend Dependent */
 
 export interface IdDetails {// TODO possibly have a better agreed upon set of fields
-  local_id: string
+  uin: string
+  pcn?: string
   full_name: string
   dob: string
   gender: string
-  //location: string
+  location?: string
   email: string
   phone: string
   face: string
-  issuerType: IssuerType
+}
+
+export interface QRVerifyResponseIdDetails {
+  [key: string]: unknown
+  uin?: string
+  pcn?: string
+  full_name?: string
+  dob?: string
+  gender?: string
+  location?: string
+  email?: string
+  phone?: string
+  face?: string
 }
 
 export interface QRVerifyRequestBody {
@@ -34,7 +43,8 @@ export interface QRVerifyRequestBody {
 }
 
 export interface QRVerifyResponseBody {
+  qr_type?: string
   error?: VerificationResult
   message?: string
-  id_details: Omit<IdDetails, "issuerType">
+  id_details?: QRVerifyResponseIdDetails & { "169"?: QRVerifyResponseIdDetails }
 }

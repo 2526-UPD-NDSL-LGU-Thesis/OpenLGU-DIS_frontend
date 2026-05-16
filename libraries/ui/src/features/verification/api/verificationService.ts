@@ -1,6 +1,4 @@
 /* Handles identity verification api calls and translate the backend */
-// TODO possibly do credentials: "include" for auth https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#including_credentials
-// TODO need to review this
 import type {
   IdDetails,
   QRVerifyRequestBody,
@@ -10,6 +8,7 @@ import type {
 
 export interface QRVerifyReturn {
   result?: VerificationResult
+  qr_type?: string
   idDetails?: IdDetails
   message?: string
 }
@@ -24,14 +23,38 @@ class HTTPResponseError extends Error {
   }
 }
 
-import { authenticatedApiClient } from "../../../../../../apps/admin-platform/src/features/auth/auth.tsx"
-import { DoorClosed } from "lucide-react"
-// TODO REPLACE
+export type VerificationRequestClient = (
+  path: string,
+  init?: RequestInit
+) => Promise<Response>
+
+function defaultVerificationRequestClient(path: string, init?: RequestInit): Promise<Response> {
+  const apiBase =
+    (import.meta as ImportMeta & { env: { VITE_API_BASE_URL?: string } }).env.VITE_API_BASE_URL ??
+    ""
+  return fetch(`${apiBase}${path}`, {
+    ...init,
+    credentials: "include",
+  })
+}
+
+let verificationRequestClient: VerificationRequestClient = defaultVerificationRequestClient
+
+// Tests can override the request client; production uses fetch with cookies included.
+export function setVerificationRequestClient(client: VerificationRequestClient | null): void {
+  verificationRequestClient = client ?? defaultVerificationRequestClient
+}
+
+function toStringValue(value: unknown): string | undefined {
+  return typeof value === "string" || typeof value === "number" ? String(value) : undefined
+}
+
+function toRequiredString(value: unknown): string {
+  return toStringValue(value) ?? ""
+}
 
 export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
   try {
-    const apiBase = import.meta.env.VITE_API_BASE_URL
-
     const requestBody: QRVerifyRequestBody = {
       qr: rawQRValue,
     }
@@ -42,25 +65,10 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
         "content-type": "application/json",
       },
       body: JSON.stringify(requestBody),
+      credentials: "include" as RequestCredentials,
     }
-    // const response = await fetch(`${apiBase}/qr/verify/`, requestOptions)
-    // const response = await authenticatedApiClient.request("/qr/verify/", requestOptions);
 
-    // if (!response.ok) {
-    //   throw new HTTPResponseError(response)
-    // }
-
-    // const contentType = response.headers.get("content-type")
-    // if (!contentType || !contentType.includes("application/json")) {
-    //   return {
-    //     result: "error_response_is_not_declared_json",
-    //     message: "API returned a non-JSON response.",
-    //   }
-    // }
-
-    // const responseBody = (await response.json()) as QRVerifyResponseBody
-
-    const response = await fetch(`${apiBase}/qr/verify`, requestOptions)
+    const response = await verificationRequestClient("/verify/qr/", requestOptions)
 
     if (!response.ok) {
       throw new HTTPResponseError(response)
@@ -74,25 +82,27 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
       }
     }
 
-    const responseBody = (await response.json()) as QRVerifyResponseBody
+    const responseBody = (await response.json()) as QRVerifyResponseBody & {
+      cwt?: QRVerifyResponseBody["id_details"]
+    }
 
-    // Support multiple backend shapes: { cwt: {...} } or { id_details: { '169': {...} } }
-    const cwt = (responseBody as any).cwt ?? (responseBody as any).id_details?.['169'] ?? (responseBody as any).id_details
+    const cwt = responseBody.cwt ?? responseBody.id_details?.["169"] ?? responseBody.id_details
 
     const idDetails = {
-      full_name: cwt?.full_name ?? cwt?.['4'],
-      dob: cwt?.dob ?? cwt?.['8'],
-      gender: cwt?.gender ?? cwt?.['9'],
-      location: cwt?.location ?? cwt?.['7'],
-      email: cwt?.email ?? cwt?.['11'],
-      phone: cwt?.phone ?? cwt?.['12'],
-      face: cwt?.face ?? cwt?.['62'],
-      local_id: cwt?.local_id ?? cwt?.['75'] ?? (cwt?.['2'] ? String(cwt['2']) : undefined),
-      issuerType: "LGU",
+      uin: toRequiredString(cwt?.uin ?? cwt?.["75"] ?? cwt?.["2"]),
+      pcn: toStringValue(cwt?.pcn ?? cwt?.["1"]),
+      full_name: toRequiredString(cwt?.full_name ?? cwt?.["4"]),
+      dob: toRequiredString(cwt?.dob ?? cwt?.["8"]),
+      gender: toRequiredString(cwt?.gender ?? cwt?.["9"]),
+      location: toStringValue(cwt?.location ?? cwt?.["7"]),
+      email: toRequiredString(cwt?.email ?? cwt?.["11"]),
+      phone: toRequiredString(cwt?.phone ?? cwt?.["12"]),
+      face: toRequiredString(cwt?.face ?? cwt?.["62"]),
     } satisfies IdDetails
 
     return {
       result: "success",
+      qr_type: responseBody.qr_type,
       idDetails,
     }
   } catch (error) {
@@ -127,106 +137,3 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
     }
   }
 }
-
-
-/*
-
-
-Original
-
-import type {
-  QRVerifyRequestBody, QRVerifyResponseBody, VerificationResult, IdDetails
-} from "#/features/verification/types/verification.js"
-
-export interface QRVerifyReturn {
-  result?: VerificationResult
-  idDetails?: IdDetails,
-  message?: string,
-}
-
-class HTTPResponseError extends Error {
-  response: Response;
-
-	constructor(response: Response) {
-		super(`HTTPResponseError: ${response.status} ${response.statusText}`);
-    this.name = "HTTPResponseError";
-		this.response = response;
-	}
-
-  responseBodyEmpty(){
-    
-  }
-}
-
-
-
-export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
-  try {
-    const apiBase = import.meta.env.VITE_API_BASE_URL;
-
-    const requestBody: QRVerifyRequestBody = {
-      qr: rawQRValue 
-    }
-
-    const requestOptions = {
-      method: "POST", // TODO possibly do credentials: "include" for auth https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#including_credentials
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(requestBody)
-    }
-
-    const response = await fetch(`${apiBase}/qr/verify`, requestOptions);
-
-
-    // Error Catching
-
-    if (!response.ok) {
-      throw new HTTPResponseError(response);
-    }
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("error_response_is_not_declared_json");
-    }
-
-    const responseBody = (await response.json()) as QRVerifyResponseBody;
-
-    const idDetails = {
-      ...responseBody.cwt,
-      issuerType: "LGU",
-    } satisfies IdDetails;
-
-    return {
-      result: "success",
-      idDetails
-    }
-  }
-
-  catch (e) {
-    // Handle expected exceptions
-
-    if (e === "error_response_is_not_declared_json"){ // TODO Improve this error handling to be 
-        // Inspirations: https://gist.github.com/odewahn/5a5eeb23279eed6a80d7798fdb47fe91
-        throw Error("API error: did not declare response as json. Fix api.");
-    }
-    else if (e instanceof HTTPResponseError) {
-      const responseBody = (await e.response.json()) as QRVerifyResponseBody;
-
-      if (responseBody.error){ // TODO Improve by specifically identifying that the errors are the specified of VerificationResult
-        return { result: responseBody.error };
-      }
-      else {
-        throw e;
-      }
-    }
-    else { // Rethrow the unexpected
-      throw e;
-    }
-  }
-
-
-
-
-}
-
-*/

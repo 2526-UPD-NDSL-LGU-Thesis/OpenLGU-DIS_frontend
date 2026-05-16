@@ -124,15 +124,16 @@ export function VerificationPage() {
         <IdentifierCaptureDialog
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
-          allowManualCapture={false}
           onSubmittingChange={setIsVerifying}
           onSubmit={async (request) => {
-            if (request.kind !== "qr") {
-              throw new Error("Manual entry is not supported here.")
+            if (request.kind === "qr") {
+              const result = await verifyQR(request.rawQRValue)
+              setVerificationData(result)
+              return
             }
 
-            const result = await verifyQR(request.rawQRValue)
-            setVerificationData(result)
+            // Manual identifier capture not yet implemented in public-portal.
+            setVerificationData({ result: "error_other", message: "Manual identifier capture is not implemented in the public portal yet." })
           }}
         />
       </section>

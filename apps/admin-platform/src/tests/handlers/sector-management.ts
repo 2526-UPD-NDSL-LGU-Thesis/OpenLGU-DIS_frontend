@@ -25,14 +25,13 @@ function buildMockSector(name?: string, description?: string): SectorItem {
 
 function buildMockResident(qr: string): IdDetails {
   return {
-    local_id: faker.string.numeric(8),
+    uin: faker.string.numeric(8),
     full_name: `${faker.person.firstName()} ${faker.person.lastName()}`,
     dob: faker.date.birthdate({ min: 18, max: 80, mode: "age" }).toISOString().slice(0, 10),
     gender: faker.helpers.arrayElement(["Male", "Female"]),
     email: `${qr.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "resident"}@openlguid.local`,
     phone: faker.phone.number(),
     face: "ZmFrZS1mYWNlLWltYWdl",
-    issuerType: "LGU",
   }
 }
 

@@ -3,26 +3,33 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { verifyQR } from "@openlguid/ui/features/verification/api/verificationService"
+import {
+  setVerificationRequestClient,
+  verifyQR,
+} from "@openlguid/ui/features/verification/api/verificationService"
 
 afterEach(() => {
-  vi.unstubAllGlobals()
+  setVerificationRequestClient(null)
 })
 
 describe("verifyQR", () => {
   it("returns resident details for a valid QR", async () => {
-    const fetchMock = vi.fn(async () =>
+    const requestMock = vi.fn(async (path: string, init?: RequestInit) =>
       new Response(
         JSON.stringify({
-          cwt: {
-            local_id: "1000",
-            full_name: "Juan Dela Cruz",
-            dob: "2000-01-01",
-            gender: "Male",
-            location: "Gubat, Diyan",
-            email: "juan@example.com",
-            phone: "09221 924 7284",
-            face: ";-;",
+          qr_type: "OpenLGUQR",
+          id_details: {
+            169: {
+              uin: "1000",
+              4: "Juan Dela Cruz",
+              8: "2000-01-01",
+              9: "Male",
+              7: "Gubat, Diyan",
+              11: "juan@example.com",
+              12: "09221 924 7284",
+              62: ";-;",
+              75: "1000",
+            },
           },
         }),
         {
@@ -33,14 +40,15 @@ describe("verifyQR", () => {
         }
       )
     )
-    vi.stubGlobal("fetch", fetchMock)
+    setVerificationRequestClient(requestMock)
 
     const ret = await verifyQR("mockedAPISuccess")
 
     expect(ret).toEqual({
       result: "success",
+      qr_type: "OpenLGUQR",
       idDetails: {
-        local_id: "1000",
+        uin: "1000",
         full_name: "Juan Dela Cruz",
         dob: "2000-01-01",
         gender: "Male",
@@ -48,13 +56,20 @@ describe("verifyQR", () => {
         email: "juan@example.com",
         phone: "09221 924 7284",
         face: ";-;",
-        issuerType: "LGU",
       },
     })
+    expect(requestMock).toHaveBeenCalledWith(
+      "/qr/verify",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ qr: "mockedAPISuccess" }),
+        credentials: "include",
+      })
+    )
   })
 
   it("returns tampered error from API", async () => {
-    const fetchMock = vi.fn(async () =>
+    const requestMock = vi.fn(async () =>
       new Response(
         JSON.stringify({
           error: "error_tampered",
@@ -67,64 +82,13 @@ describe("verifyQR", () => {
         }
       )
     )
-    vi.stubGlobal("fetch", fetchMock)
+    setVerificationRequestClient(requestMock)
 
     const ret = await verifyQR("mockedAPIerror_tampered")
 
     expect(ret).toEqual({
       result: "error_tampered",
       message: undefined,
-    })
+    }    )
   })
 })
-
-
-/*
-
-Original:
-
-
-import { describe, it, expect } from 'vitest';
-
-import { verifyQR } from '@openlguid/ui/features/verification/api/verificationService';
-
-
-describe('verifyQR', () => {    
-    it('returns LGUser details for a valid QR', async () => {
-        const rawQRValue = "mockedAPISuccess";
-
-        const ret = await verifyQR(rawQRValue);
-        
-        expect(ret).toEqual(
-            {
-                result: "success",
-                idDetails: {
-                    local_id: "1000",
-                    full_name: "Juan Dela Cruz",
-                    dob: "2000-01-01",
-                    gender: "Male",
-                    location: "Gubat, Diyan",
-                    email: "juan@example.com",
-                    phone: "09221 924 7284",
-                    face: ";-;", // TODO not the most representative face data
-                    issuerType: "LGU"
-                },
-            }
-        );
-    });
-
-    it('returns error for tampered qr', async () => {
-        const rawQRValue = "mockedAPIerror_tampered";
-
-        const ret = await verifyQR(rawQRValue);
-
-        expect(ret).toEqual(
-            {
-                result: "error_tampered"
-            }
-        )
-    })
-});
-
-
-*/

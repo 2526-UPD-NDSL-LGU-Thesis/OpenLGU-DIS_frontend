@@ -55,7 +55,6 @@ export interface IdentifierCaptureDialogProps {
   onOpenChange: (nextOpen: boolean) => void
   onSubmit: (request: IdentifierCaptureRequest) => Promise<void>
   onSubmittingChange?: (isSubmitting: boolean) => void
-  allowManualCapture?: boolean
 }
 
 const CAPTURE_FAILURE_MESSAGE = "Capture failed. Please try again."
@@ -67,7 +66,6 @@ export function IdentifierCaptureDialog({
   onOpenChange,
   onSubmit,
   onSubmittingChange,
-  allowManualCapture = true,
 }: IdentifierCaptureDialogProps) {
   const [activeTab, setActiveTab] = useState<CaptureMode>("qr")
   const [isDragging, setIsDragging] = useState(false)
@@ -112,11 +110,6 @@ export function IdentifierCaptureDialog({
     onSubmittingChange?.(isBusy)
   }, [isBusy, onSubmittingChange])
 
-  useEffect(() => {
-    if (!allowManualCapture && activeTab === "manual") {
-      setActiveTab("qr")
-    }
-  }, [activeTab, allowManualCapture])
 
   useEffect(() => {
     if (!open) {
@@ -278,12 +271,10 @@ export function IdentifierCaptureDialog({
               <ImagePlus className="size-4" />
               Upload Image
             </TabsTrigger>
-            {allowManualCapture ? (
-              <TabsTrigger value="manual" className="gap-1.5">
-                <QrCode className="size-4" />
-                Manual Entry
-              </TabsTrigger>
-            ) : null}
+            <TabsTrigger value="manual" className="gap-1.5">
+              <QrCode className="size-4" />
+              Manual Entry
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="qr" className="space-y-4 pt-3">
@@ -344,8 +335,7 @@ export function IdentifierCaptureDialog({
             </div>
           </TabsContent>
 
-          {allowManualCapture ? (
-            <TabsContent value="manual" className="space-y-4 pt-3">
+          <TabsContent value="manual" className="space-y-4 pt-3">
             <div className="grid gap-4 rounded-2xl border bg-muted/20 p-4">
               <fieldset className="space-y-2">
                 <legend className="text-sm font-medium">Identifier type</legend>
@@ -393,7 +383,6 @@ export function IdentifierCaptureDialog({
               </div>
             </div>
             </TabsContent>
-          ) : null}
         </Tabs>
 
         {submissionError ? (
