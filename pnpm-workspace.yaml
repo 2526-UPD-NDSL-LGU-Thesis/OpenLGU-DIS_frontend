@@ -14,10 +14,11 @@ catalog:
   "@eslint/js": ^9.39.4
   '@faker-js/faker': ^10.4.0
   "@fontsource-variable/noto-sans": ^5.2.10
+  "@next/eslint-plugin-next": ^16.2.0
   "@pdfme/common": ^6.1.2
   "@pdfme/generator": ^6.1.2
   "@pdfme/schemas": ^6.1.2
-  "@next/eslint-plugin-next": ^16.2.0
+  '@stepperize/react': ^6.1.0
   "@tailwindcss/vite": ^4.2.4
   '@tanstack/react-form': ^1.32.0
   '@tanstack/react-table': ^8.21.3
@@ -32,6 +33,7 @@ catalog:
   '@zxing/library': ^0.21.3
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
+  date-fns: ^4.1.0
   eslint: ^9.39.4
   eslint-config-prettier: ^10.1.1
   eslint-plugin-only-warn: ^1.1.0
@@ -46,6 +48,7 @@ catalog:
   next-themes: ^0.4.6
   only-allow: ^1.2.2
   react: ^19.2.5
+  react-day-picker: ^10.0.1
   react-dom: ^19.2.5
   recharts: 3.8.0
   shadcn: ^4.1.0
