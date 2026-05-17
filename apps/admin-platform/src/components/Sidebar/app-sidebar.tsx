@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Link, linkOptions, useRouter } from "@tanstack/react-router"
+import { Link, linkOptions } from "@tanstack/react-router"
 
 import { NavDocuments } from "#/components/Sidebar/nav-documents"
 import { NavMain } from "#/components/Sidebar/nav-main"
@@ -14,128 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@openlguid/ui/components/sidebar"
-import { LayoutDashboardIcon, ListIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
-
-import useAuthStore from "#/features/auth/auth"
-
-const dummyData = {
-  user: {
-    name: "LGU Super Admin",
-    email: "super@openlguid.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-
-
-  navClouds: [
-    {
-      title: "Capture",
-      icon: (
-        <CameraIcon
-        />
-      ),
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: (
-        <CircleHelpIcon
-        />
-      ),
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: (
-        <SearchIcon
-        />
-      ),
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: (
-        <DatabaseIcon
-        />
-      ),
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: (
-        <FileChartColumnIcon
-        />
-      ),
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <FileIcon
-        />
-      ),
-    },
-  ],
-}
+import { CommandIcon } from "lucide-react"
 
 
 const navMainItems = linkOptions([
@@ -161,26 +40,7 @@ const navMainItems = linkOptions([
     }
 ]);
 
-
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const router = useRouter()
-  const { session, logout } = useAuthStore()
-
-  // Map IdentityProfile to NavUser user data
-  const userData = session.userProfile
-    ? {
-        name: session.userProfile.username,
-        email: `${session.userProfile.username}@openlguid.local`,
-        avatar: "/avatars/shadcn.jpg",
-      }
-    : dummyData.user
-
-  const handleLogout = async () => {
-    await logout()
-    await router.navigate({ to: "/login" })
-  }
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -204,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={dummyData.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={userData} onLogout={handleLogout} />
+        <NavUser/>
       </SidebarFooter>
     </Sidebar>
   )

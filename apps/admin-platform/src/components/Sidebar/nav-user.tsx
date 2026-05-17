@@ -23,23 +23,28 @@ import {
 
 import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react";
 import { useState } from "react";
+import useAuthStore from "#/features/auth/auth";
+import { useNavigate } from "@tanstack/react-router";
 
-export function NavUser({ user, onLogout,}: 
-{
-  user: {
-    name: string
-    email: string
-    avatar: string
+export function NavUser() { 
+  const navigate = useNavigate();
+  const { isMobile } = useSidebar();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { session, logout } = useAuthStore();
+
+  // Map UserProfile to NavUser user
+  const user = {
+    name: session.userProfile?.username ?? "Error No Username",
+    email: `${session.userProfile?.username}@openlguid.local`,
+    roles: session.userProfile?.roles ?? "Error No Roles",
+    avatar: "/avatars/shadcn.jpg", // TODO implement avatars in backend
   }
-  onLogout: () => Promise<void>
-}) {
-  const { isMobile } = useSidebar()
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
-  
+
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await onLogout()
+      await logout()
+      await navigate({ to: "/login" })
     } finally {
       setIsLoggingOut(false)
     }
@@ -91,19 +96,12 @@ export function NavUser({ user, onLogout,}:
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <CircleUserRoundIcon
-                />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon
-                />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon
-                />
-                Notifications
+                  <div className="grid flex-1 text-start text-sm leading-tight">
+                    <span className="truncate font-medium">Roles</span>
+                    <span className="text-xs text-muted-foreground">
+                      {user.roles.join(", ")}
+                    </span>
+                  </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
