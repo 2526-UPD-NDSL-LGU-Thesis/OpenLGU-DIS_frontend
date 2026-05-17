@@ -8,9 +8,9 @@ describe("canAccessIdManagement", () => {
     const authState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-1",
-        roles: ["SUPER"],
+        roles: ["Super"],
       },
     }
 
@@ -21,9 +21,9 @@ describe("canAccessIdManagement", () => {
     const authState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-2",
-        roles: ["ID_MANAGEMENT_ADMIN", "ID_MANAGEMENT_EMPLOYEE"],
+        roles: ["ID Management Admin", "ID Management Employee"],
       },
     }
 
@@ -34,16 +34,16 @@ describe("canAccessIdManagement", () => {
     const unauthorizedRoleState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-3",
-        roles: ["SERVICE_CLAIM_EMPLOYEE"],
+        roles: ["Service Claim Employee"],
       },
     }
 
     const unauthenticatedState: AuthStateSnapshot = {
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     }
 
     expect(canAccessIdManagement(unauthorizedRoleState)).toBe(false)

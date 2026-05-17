@@ -25,7 +25,7 @@ export interface AuthRuntime {
 const INITIAL_AUTH_STATE: AuthStateSnapshot = {
   phase: "unknown",
   accessToken: null,
-  identityProfile: null,
+  userProfile: null,
 }
 
 export function createAuthRuntime(args: { queryClient: QueryClient }): AuthRuntime {

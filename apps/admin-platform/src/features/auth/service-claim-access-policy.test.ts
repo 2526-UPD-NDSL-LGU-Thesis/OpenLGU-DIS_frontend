@@ -8,9 +8,9 @@ describe("canAccessServiceClaim", () => {
     const authState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-1",
-        roles: ["SUPER"],
+        roles: ["Super"],
       },
     }
 
@@ -21,9 +21,9 @@ describe("canAccessServiceClaim", () => {
     const authState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-2",
-        roles: ["SERVICE_CLAIM_ADMIN", "SERVICE_CLAIM_EMPLOYEE"],
+        roles: ["Service Claim Admin", "Service Claim Employee", "Service Admin", "Service Employee"],
       },
     }
 
@@ -34,16 +34,16 @@ describe("canAccessServiceClaim", () => {
     const unauthorizedRoleState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-3",
-        roles: ["ID_MANAGEMENT_EMPLOYEE"],
+        roles: ["ID Management Employee"],
       },
     }
 
     const unauthenticatedState: AuthStateSnapshot = {
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     }
 
     expect(canAccessServiceClaim(unauthorizedRoleState)).toBe(false)

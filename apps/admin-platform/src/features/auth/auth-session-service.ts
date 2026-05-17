@@ -1,32 +1,19 @@
 import { QueryClient } from "@tanstack/react-query"
 import { linkOptions } from "@tanstack/react-router"
+import { z } from 'zod';
 
 import { AuthApiError, createAuthApiClient } from "./api/authAPI"
 import type { AuthApiClient, LoginCredentials } from "./api/authAPI"
 
-const CANONICAL_ROLES = [
-  "SUPER",
-  "SECTOR_ADMIN",
-  "SERVICE_CLAIM_ADMIN",
-  "SECTOR_EMPLOYEE",
-  "SERVICE_CLAIM_EMPLOYEE",
-  "ID_MANAGEMENT_ADMIN",
-  "ID_MANAGEMENT_EMPLOYEE",
-] as const
-
-type CanonicalRole = (typeof CANONICAL_ROLES)[number]
-
-export interface IdentityProfile {
-  username: string
-  roles: CanonicalRole[]
-}
+import { userProfileSchema } from "#/types/schema"
+import type { UserProfile } from "#/types/schema";
 
 export type AuthStatePhase = "unknown" | "authenticated" | "unauthenticated"
 
 export interface AuthStateSnapshot {
   phase: AuthStatePhase
   accessToken: string | null
-  identityProfile: IdentityProfile | null
+  userProfile: UserProfile | null
 }
 
 export interface LoginFailure {
@@ -95,13 +82,13 @@ export interface AuthStateStore {
 const initialAuthState: AuthStateSnapshot = {
   phase: "unknown",
   accessToken: null,
-  identityProfile: null,
+  userProfile: null,
 }
 
 const unauthenticatedState: AuthStateSnapshot = {
   phase: "unauthenticated",
   accessToken: null,
-  identityProfile: null,
+  userProfile: null,
 }
 
 function createInMemoryAuthStateStore(
@@ -117,34 +104,7 @@ function createInMemoryAuthStateStore(
   }
 }
 
-function normalizeIdentityProfile(raw: unknown): IdentityProfile | null {
-  if (!raw || typeof raw !== "object") {
-    return null
-  }
 
-  const maybeUsername = (raw as { username?: unknown }).username
-  const maybeRoles = (raw as { roles?: unknown }).roles
-
-  if (typeof maybeUsername !== "string" || !Array.isArray(maybeRoles)) {
-    return null
-  }
-
-  const canonicalRoles = maybeRoles.filter((role): role is CanonicalRole => {
-    return (
-      typeof role === "string" &&
-      CANONICAL_ROLES.includes(role as CanonicalRole)
-    )
-  })
-
-  if (canonicalRoles.length === 0) {
-    return null
-  }
-
-  return {
-    username: maybeUsername,
-    roles: canonicalRoles,
-  }
-}
 
 const defaultQueryClient = new QueryClient()
 const defaultAuthApiClient = createAuthApiClient(defaultQueryClient)
@@ -175,28 +135,32 @@ export function createAuthSessionService(
 
   const setAuthenticated = (next: {
     accessToken: string
-    identityProfile: IdentityProfile
+    identityProfile: UserProfile
   }) => {
     stateStore.setState({
       phase: "authenticated",
       accessToken: next.accessToken,
-      identityProfile: next.identityProfile,
+      userProfile: next.identityProfile,
     })
   }
 
   const refreshAndHydrate = async (): Promise<boolean> => {
-    const tokenPayload = await apiClient.requestRefreshAccessToken()
-    const identityPayload = await apiClient.requestIdentityProfile(
-      tokenPayload.access
-    )
-    const identityProfile = normalizeIdentityProfile(identityPayload)
+    try {
+      const tokenPayload = await apiClient.requestRefreshAccessToken()
+      const identityPayload = await apiClient.requestIdentityProfile(
+        tokenPayload.access
+      )
+      const identityProfile = userProfileSchema.parse(identityPayload)
 
-    if (!identityProfile) {
+      setAuthenticated({ accessToken: tokenPayload.access, identityProfile })
+      return true
+    }
+    catch (error) {
+      if (error instanceof z.ZodError) {
+        return false
+      }
       return false
     }
-
-    setAuthenticated({ accessToken: tokenPayload.access, identityProfile })
-    return true
   }
 
   return {
@@ -206,18 +170,7 @@ export function createAuthSessionService(
         const identityPayload = await apiClient.requestIdentityProfile(
           tokenPayload.access
         )
-        const identityProfile = normalizeIdentityProfile(identityPayload)
-
-        if (!identityProfile) {
-          clear()
-          return {
-            ok: false,
-            error: {
-              code: "identity_profile_failed",
-              message: "Identity profile response is invalid.",
-            },
-          }
-        }
+        const identityProfile = userProfileSchema.parse(identityPayload);
 
         setAuthenticated({ accessToken: tokenPayload.access, identityProfile })
 
@@ -237,6 +190,15 @@ export function createAuthSessionService(
             },
           }
         }
+        else if (error instanceof z.ZodError){
+          return {
+            ok: false,
+            error: {
+              code: "identity_profile_failed",
+              message: "Identity profile response schema failed to parse"
+            }
+          }
+        }
 
         return {
           ok: false,
@@ -253,7 +215,7 @@ export function createAuthSessionService(
       if (
         current.phase === "authenticated" &&
         current.accessToken &&
-        current.identityProfile
+        current.userProfile
       ) {
         return { ok: true, state: current }
       }

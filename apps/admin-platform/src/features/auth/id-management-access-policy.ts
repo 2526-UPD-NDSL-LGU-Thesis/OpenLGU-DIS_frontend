@@ -1,15 +1,19 @@
-import type { AuthStateSnapshot } from "./auth-session-service"
+import type { AuthStateSnapshot } from "./auth-session-service";
+import { userRolesListSchema } from "#/types/schema";
 
-const ID_MANAGEMENT_ALLOWED_ROLES = new Set([
-  "SUPER",
-  "ID_MANAGEMENT_ADMIN",
-  "ID_MANAGEMENT_EMPLOYEE",
+const allowdRolesSchema = userRolesListSchema.extract([
+  "Super",
+  "ID Management Admin",
+  "ID Management Employee",
 ])
 
+
 export function canAccessIdManagement(authState: AuthStateSnapshot): boolean {
-  if (authState.phase !== "authenticated" || !authState.identityProfile) {
+  if (authState.phase !== "authenticated" || !authState.userProfile) {
     return false
   }
 
-  return authState.identityProfile.roles.some((role) => ID_MANAGEMENT_ALLOWED_ROLES.has(role))
+ 
+  const hasMatch = authState.userProfile.roles.some(role => allowdRolesSchema.safeParse(role) .success)
+  return hasMatch; 
 }

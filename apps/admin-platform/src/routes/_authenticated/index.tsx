@@ -22,7 +22,6 @@ function App() {
           You do not have sufficient permissions to access that feature.
         </div>
       ) : null}
-      <div>Hello "/routes"!</div>
     </div>
   )
 }

@@ -1,15 +1,21 @@
-import type { AuthStateSnapshot } from "./auth-session-service"
+import type { AuthStateSnapshot } from "./auth-session-service";
+import { userRolesListSchema } from "#/types/schema";
 
-const SERVICE_CLAIM_ALLOWED_ROLES = new Set([
-  "SUPER",
-  "SERVICE_CLAIM_ADMIN",
-  "SERVICE_CLAIM_EMPLOYEE",
+const allowdRolesSchema = userRolesListSchema.extract([
+  "Super",
+  "Service Admin",
+  "Service Employee",
+  "Service Claim Admin",
+  "Service Claim Employee"
 ])
 
+
+
 export function canAccessServiceClaim(authState: AuthStateSnapshot): boolean {
-  if (authState.phase !== "authenticated" || !authState.identityProfile) {
+  if (authState.phase !== "authenticated" || !authState.userProfile) {
     return false
   }
 
-  return authState.identityProfile.roles.some((role) => SERVICE_CLAIM_ALLOWED_ROLES.has(role))
+  const hasMatch = authState.userProfile.roles.some(role => allowdRolesSchema.safeParse(role) .success)
+  return hasMatch;
 }

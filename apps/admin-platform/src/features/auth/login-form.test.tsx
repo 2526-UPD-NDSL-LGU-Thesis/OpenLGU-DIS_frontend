@@ -24,7 +24,7 @@ interface TestRouterContext {
 
 function AuthenticatedArea() {
   const { session } = useAuthStore()
-  return <p>Authenticated as {session.identityProfile?.username ?? "none"}</p>
+  return <p>Authenticated as {session.userProfile?.username ?? "none"}</p>
 }
 
 async function renderLoginFlow(redirectTo = "/protected") {

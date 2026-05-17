@@ -129,9 +129,9 @@ export const authHandlers = [
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
 
-    // if (!isMockModeRequest(request)) { TODO Re-enable once Role Based Access Control is fixed
-    //   return passthrough()
-    // }
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
 
     const username = readPersistedMockUsername() ?? lastMockUsername ?? "employee-1"
 

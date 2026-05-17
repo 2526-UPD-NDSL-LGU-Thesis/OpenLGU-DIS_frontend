@@ -168,10 +168,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { session, logout } = useAuthStore()
 
   // Map IdentityProfile to NavUser user data
-  const userData = session.identityProfile
+  const userData = session.userProfile
     ? {
-        name: session.identityProfile.username,
-        email: `${session.identityProfile.username}@openlguid.local`,
+        name: session.userProfile.username,
+        email: `${session.userProfile.username}@openlguid.local`,
         avatar: "/avatars/shadcn.jpg",
       }
     : dummyData.user

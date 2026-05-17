@@ -1,4 +1,16 @@
-import type { AuthStateSnapshot } from "#/features/auth/auth-session-service"
+// TODO I feel like we should consolidate access policies into one file
+
+import type { AuthStateSnapshot } from "#/features/auth/auth-session-service";
+
+import { userRolesListSchema } from "#/types/schema";
+
+const allowdRolesSchema = userRolesListSchema.extract([
+  "Super",
+  "Sector Admin",
+  "Sector Employee",
+])
+
+
 
 const SECTOR_MANAGEMENT_ALLOWED_ROLES = new Set([
   "SUPER",
@@ -6,27 +18,26 @@ const SECTOR_MANAGEMENT_ALLOWED_ROLES = new Set([
   "SECTOR_EMPLOYEE",
 ])
 
-const SECTOR_MANAGE_ALLOWED_ROLES = new Set([
-  "SUPER",
-  "SECTOR_ADMIN",
+const SECTOR_MANAGE_ALLOWED_ROLES = new Set([ // TODO why did I need this?
+  "Super",
+  "Sector Admin",
 ])
 
 export function canAccessSectorManagement(authState: AuthStateSnapshot): boolean {
-  if (authState.phase !== "authenticated" || !authState.identityProfile) {
+  if (authState.phase !== "authenticated" || !authState.userProfile) {
     return false
   }
 
-  return authState.identityProfile.roles.some((role) =>
-    SECTOR_MANAGEMENT_ALLOWED_ROLES.has(role)
-  )
+  const hasMatch = authState.userProfile.roles.some(role => allowdRolesSchema.safeParse(role) .success)
+  return hasMatch;
 }
 
 export function canManageSectors(authState: AuthStateSnapshot): boolean {
-  if (authState.phase !== "authenticated" || !authState.identityProfile) {
+  if (authState.phase !== "authenticated" || !authState.userProfile) {
     return false
   }
 
-  return authState.identityProfile.roles.some((role) =>
+  return authState.userProfile.roles.some((role) =>
     SECTOR_MANAGE_ALLOWED_ROLES.has(role)
   )
 }

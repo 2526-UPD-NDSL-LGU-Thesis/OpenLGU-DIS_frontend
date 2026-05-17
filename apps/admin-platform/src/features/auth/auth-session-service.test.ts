@@ -1,3 +1,5 @@
+// TODO these broke after changing to UserSchemas
+
 import { describe, expect, it, vi } from "vitest"
 import { http, HttpResponse } from "msw"
 
@@ -38,9 +40,9 @@ describe("createAuthSessionService", () => {
     expect(state.phase).toBe("authenticated")
     expect(typeof state.accessToken).toBe("string")
     expect(state.accessToken).not.toHaveLength(0)
-    expect(typeof state.identityProfile?.username).toBe("string")
-    expect(state.identityProfile?.roles.length).toBeGreaterThan(0)
-    for (const role of state.identityProfile?.roles ?? []) {
+    expect(typeof state.userProfile?.username).toBe("string")
+    expect(state.userProfile?.roles.length).toBeGreaterThan(0)
+    for (const role of state.userProfile?.roles ?? []) {
       expect(CANONICAL_ROLES.has(role)).toBe(true)
     }
   })
@@ -136,7 +138,7 @@ describe("createAuthSessionService", () => {
     const state = service.getAuthState()
     expect(state.phase).toBe("authenticated")
     expect(typeof state.accessToken).toBe("string")
-    expect(state.identityProfile?.roles.length).toBeGreaterThan(0)
+    expect(state.userProfile?.roles.length).toBeGreaterThan(0)
   })
 
   it("redirects to Public Area login with return target when silent refresh fails", async () => {
