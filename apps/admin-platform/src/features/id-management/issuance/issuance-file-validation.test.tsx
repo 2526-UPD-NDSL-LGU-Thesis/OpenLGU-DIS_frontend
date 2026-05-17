@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it } from "vitest"
 import { cleanup, render, screen, fireEvent } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
+import "./issuance-test-mocks"
+
 import IssuanceWizard from "./IssuanceWizard"
 
 describe("IssuanceWizard - file validation", () => {

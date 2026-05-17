@@ -1,3 +1,15 @@
+export class UploadHttpError extends Error {
+  status: number
+  body: unknown
+
+  constructor(status: number, body: unknown) {
+    super(`Upload failed: ${status}`)
+    this.name = "UploadHttpError"
+    this.status = status
+    this.body = body
+  }
+}
+
 export async function uploadWithProgress(url: string, formData: FormData, onProgress: (p: number) => void, signal?: AbortSignal): Promise<Response> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -11,7 +23,7 @@ export async function uploadWithProgress(url: string, formData: FormData, onProg
         // Wrap xhr.response into a Response-like object
         resolve(new Response(JSON.stringify(body), { status }))
       } else {
-        reject(new Error(`Upload failed: ${status}`))
+        reject(new UploadHttpError(status, body))
       }
     }
 

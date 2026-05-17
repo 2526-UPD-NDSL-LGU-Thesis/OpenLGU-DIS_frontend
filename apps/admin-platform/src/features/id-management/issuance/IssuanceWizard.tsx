@@ -28,6 +28,7 @@ import { ImagePlus } from "lucide-react"
 import DatePicker from "@openlguid/ui/components/date-picker"
 import { uploadWithProgress } from "#/lib/upload"
 import { buildIssuanceSubmissionFormData } from "./issuancePayload"
+import { parseIssuanceSubmissionFailure } from "./issuanceSubmissionErrors"
 
 const STEPS = [
   { id: "applicant", title: "Applicant", description: "Name and basic info" },
@@ -94,6 +95,7 @@ export default function IssuanceWizard(): JSX.Element {
   const [uploadAbortController, setUploadAbortController] = useState<AbortController | null>(null)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [submissionResult, setSubmissionResult] = useState<{ uin: string; pcn?: string } | null>(null)
+  const [submissionFieldErrors, setSubmissionFieldErrors] = useState<Record<string, string>>({})
   const MAX_BYTES = 10 * 1024 * 1024
   const formRef = useRef<HTMLFormElement | null>(null)
 
@@ -106,12 +108,22 @@ export default function IssuanceWizard(): JSX.Element {
     window.dispatchEvent(new PopStateEvent("popstate"))
   }
 
+  function navigateToLogin() {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    window.history.pushState({}, "", "/login")
+    window.dispatchEvent(new PopStateEvent("popstate"))
+  }
+
   // TanStack form
   // zod schema for issuance
   const IssuanceSchema = z.object({
     first_name: z.string().min(1, { message: 'First name is required.' }),
     middle_name: z.string().optional(),
     last_name: z.string().min(1, { message: 'Last name is required.' }),
+    gender: z.string().optional(),
     pcn: z.string().optional(),
     dob: z.string().optional(),
     address: z.string().optional(),
@@ -125,6 +137,7 @@ export default function IssuanceWizard(): JSX.Element {
       first_name: '',
       middle_name: '',
       last_name: '',
+      gender: '',
       pcn: '',
       dob: '',
       address: '',
@@ -149,6 +162,7 @@ export default function IssuanceWizard(): JSX.Element {
     },
     onSubmit: async ({ value }) => {
       setFileError(null)
+      setSubmissionFieldErrors({})
       setSubmissionResult(null)
 
       const proof = value.proof
@@ -198,8 +212,24 @@ export default function IssuanceWizard(): JSX.Element {
       } catch (err: any) {
         if (err && err.name === 'AbortError') {
           setFileError('Upload cancelled.')
+          return
+        }
+
+        const failure = parseIssuanceSubmissionFailure(err)
+        if (!failure) {
+          return
+        }
+
+        if (failure.kind === "auth") {
+          navigateToLogin()
+          return
+        }
+
+        if (failure.kind === "validation") {
+          setSubmissionFieldErrors(failure.fieldErrors)
+          setFileError(failure.message)
         } else {
-          setFileError('Upload failed. Please try again.')
+          setFileError(failure.message)
         }
       } finally {
         setIsUploading(false)
@@ -211,6 +241,7 @@ export default function IssuanceWizard(): JSX.Element {
   function handleCancel() {
     // reset form and local state
     setFileError(null)
+    setSubmissionFieldErrors({})
     setProofFileName(null)
     setIsUploading(false)
     setUploadProgress(null)
@@ -276,73 +307,147 @@ export default function IssuanceWizard(): JSX.Element {
 
                   <div>
                     {s.id === "applicant" && (
-                      <>
-                        <>
-                            <form.Field name="first_name">
-                              {(field: any) => (
-                                <Field>
-                                  <FieldLabel htmlFor={field.name}>First name</FieldLabel>
-                                  <Input id={field.name} name={field.name} aria-label="First name" value={field.state.value} onBlur={field.handleBlur} onChange={(e:any)=>field.handleChange(e.target.value)} />
-                                </Field>
-                              )}
-                            </form.Field>
+                      <div className="space-y-4">
+                        <form.Field name="pcn">
+                          {(field: any) => (
+                            <div className="rounded-2xl border border-border/70 bg-muted/40 px-4 py-3">
+                              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                PCN
+                              </div>
+                              <div className="mt-1 text-sm font-semibold text-foreground">
+                                {field.state.value || "Empty"}
+                              </div>
+                            </div>
+                          )}
+                        </form.Field>
 
-                            <form.Field name="middle_name">
-                              {(field: any) => (
-                                <Field>
-                                  <FieldLabel htmlFor={field.name}>Middle name</FieldLabel>
-                                  <Input id={field.name} name={field.name} aria-label="Middle name" value={field.state.value} onBlur={field.handleBlur} onChange={(e:any)=>field.handleChange(e.target.value)} />
-                                </Field>
-                              )}
-                            </form.Field>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <form.Field name="first_name">
+                            {(field: any) => (
+                              <Field>
+                                <FieldLabel htmlFor={field.name}>First name</FieldLabel>
+                                <Input
+                                  id={field.name}
+                                  name={field.name}
+                                  aria-label="First name"
+                                  value={field.state.value}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: any) => field.handleChange(e.target.value)}
+                                />
+                                {submissionFieldErrors.first_name ? (
+                                  <div role="alert" className="text-sm text-destructive">
+                                    {submissionFieldErrors.first_name}
+                                  </div>
+                                ) : null}
+                              </Field>
+                            )}
+                          </form.Field>
 
-                            <form.Field name="last_name">
-                              {(field: any) => (
-                                <Field>
-                                  <FieldLabel htmlFor={field.name}>Last name</FieldLabel>
-                                  <Input id={field.name} name={field.name} aria-label="Last name" value={field.state.value} onBlur={field.handleBlur} onChange={(e:any)=>field.handleChange(e.target.value)} />
-                                </Field>
-                              )}
-                            </form.Field>
+                          <form.Field name="middle_name">
+                            {(field: any) => (
+                              <Field>
+                                <FieldLabel htmlFor={field.name}>Middle name</FieldLabel>
+                                <Input
+                                  id={field.name}
+                                  name={field.name}
+                                  aria-label="Middle name"
+                                  value={field.state.value}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: any) => field.handleChange(e.target.value)}
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
 
-                            <form.Field name="pcn">
-                              {(field: any) => (
-                                <Field>
-                                  <FieldLabel htmlFor={field.name}>PCN</FieldLabel>
-                                  <Input id={field.name} name={field.name} aria-label="PCN" value={field.state.value || ''} readOnly />
-                                </Field>
-                              )}
-                            </form.Field>
+                          <form.Field name="last_name">
+                            {(field: any) => (
+                              <Field>
+                                <FieldLabel htmlFor={field.name}>Last name</FieldLabel>
+                                <Input
+                                  id={field.name}
+                                  name={field.name}
+                                  aria-label="Last name"
+                                  value={field.state.value}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: any) => field.handleChange(e.target.value)}
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
 
-                            <form.Field name="dob">
-                              {(field: any) => (
-                                <Field>
-                                  <FieldLabel htmlFor={field.name}>Date of birth</FieldLabel>
-                                  <DatePicker id={field.name} name={field.name} aria-label="Date of birth" value={field.state.value} onBlur={field.handleBlur} onChange={(e:any)=>field.handleChange(e.target.value)} />
-                                </Field>
-                              )}
-                            </form.Field>
+                          <form.Field name="gender">
+                            {(field: any) => (
+                              <Field>
+                                <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
+                                <Input
+                                  id={field.name}
+                                  name={field.name}
+                                  aria-label="Gender"
+                                  value={field.state.value}
+                                  placeholder="Male / Female / Other"
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: any) => field.handleChange(e.target.value)}
+                                />
+                                {submissionFieldErrors.gender ? (
+                                  <div role="alert" className="text-sm text-destructive">
+                                    {submissionFieldErrors.gender}
+                                  </div>
+                                ) : null}
+                              </Field>
+                            )}
+                          </form.Field>
 
+                          <form.Field name="dob">
+                            {(field: any) => (
+                              <Field>
+                                <FieldLabel htmlFor={field.name}>Date of birth</FieldLabel>
+                                <DatePicker
+                                  id={field.name}
+                                  name={field.name}
+                                  aria-label="Date of birth"
+                                  value={field.state.value}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: any) => field.handleChange(e.target.value)}
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name="contact_number">
+                            {(field: any) => (
+                              <Field>
+                                <FieldLabel htmlFor={field.name}>Contact number</FieldLabel>
+                                <Input
+                                  id={field.name}
+                                  name={field.name}
+                                  aria-label="Contact number"
+                                  value={field.state.value}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: any) => field.handleChange(e.target.value)}
+                                />
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <div className="md:col-span-2">
                             <form.Field name="address">
                               {(field: any) => (
                                 <Field>
                                   <FieldLabel htmlFor={field.name}>Address</FieldLabel>
-                                  <Textarea id={field.name} name={field.name} aria-label="Address" value={field.state.value} onBlur={field.handleBlur} onChange={(e:any)=>field.handleChange(e.target.value)} />
+                                  <Textarea
+                                    id={field.name}
+                                    name={field.name}
+                                    aria-label="Address"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e: any) => field.handleChange(e.target.value)}
+                                  />
                                 </Field>
                               )}
                             </form.Field>
-
-                            <form.Field name="contact_number">
-                              {(field: any) => (
-                                <Field>
-                                  <FieldLabel htmlFor={field.name}>Contact number</FieldLabel>
-                                  <Input id={field.name} name={field.name} aria-label="Contact number" value={field.state.value} onBlur={field.handleBlur} onChange={(e:any)=>field.handleChange(e.target.value)} />
-                                </Field>
-                              )}
-                            </form.Field>
-
-                          </>
-                      </>
+                          </div>
+                        </div>
+                      </div>
                     )}
 
                     {s.id === "documents" && (
@@ -415,6 +520,11 @@ export default function IssuanceWizard(): JSX.Element {
                                 </Button>
                                 {proofFileName ? (
                                   <p className="text-xs text-muted-foreground">{proofFileName}</p>
+                                ) : null}
+                                {submissionFieldErrors.proof ? (
+                                  <div role="alert" className="text-sm text-destructive">
+                                    {submissionFieldErrors.proof}
+                                  </div>
                                 ) : null}
                               </div>
                             )}</form.Field>

@@ -2,6 +2,7 @@ export interface IssuanceSubmissionValues {
   first_name: string
   middle_name?: string
   last_name: string
+  gender?: string
   pcn?: string
   dob?: string
   address?: string
@@ -20,6 +21,7 @@ export function buildIssuanceSubmissionFormData(
     JSON.stringify({
       ...values,
       middle_name: values.middle_name ?? "",
+      gender: values.gender ?? "",
       pcn: values.pcn ?? "",
       dob: values.dob ?? "",
       address: values.address ?? "",

@@ -191,6 +191,7 @@ export function createAuthSessionService(
           }
         }
         else if (error instanceof z.ZodError){
+          console.error(error)
           return {
             ok: false,
             error: {
