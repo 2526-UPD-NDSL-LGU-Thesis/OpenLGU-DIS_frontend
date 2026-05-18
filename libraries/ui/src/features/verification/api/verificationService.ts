@@ -11,6 +11,7 @@ export interface QRVerifyReturn {
   qr_type?: string
   idDetails?: IdDetails
   message?: string
+  rawQRValue?: string
 }
 
 class HTTPResponseError extends Error {
@@ -117,6 +118,7 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
       result: "success",
       qr_type: responseBody.qr_type,
       idDetails,
+      rawQRValue
     }
   } catch (error) {
     if (error instanceof HTTPResponseError) {

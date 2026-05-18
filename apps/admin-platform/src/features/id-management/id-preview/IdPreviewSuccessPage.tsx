@@ -52,7 +52,7 @@ export function IdPreviewSuccessPage({
       </CardHeader>
       <CardContent className="space-y-4">
         <div ref={previewRef} className="rounded-2xl border border-border/70 bg-muted/40 p-4">
-          <PhysicalLGUIDPreview data={data} className="min-h-[16rem]" />
+          <PhysicalLGUIDPreview data={data} className="h-[36rem]" />
         </div>
         <div className="flex flex-wrap gap-3">
           <Button onClick={handleOpenPrint}>Print ID</Button>

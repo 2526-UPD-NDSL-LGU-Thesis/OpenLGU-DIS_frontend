@@ -6,7 +6,7 @@ const TRANSPARENT_PIXEL =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7/7GQAAAAASUVORK5CYII="
 
 export const PHYSICAL_LGU_ID_PAGE_SIZE = {
-  width: 86,
+  width: 81,
   height: 54,
   padding: [2, 2, 2, 2] as [number, number, number, number],
 }
@@ -64,6 +64,14 @@ export const PHYSICAL_LGU_ID_TEMPLATE: Template = {
         fontSize: 8,
       },
       {
+        name: "phone",
+        type: "text",
+        position: { x: 24, y: 35},
+        width: 32,
+        height: 4,
+        fontSize: 8,
+      },
+      {
         name: "address",
         type: "text",
         position: { x: 4, y: 37 },
@@ -71,12 +79,14 @@ export const PHYSICAL_LGU_ID_TEMPLATE: Template = {
         height: 4,
         fontSize: 7,
       },
+    ],
+    [
       {
         name: "qrValue",
-        type: "qrcode",
-        position: { x: 63, y: 33 },
-        width: 18,
-        height: 18,
+        type: "image",
+        position: { x: 15, y: 2.5 },
+        width: 50,
+        height: 50,
       },
     ],
   ],
@@ -93,6 +103,7 @@ export function buildPhysicalLGUIDInputs(data: PhysicalLGUIDTemplateData) {
       gender: `Gender: ${data.gender}`,
       address: `Address: ${data.address}`,
       qrValue: data.qrValue,
+      phone: `Phone: ${data.phone}`,
     },
   ]
 }
@@ -106,5 +117,5 @@ function normalizeImageValue(image: string | undefined) {
     return image
   }
 
-  return `data:image/png;base64,${image}`
+  return `data:image/jpg;base64,${image}`
 }

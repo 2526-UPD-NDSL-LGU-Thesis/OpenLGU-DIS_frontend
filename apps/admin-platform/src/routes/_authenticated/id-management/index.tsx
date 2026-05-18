@@ -68,8 +68,11 @@ export function IdManagementDashboard() {
     if (result.result !== "success" || !result.idDetails) {
       throw new Error(result.message ?? "Verification failed. Please try again.")
     }
+    console.log(result)
 
-    setIdPreviewData(buildPhysicalIdTemplateData(result.idDetails))
+    const templateData = await buildPhysicalIdTemplateData(result.idDetails, result.rawQRValue);
+
+    setIdPreviewData(templateData);
     await router.navigate({ to: "/id-management/id-preview" })
   }
 

@@ -15,8 +15,8 @@
     "check": "prettier --write . && eslint --fix"
   },
   "dependencies": {
-    "@openlguid/ui": "workspace:*",
     "@openlguid/physical-id-template": "workspace:*",
+    "@openlguid/ui": "workspace:*",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-form": "catalog:",
@@ -31,6 +31,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
+    "qrcode": "catalog:",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tailwind-merge": "^3.6.0",

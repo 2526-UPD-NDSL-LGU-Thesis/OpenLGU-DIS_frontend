@@ -4,6 +4,7 @@ export interface PhysicalLGUIDTemplateData {
   dob: string
   gender: string
   address: string
+  phone: string
   qrValue: string
   face?: string
   pcn?: string

@@ -13,7 +13,7 @@ import type {
 type RenderStatus = "loading" | "ready" | "error"
 
 const defaultLoadPdfme: LoadPdfmeDependencies = async () => {
-  const [{ generate }, { barcodes, image }] = await Promise.all([
+  const [{ generate }, { barcodes, image, text }] = await Promise.all([
     import("@pdfme/generator"),
     import("@pdfme/schemas"),
   ])
@@ -23,6 +23,7 @@ const defaultLoadPdfme: LoadPdfmeDependencies = async () => {
     plugins: {
       Image: image,
       "QR Code": barcodes.qrcode,
+      text,
     },
   }
 }
@@ -37,6 +38,7 @@ export function PhysicalLGUIDPreview({
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
 
   const inputs = useMemo(() => buildPhysicalLGUIDInputs(data), [data])
+  console.log(inputs)
 
   useEffect(() => {
     let isActive = true
@@ -61,7 +63,8 @@ export function PhysicalLGUIDPreview({
         setPdfUrl(nextUrl)
         setStatus("ready")
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("pdfme generation failed:", err);
         if (isActive) {
           setStatus("error")
         }
