@@ -1,8 +1,15 @@
-import { Link, createFileRoute, linkOptions, redirect, useRouter } from '@tanstack/react-router'
+import { createFileRoute, linkOptions, redirect, useRouter } from '@tanstack/react-router'
 import { useState } from "react"
 import { canAccessIdManagement } from "#/features/auth/id-management-access-policy"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
 import { buttonVariants } from "@openlguid/ui/components/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@openlguid/ui/components/dialog"
 import {
   IdentifierCaptureDialog,
   type IdentifierCaptureRequest,
@@ -12,6 +19,9 @@ import { verifyQR } from "@openlguid/ui/features/verification/api/verificationSe
 import { submitIdentifierCapture } from "#/features/identifier-capture/identifier-capture-submit"
 import { buildPhysicalIdTemplateData } from "#/features/id-management/id-preview/id-preview-mapper"
 import { setIdPreviewData } from "#/features/id-management/id-preview/id-preview-store"
+import { verifyNationalId } from "#/features/id-management/issuance/nationalIdVerification"
+import { mapNationalIdToIssuancePrefill } from "#/features/id-management/issuance/issuance-prefill-mapper"
+import { setIssuancePrefill } from "#/features/id-management/issuance/issuance-prefill-store"
 
 const insufficientPermissionsRedirect = linkOptions({
   to: "/",
@@ -33,6 +43,14 @@ export const Route = createFileRoute('/_authenticated/id-management/')({
 export function IdManagementDashboard() {
   const router = useRouter()
   const [isCaptureOpen, setIsCaptureOpen] = useState(false)
+  const [isIssuanceChoiceOpen, setIsIssuanceChoiceOpen] = useState(false)
+  const [isNationalIdCaptureOpen, setIsNationalIdCaptureOpen] = useState(false)
+  const [nationalIdDetails, setNationalIdDetails] = useState<{
+    first_name?: string
+    last_name?: string
+    birthdate?: string
+    pcn?: string
+  } | null>(null)
   // Mocked metrics for tracer/demo purposes
   const metrics = {
     totalIssuedThisMonth: 124,
@@ -53,6 +71,44 @@ export function IdManagementDashboard() {
 
     setIdPreviewData(buildPhysicalIdTemplateData(result.idDetails))
     await router.navigate({ to: "/id-management/id-preview" })
+  }
+
+  const handleNationalIdCapture = async (request: IdentifierCaptureRequest) => {
+    const result = await submitIdentifierCapture(request, {
+      qr: async (rawQRValue) => verifyNationalId(rawQRValue),
+      manual: async () => {
+        throw new Error("Manual identifier capture is not supported for National ID intake.")
+      },
+    })
+
+    setNationalIdDetails({
+      first_name: result.first_name,
+      last_name: result.last_name,
+      birthdate: result.birthdate,
+      pcn: result.pcn,
+    })
+  }
+
+  const handleContinueToIssuance = async (prefill?: {
+    first_name?: string
+    last_name?: string
+    birthdate?: string
+    pcn?: string
+  }) => {
+    setIsIssuanceChoiceOpen(false)
+    setIsNationalIdCaptureOpen(false)
+    setNationalIdDetails(null)
+    if (prefill) {
+      setIssuancePrefill(
+        mapNationalIdToIssuancePrefill({
+          first_name: prefill.first_name,
+          last_name: prefill.last_name,
+          birthdate: prefill.birthdate,
+          pcn: prefill.pcn,
+        })
+      )
+    }
+    await router.navigate({ to: "/id-management/issuance" })
   }
 
   return (
@@ -87,9 +143,13 @@ export function IdManagementDashboard() {
           >
             Verify/View/Print ID
           </button>
-          <Link to="/id-management/issuance" className={buttonVariants({ variant: "outline" })}>
+          <button
+            type="button"
+            className={buttonVariants({ variant: "outline" })}
+            onClick={() => setIsIssuanceChoiceOpen(true)}
+          >
             Start Issuance
-          </Link>
+          </button>
         </div>
       </div>
       <IdentifierCaptureDialog
@@ -97,6 +157,71 @@ export function IdManagementDashboard() {
         onOpenChange={setIsCaptureOpen}
         onSubmit={handleCaptureSubmit}
       />
+      <Dialog open={isIssuanceChoiceOpen} onOpenChange={setIsIssuanceChoiceOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Start issuance</DialogTitle>
+            <DialogDescription>
+              Choose how you want to start the issuance flow.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              className={buttonVariants({})}
+              onClick={() => {
+                setIsIssuanceChoiceOpen(false)
+                setIsNationalIdCaptureOpen(true)
+              }}
+            >
+              Scan National ID
+            </button>
+            <button
+              type="button"
+              className={buttonVariants({ variant: "outline" })}
+              onClick={() => handleContinueToIssuance()}
+            >
+              Continue without National ID
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <IdentifierCaptureDialog
+        open={isNationalIdCaptureOpen}
+        onOpenChange={setIsNationalIdCaptureOpen}
+        onSubmit={handleNationalIdCapture}
+      />
+      <Dialog open={Boolean(nationalIdDetails)} onOpenChange={() => setNationalIdDetails(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>National ID details</DialogTitle>
+            <DialogDescription>
+              Review the captured details before continuing.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+            <div>Name: {[nationalIdDetails?.first_name, nationalIdDetails?.last_name].filter(Boolean).join(" ") || "—"}</div>
+            <div>PCN: {nationalIdDetails?.pcn ?? "—"}</div>
+            <div>Birthdate: {nationalIdDetails?.birthdate ?? "—"}</div>
+          </div>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              className={buttonVariants({})}
+              onClick={() => handleContinueToIssuance(nationalIdDetails ?? undefined)}
+            >
+              Continue to issuance form
+            </button>
+            <button
+              type="button"
+              className={buttonVariants({ variant: "outline" })}
+              onClick={() => handleContinueToIssuance()}
+            >
+              Continue manually
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

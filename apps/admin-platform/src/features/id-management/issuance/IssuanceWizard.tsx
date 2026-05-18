@@ -34,6 +34,10 @@ import {
   loadPhysicalIdReprintCache,
   savePhysicalIdReprintCache,
 } from "#/features/id-management/reprint-cache"
+import {
+  clearIssuancePrefill,
+  getIssuancePrefill,
+} from "./issuance-prefill-store"
 import { PhysicalLGUIDPreview } from "@openlguid/physical-id-template/preview"
 import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
 
@@ -132,6 +136,10 @@ export default function IssuanceWizard(): JSX.Element {
   const [submissionFieldErrors, setSubmissionFieldErrors] = useState<Record<string, string>>({})
   const MAX_BYTES = 10 * 1024 * 1024
   const formRef = useRef<HTMLFormElement | null>(null)
+  const initialPrefill = getIssuancePrefill()
+  if (initialPrefill) {
+    clearIssuancePrefill()
+  }
 
   function navigateToDashboard() {
     if (typeof window === "undefined") {
@@ -168,14 +176,14 @@ export default function IssuanceWizard(): JSX.Element {
 
   const form = useForm({
     defaultValues: {
-      first_name: '',
-      middle_name: '',
-      last_name: '',
-      gender: '',
-      pcn: '',
-      dob: '',
-      address: '',
-      contact_number: '',
+      first_name: initialPrefill?.first_name ?? '',
+      middle_name: initialPrefill?.middle_name ?? '',
+      last_name: initialPrefill?.last_name ?? '',
+      gender: initialPrefill?.gender ?? '',
+      pcn: initialPrefill?.pcn ?? '',
+      dob: initialPrefill?.dob ?? '',
+      address: initialPrefill?.address ?? '',
+      contact_number: initialPrefill?.contact_number ?? '',
       sectors: [],
       proof: null,
     },

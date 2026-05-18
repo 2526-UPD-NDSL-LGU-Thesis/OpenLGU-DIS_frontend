@@ -49,6 +49,31 @@ vi.mock("@openlguid/ui/components/dialog", () => ({
   DialogTitle: ({ children }: { children?: ReactNode }) => <h2>{children}</h2>,
 }))
 
+vi.mock("@openlguid/ui/features/verification/components/IdentifierCaptureDialog", () => ({
+  IdentifierCaptureDialog: (props: {
+    open: boolean
+    onSubmit: (request: { kind: "qr"; rawQRValue: string }) => Promise<void>
+  }) => {
+    if (!props.open) {
+      return null
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={() =>
+          props.onSubmit({
+            kind: "qr",
+            rawQRValue: "mocked-mosip-qr",
+          })
+        }
+      >
+        Submit capture
+      </button>
+    )
+  },
+}))
+
 vi.mock("@openlguid/physical-id-template/preview", () => ({
   PhysicalLGUIDPreview: ({ className }: { className?: string }) => (
     <iframe title="Physical LGU ID preview" className={className} />

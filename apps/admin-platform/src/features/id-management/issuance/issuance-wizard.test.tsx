@@ -10,7 +10,47 @@ import "./issuance-test-mocks"
 import IssuanceWizard from "./IssuanceWizard"
 
 describe("IssuanceWizard", () => {
-  afterEach(() => cleanup())
+  afterEach(() => {
+    cleanup()
+  })
+
+  it("autofills issuance form after verifying a National ID scan", async () => {
+    server.use(
+      http.post(`/api/mosip/verify/`, () => {
+        return HttpResponse.json(
+          {
+            id_details: {
+              first_name: "Juan",
+              middle_name: "Santos",
+              last_name: "Dela Cruz",
+              gender: "Male",
+              birthdate: "2000-01-01",
+              address: "Gubat, Diyan",
+              phone: "09221 924 7284",
+              pcn: "PCN-2026-0001",
+            },
+          },
+          { status: 200 }
+        )
+      })
+    )
+
+    const user = userEvent.setup()
+    render(<IssuanceWizard />)
+
+    await user.click(screen.getByRole("button", { name: /Scan National ID/i }))
+
+    expect(await screen.findByRole("button", { name: "Submit capture" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Submit capture" }))
+
+    expect(await screen.findByText(/Review National ID details/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: /Continue to issuance form/i }))
+
+    expect(await screen.findByLabelText(/First name/i)).toHaveValue("Juan")
+    expect(await screen.findByText("PCN-2026-0001")).toBeInTheDocument()
+  })
 
   it("redirects to login when issuance submit is unauthorized", async () => {
     server.use(
