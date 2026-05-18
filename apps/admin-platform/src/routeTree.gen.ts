@@ -18,6 +18,7 @@ import { Route as AuthenticatedIdManagementIndexRouteImport } from './routes/_au
 import { Route as AuthenticatedServiceClaimServiceIDRouteImport } from './routes/_authenticated/service-claim/$serviceID'
 import { Route as AuthenticatedSectorManagementSectorIDRouteImport } from './routes/_authenticated/sector-management/$sectorID'
 import { Route as AuthenticatedIdManagementIssuanceRouteImport } from './routes/_authenticated/id-management/issuance'
+import { Route as AuthenticatedIdManagementIdPreviewRouteImport } from './routes/_authenticated/id-management/id-preview'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -69,10 +70,17 @@ const AuthenticatedIdManagementIssuanceRoute =
     path: '/id-management/issuance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIdManagementIdPreviewRoute =
+  AuthenticatedIdManagementIdPreviewRouteImport.update({
+    id: '/id-management/id-preview',
+    path: '/id-management/id-preview',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof PublicLoginRoute
+  '/id-management/id-preview': typeof AuthenticatedIdManagementIdPreviewRoute
   '/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
   '/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
@@ -83,6 +91,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof PublicLoginRoute
   '/': typeof AuthenticatedIndexRoute
+  '/id-management/id-preview': typeof AuthenticatedIdManagementIdPreviewRoute
   '/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
   '/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
@@ -95,6 +104,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_public/login': typeof PublicLoginRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/id-management/id-preview': typeof AuthenticatedIdManagementIdPreviewRoute
   '/_authenticated/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
   '/_authenticated/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/_authenticated/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/id-management/id-preview'
     | '/id-management/issuance'
     | '/sector-management/$sectorID'
     | '/service-claim/$serviceID'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/'
+    | '/id-management/id-preview'
     | '/id-management/issuance'
     | '/sector-management/$sectorID'
     | '/service-claim/$serviceID'
@@ -128,6 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/_public/login'
     | '/_authenticated/'
+    | '/_authenticated/id-management/id-preview'
     | '/_authenticated/id-management/issuance'
     | '/_authenticated/sector-management/$sectorID'
     | '/_authenticated/service-claim/$serviceID'
@@ -206,11 +219,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIdManagementIssuanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/id-management/id-preview': {
+      id: '/_authenticated/id-management/id-preview'
+      path: '/id-management/id-preview'
+      fullPath: '/id-management/id-preview'
+      preLoaderRoute: typeof AuthenticatedIdManagementIdPreviewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedIdManagementIdPreviewRoute: typeof AuthenticatedIdManagementIdPreviewRoute
   AuthenticatedIdManagementIssuanceRoute: typeof AuthenticatedIdManagementIssuanceRoute
   AuthenticatedSectorManagementSectorIDRoute: typeof AuthenticatedSectorManagementSectorIDRoute
   AuthenticatedServiceClaimServiceIDRoute: typeof AuthenticatedServiceClaimServiceIDRoute
@@ -221,6 +242,8 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedIdManagementIdPreviewRoute:
+    AuthenticatedIdManagementIdPreviewRoute,
   AuthenticatedIdManagementIssuanceRoute:
     AuthenticatedIdManagementIssuanceRoute,
   AuthenticatedSectorManagementSectorIDRoute:

@@ -59,7 +59,7 @@ describe("verifyQR", () => {
       },
     })
     expect(requestMock).toHaveBeenCalledWith(
-      "/qr/verify",
+      "/verify/qr/",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ qr: "mockedAPISuccess" }),

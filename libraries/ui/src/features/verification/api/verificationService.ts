@@ -41,8 +41,8 @@ function defaultVerificationRequestClient(path: string, init?: RequestInit): Pro
   const authClient = (globalThis as any).__OPENLGU_AUTH_CLIENT
   if (authClient && typeof authClient.request === "function") {
     // Delegate to the authenticated client's request method so authentication
-    ///session handling is centralized in the app layer.
-    return authClient.request(`${apiBase}${path}`, init)
+    // and base URL handling stay centralized in the app layer.
+    return authClient.request(path, init)
   }
 
   return fetch(`${apiBase}${path}`, {
@@ -81,7 +81,7 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
       credentials: "include" as RequestCredentials,
     }
 
-    const response = await verificationRequestClient("/qr/verify", requestOptions)
+    const response = await verificationRequestClient("/verify/qr/", requestOptions)
 
     if (!response.ok) {
       throw new HTTPResponseError(response)
