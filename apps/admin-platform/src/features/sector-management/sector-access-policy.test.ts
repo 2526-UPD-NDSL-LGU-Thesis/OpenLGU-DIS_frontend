@@ -18,12 +18,12 @@ describe("sector access policy", () => {
     const superState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "token",
-      userProfile: { username: "super", roles: ["SUPER"] },
+      userProfile: { username: "super", roles: ["Super"] },
     }
     const employeeState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "token",
-      userProfile: { username: "employee", roles: ["SECTOR_EMPLOYEE"] },
+      userProfile: { username: "employee", roles: ["Sector Employee"] },
     }
 
     expect(canAccessSectorManagement(superState)).toBe(true)
@@ -35,19 +35,19 @@ describe("sector access policy", () => {
     const adminState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "token",
-      userProfile: { username: "admin", roles: ["SECTOR_ADMIN"] },
+      userProfile: { username: "admin", roles: ["Sector Admin"] },
     }
     const employeeState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "token",
-      userProfile: { username: "employee", roles: ["SECTOR_EMPLOYEE"] },
+      userProfile: { username: "employee", roles: ["Sector Employee"] },
     }
     const additiveState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "token",
       userProfile: {
         username: "mixed",
-        roles: ["ID_MANAGEMENT_EMPLOYEE", "SECTOR_ADMIN"],
+        roles: ["ID Management Employee", "Sector Admin"],
       },
     }
 

@@ -25,6 +25,7 @@ import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, Lo
 import { useState } from "react";
 import useAuthStore from "#/features/auth/auth";
 import { useNavigate } from "@tanstack/react-router";
+import { logoutAndClearPhysicalIdReprintCache } from "#/features/id-management/reprint-cache"
 
 export function NavUser() { 
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export function NavUser() {
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await logout()
+      await logoutAndClearPhysicalIdReprintCache(logout)
       await navigate({ to: "/login" })
     } finally {
       setIsLoggingOut(false)

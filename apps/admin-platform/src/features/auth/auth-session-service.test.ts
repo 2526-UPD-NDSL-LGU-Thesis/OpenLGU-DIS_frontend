@@ -9,14 +9,16 @@ import { buildMockAccessToken } from "#/tests/handlers/auth"
 import { authApiBaseUrl, createAuthApiClient } from "./api/authAPI"
 import { createAuthSessionService } from "./auth-session-service"
 
-const CANONICAL_ROLES = new Set([
-  "SUPER",
-  "SECTOR_ADMIN",
-  "SERVICE_CLAIM_ADMIN",
-  "SECTOR_EMPLOYEE",
-  "SERVICE_CLAIM_EMPLOYEE",
-  "ID_MANAGEMENT_ADMIN",
-  "ID_MANAGEMENT_EMPLOYEE",
+const DISPLAY_ROLES = new Set([
+  "Super",
+  "Sector Admin",
+  "Sector Employee",
+  "Service Admin",
+  "Service Employee",
+  "Service Claim Admin",
+  "Service Claim Employee",
+  "ID Management Admin",
+  "ID Management Employee",
 ])
 
 describe("createAuthSessionService", () => {
@@ -26,7 +28,7 @@ describe("createAuthSessionService", () => {
     expect(service.getAuthState()).toEqual({
       phase: "unknown",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
@@ -43,7 +45,7 @@ describe("createAuthSessionService", () => {
     expect(typeof state.userProfile?.username).toBe("string")
     expect(state.userProfile?.roles.length).toBeGreaterThan(0)
     for (const role of state.userProfile?.roles ?? []) {
-      expect(CANONICAL_ROLES.has(role)).toBe(true)
+      expect(DISPLAY_ROLES.has(role)).toBe(true)
     }
   })
 
@@ -67,7 +69,7 @@ describe("createAuthSessionService", () => {
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
@@ -96,11 +98,11 @@ describe("createAuthSessionService", () => {
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
-  it("returns identity_profile_failed and clears session when /users/me hydration fails", async () => {
+  it("returns user_profile_failed and clears session when /users/me hydration fails", async () => {
     server.use(
       http.post(`${authApiBaseUrl}/token/`, () => {
         return HttpResponse.json({ access: buildMockAccessToken() }, { status: 200 })
@@ -116,14 +118,14 @@ describe("createAuthSessionService", () => {
     expect(result).toEqual({
       ok: false,
       error: {
-        code: "identity_profile_failed",
-        message: "Unable to load LGU Employee identity profile.",
+        code: "user_profile_failed",
+        message: "Unable to load LGU Employee user profile.",
       },
     })
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
@@ -165,7 +167,7 @@ describe("createAuthSessionService", () => {
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
@@ -183,7 +185,7 @@ describe("createAuthSessionService", () => {
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
@@ -244,7 +246,7 @@ describe("createAuthSessionService", () => {
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 

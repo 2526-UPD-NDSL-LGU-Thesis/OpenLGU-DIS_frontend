@@ -1,7 +1,7 @@
-import { createFileRoute, linkOptions, redirect, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, linkOptions, redirect } from '@tanstack/react-router'
 import { canAccessIdManagement } from "#/features/auth/id-management-access-policy"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
-import { Button } from "@openlguid/ui/components/button"
+import { buttonVariants } from "@openlguid/ui/components/button"
 
 const insufficientPermissionsRedirect = linkOptions({
   to: "/",
@@ -21,8 +21,6 @@ export const Route = createFileRoute('/_authenticated/id-management/')({
 })
 
 export function IdManagementDashboard() {
-  const navigate = useNavigate()
-
   // Mocked metrics for tracer/demo purposes
   const metrics = {
     totalIssuedThisMonth: 124,
@@ -52,12 +50,10 @@ export function IdManagementDashboard() {
           </CardContent>
         </Card>
       </div>
-
       <div className="mt-6">
-        <Button onClick={() => navigate({ to: "/id-management/issuance" })}>
+        <Link to="/id-management/issuance" className={buttonVariants({})}>
           Start Issuance
-        </Button>
-        <a href="/id-management/issuance" className="sr-only" />
+        </Link>
       </div>
     </div>
   )

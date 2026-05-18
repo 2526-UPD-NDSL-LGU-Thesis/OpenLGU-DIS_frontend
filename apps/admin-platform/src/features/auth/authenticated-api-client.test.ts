@@ -30,7 +30,7 @@ describe("createAuthenticatedApiClient", () => {
         return HttpResponse.json({ access: refreshedAccessToken }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/me/`, () => {
-        return HttpResponse.json({ username: "employee-1", roles: ["SUPER"] }, { status: 200 })
+        return HttpResponse.json({ username: "employee-1", roles: ["Super"] }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/services/`, ({ request }) => {
         protectedCalls += 1
@@ -75,7 +75,7 @@ describe("createAuthenticatedApiClient", () => {
         return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
       }),
       http.get(`${authApiBaseUrl}/me/`, () => {
-        return HttpResponse.json({ username: "employee-1", roles: ["SUPER"] }, { status: 200 })
+        return HttpResponse.json({ username: "employee-1", roles: ["Super"] }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/services/`, () => {
         return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
@@ -94,7 +94,7 @@ describe("createAuthenticatedApiClient", () => {
     expect(authSessionService.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
@@ -112,7 +112,7 @@ describe("createAuthenticatedApiClient", () => {
         return HttpResponse.json({ access: "refreshed-token" }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/me/`, () => {
-        return HttpResponse.json({ username: "employee-1", roles: ["SUPER"] }, { status: 200 })
+        return HttpResponse.json({ username: "employee-1", roles: ["Super"] }, { status: 200 })
       }),
       http.post(`${authApiBaseUrl}/claim/:serviceName/`, () => {
         claimCalls += 1

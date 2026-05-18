@@ -2,18 +2,7 @@ import { faker } from "@faker-js/faker"
 import { http, HttpResponse, passthrough } from "msw"
 
 import { authApiBaseUrl } from "#/features/auth/api/authAPI"
-
-const CANONICAL_ROLES = [
-  "SUPER",
-  "SECTOR_ADMIN",
-  "SERVICE_CLAIM_ADMIN",
-  "SECTOR_EMPLOYEE",
-  "SERVICE_CLAIM_EMPLOYEE",
-  "ID_MANAGEMENT_ADMIN",
-  "ID_MANAGEMENT_EMPLOYEE",
-] as const
-
-type CanonicalRole = (typeof CANONICAL_ROLES)[number]
+import { UserRolesList } from "#/types/schema"
 
 const IS_VITEST = Boolean(process.env.VITEST)
 const MOCK_USERNAME_PREFIX = "mock:"
@@ -27,7 +16,7 @@ let lastMockUsername: string | null = IS_VITEST ? "employee-1" : null
 function readPersistedMockUsername(): string | null {
   if (typeof window === "undefined") return null
   try {
-    return window.localStorage.getItem(MOCK_STORAGE_KEY)
+    return window.localStorage.getItem(MOCK_STORAGE_KEY) // TODO I don't think this localStorage approach is good for long term. It doesn't get cleared on logout
   } catch {
     return null
   }
@@ -57,25 +46,61 @@ export function buildMockAccessToken(): string {
   return faker.string.alphanumeric(48)
 }
 
-function rolesForMockUser(username: string): CanonicalRole[] {
-  if (username.toLowerCase().includes("super")) return ["SUPER"]
-  if (username.toLowerCase().includes("id")) return ["ID_MANAGEMENT_ADMIN"]
-  if (username.toLowerCase().includes("service")) return ["SERVICE_CLAIM_ADMIN"]
+function rolesForMockUser(username: string): UserRolesList[] {
+  const normalized = username.toLowerCase()
 
-  return ["SUPER"] // Simple, deterministic roles for dev: tweak later if you want mock users with varying RBAC.
+  if (normalized.includes("super")) return ["Super"]
+  if (normalized.includes("sector-admin")) return ["Sector Admin"]
+  if (normalized.includes("sector-employee")) return ["Sector Employee"]
+  if (normalized.includes("service-claim-admin") || normalized.includes("service-admin")) {
+    return ["Service Claim Admin"]
+  }
+  if (normalized.includes("service-claim-employee") || normalized.includes("service-employee")) {
+    return ["Service Claim Employee"]
+  }
+  if (normalized.includes("id-management-admin") || normalized.includes("id-admin")) {
+    return ["ID Management Admin"]
+  }
+  if (normalized.includes("id-management-employee") || normalized.includes("id-employee")) {
+    return ["ID Management Employee"]
+  }
+
+  return ["ID Management Employee"]
 }
 
-export function buildMockIdentityProfile(overrides?: {
-  username?: string
-  roles?: CanonicalRole[]
-}): {
+function titleize(value: string): string {
+  return value
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ")
+}
+
+export interface MockUserProfilePayload {
   username: string
-  roles: CanonicalRole[]
-} {
+  first_name: string
+  last_name: string
+  groups: Array<{ name: string }>
+  assignment: null
+}
+
+
+export function buildMockUserProfile(overrides?: {
+  username?: string
+  roles?: UserRolesList[]
+}): MockUserProfilePayload {
   const username = overrides?.username ?? "employee-1"
+  const [firstNameToken, ...restTokens] = username.split(/[\s._-]+/).filter(Boolean)
+  const firstName = titleize(firstNameToken ?? "Mock")
+  const lastName = titleize(restTokens.join(" ") || "User")
+  const roles = overrides?.roles ?? rolesForMockUser(username)
+
   return {
     username,
-    roles: overrides?.roles ?? rolesForMockUser(username),
+    first_name: firstName,
+    last_name: lastName,
+    groups: roles.map((r) => ({ name: r })),
+    assignment: null,
   }
 }
 
@@ -98,7 +123,14 @@ export const authHandlers = [
       : payload.username
 
     lastMockUsername = actualUsername || "employee-1"
-    persistMockUsername(lastMockUsername)
+    // Only persist mock username across page reloads when explicitly requested
+    // by using the mock:username prefix in non-test (non-vitest) environments.
+    if (!IS_VITEST && payload.username.startsWith(MOCK_USERNAME_PREFIX)) {
+      persistMockUsername(lastMockUsername)
+    } else {
+      // avoid aggressive localStorage persistence for implicit/mock-mode logins
+      persistMockUsername(null)
+    }
 
     return HttpResponse.json(
       {
@@ -135,7 +167,7 @@ export const authHandlers = [
 
     const username = readPersistedMockUsername() ?? lastMockUsername ?? "employee-1"
 
-    return HttpResponse.json(buildMockIdentityProfile({ username }), { status: 200 })
+    return HttpResponse.json(buildMockUserProfile({ username }), { status: 200 })
   }),
 
   http.post(`${authApiBaseUrl}/logout/`, ({ request }) => {

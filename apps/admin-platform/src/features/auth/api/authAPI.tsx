@@ -12,12 +12,15 @@ export interface AccessTokenPayload {
   access: string
 }
 
-export interface IdentityProfilePayload {
+export interface UserProfilePayload {
   username: string
-  roles: string[]
+  first_name?: string
+  last_name?: string
+  groups?: Array<{ name: string }>
+  assignment?: any | null
 }
 
-type AuthApiErrorCode = "invalid_credentials" | "response_not_json" | "missing_access_token" | "identity_profile_failed"
+type AuthApiErrorCode = "invalid_credentials" | "response_not_json" | "missing_access_token" | "user_profile_failed"
 
 export class AuthApiError extends Error {
   code: AuthApiErrorCode
@@ -32,7 +35,7 @@ export class AuthApiError extends Error {
 export interface AuthApiClient {
   requestAccessToken: (credentials: LoginCredentials) => Promise<AccessTokenPayload>
   requestRefreshAccessToken: () => Promise<AccessTokenPayload>
-  requestIdentityProfile: (accessToken: string) => Promise<IdentityProfilePayload>
+  requestUserProfile: (accessToken: string) => Promise<UserProfilePayload>
 }
 
 function isJsonResponse(response: Response): boolean {
@@ -64,7 +67,7 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
               body: JSON.stringify(credentials),
             })
           } catch {
-            throw new AuthApiError("identity_profile_failed", "Unable to reach auth server.")
+            throw new AuthApiError("user_profile_failed", "Unable to reach auth server.")
           }
 
           if (!response.ok) {
@@ -85,9 +88,9 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
       })
     },
 
-    async requestIdentityProfile(accessToken) {
+    async requestUserProfile(accessToken) {
       return queryClient.fetchQuery({
-        queryKey: ["auth", "identity-profile"],
+        queryKey: ["auth", "user-profile"],
         staleTime: 0,
         gcTime: 0,
         retry: false,
@@ -102,14 +105,14 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
               credentials: "include",
             })
           } catch {
-            throw new AuthApiError("identity_profile_failed", "Unable to reach auth server.")
+            throw new AuthApiError("user_profile_failed", "Unable to reach auth server.")
           }
 
           if (!response.ok || !isJsonResponse(response)) {
-            throw new AuthApiError("identity_profile_failed", "Unable to load LGU Employee identity profile.")
+            throw new AuthApiError("user_profile_failed", "Unable to load LGU Employee user profile.")
           }
 
-          return (await response.json()) as IdentityProfilePayload
+          return (await response.json()) as UserProfilePayload
         },
       })
     },
@@ -132,7 +135,7 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
               body: JSON.stringify({}),
             })
           } catch {
-            throw new AuthApiError("identity_profile_failed", "Unable to reach auth server.")
+            throw new AuthApiError("user_profile_failed", "Unable to reach auth server.")
           }
 
           if (!response.ok) {

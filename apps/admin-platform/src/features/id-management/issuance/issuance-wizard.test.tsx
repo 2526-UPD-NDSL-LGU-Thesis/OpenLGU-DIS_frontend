@@ -106,6 +106,41 @@ describe("IssuanceWizard", () => {
 
     expect(await screen.findByText(/UIN-2026-0001/)).toBeInTheDocument()
     expect(await screen.findByRole("button", { name: /Back to dashboard/i })).toBeInTheDocument()
+    expect(await screen.findByText(/Cached reprint available for 1 hour/i)).toBeInTheDocument()
+    expect(await screen.findByRole("button", { name: /Clear cached reprint/i })).toBeInTheDocument()
+    expect(await screen.findByTitle("Physical LGU ID preview")).toBeInTheDocument()
+  })
+
+  it("clears the cached reprint after confirmation", async () => {
+    server.use(
+      http.post(`/api/ids/issue`, () =>
+        HttpResponse.json(
+          {
+            ok: true,
+            uin: "UIN-2026-0001",
+            pcn: "PCN-2026-0001",
+          },
+          { status: 201 }
+        )
+      )
+    )
+
+    const user = userEvent.setup()
+    render(<IssuanceWizard />)
+
+    await user.type(screen.getByLabelText(/First name/i), "Juan")
+    await user.type(screen.getByLabelText(/Last name/i), "Dela Cruz")
+    const file = new File(["residence"], "proof.pdf", { type: "application/pdf" })
+    await user.upload(screen.getByLabelText(/Proof of residence/i), file)
+
+    fireEvent.submit(screen.getByRole("form", { name: /Issuance form/i }))
+
+    await user.click(await screen.findByRole("button", { name: /Clear cached reprint/i }))
+    expect(await screen.findByText(/Clear cached reprint\?/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: /^Clear cache$/i }))
+
+    expect(screen.queryByText(/Cached reprint available for 1 hour/i)).not.toBeInTheDocument()
   })
 
   it("shows inline validation errors when issuance submit is rejected", async () => {

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@openlguid/ui": "workspace:*",
+    "@openlguid/physical-id-template": "workspace:*",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-form": "catalog:",

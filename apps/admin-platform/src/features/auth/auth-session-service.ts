@@ -23,7 +23,7 @@ export interface LoginFailure {
       | "invalid_credentials"
       | "response_not_json"
       | "missing_access_token"
-      | "identity_profile_failed"
+      | "user_profile_failed"
     message: string
   }
 }
@@ -127,7 +127,9 @@ export function createAuthSessionService(
     request: (path: string, init?: RequestInit) => Promise<Response>
   } | null = null
 
-  const getAuthState = () => stateStore.getState()
+  const getAuthState = () => {
+    return stateStore.getState()
+  }
 
   const clear = () => {
     stateStore.setState({ ...unauthenticatedState })
@@ -135,24 +137,24 @@ export function createAuthSessionService(
 
   const setAuthenticated = (next: {
     accessToken: string
-    identityProfile: UserProfile
+    userProfile: UserProfile
   }) => {
     stateStore.setState({
       phase: "authenticated",
       accessToken: next.accessToken,
-      userProfile: next.identityProfile,
+      userProfile: next.userProfile,
     })
   }
 
   const refreshAndHydrate = async (): Promise<boolean> => {
     try {
       const tokenPayload = await apiClient.requestRefreshAccessToken()
-      const identityPayload = await apiClient.requestIdentityProfile(
+      const userPayload = await apiClient.requestUserProfile(
         tokenPayload.access
       )
-      const identityProfile = userProfileSchema.parse(identityPayload)
+      const userProfile = userProfileSchema.parse(userPayload)
 
-      setAuthenticated({ accessToken: tokenPayload.access, identityProfile })
+      setAuthenticated({ accessToken: tokenPayload.access, userProfile })
       return true
     }
     catch (error) {
@@ -167,12 +169,12 @@ export function createAuthSessionService(
     async login(credentials) {
       try {
         const tokenPayload = await apiClient.requestAccessToken(credentials)
-        const identityPayload = await apiClient.requestIdentityProfile(
+        const userPayload = await apiClient.requestUserProfile(
           tokenPayload.access
         )
-        const identityProfile = userProfileSchema.parse(identityPayload);
+        const userProfile = userProfileSchema.parse(userPayload);
 
-        setAuthenticated({ accessToken: tokenPayload.access, identityProfile })
+        setAuthenticated({ accessToken: tokenPayload.access, userProfile })
 
         return {
           ok: true,
@@ -195,8 +197,8 @@ export function createAuthSessionService(
           return {
             ok: false,
             error: {
-              code: "identity_profile_failed",
-              message: "Identity profile response schema failed to parse"
+              code: "user_profile_failed",
+              message: "User profile response schema failed to parse"
             }
           }
         }
@@ -204,8 +206,8 @@ export function createAuthSessionService(
         return {
           ok: false,
           error: {
-            code: "identity_profile_failed",
-            message: "Unable to load LGU Employee identity profile.",
+            code: "user_profile_failed",
+            message: "Unable to load LGU Employee user profile.",
           },
         }
       }

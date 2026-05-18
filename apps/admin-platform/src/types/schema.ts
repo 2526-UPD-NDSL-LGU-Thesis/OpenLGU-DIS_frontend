@@ -29,7 +29,6 @@ const apiUserProfileSchema = z.object({
     }))
 });
 
-
 export const userProfileSchema = apiUserProfileSchema.transform((data) => ({
     username: data.username,
     name: data.first_name + " " + data.last_name,

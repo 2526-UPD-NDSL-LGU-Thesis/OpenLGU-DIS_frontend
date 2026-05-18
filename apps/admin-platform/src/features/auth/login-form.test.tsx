@@ -1,3 +1,4 @@
+import "#/features/id-management/issuance/issuance-test-mocks"
 import { QueryClient } from "@tanstack/react-query"
 import {
   Outlet,
@@ -112,7 +113,7 @@ describe("LoginForm", () => {
       }),
       http.get(`${authApiBaseUrl}/users/me/`, () => {
         return HttpResponse.json(
-          { username: "employee-1", roles: ["SERVICE_CLAIM_ADMIN"] },
+          { username: "employee-1", roles: ["Service Claim Admin"] },
           { status: 200 }
         )
       })

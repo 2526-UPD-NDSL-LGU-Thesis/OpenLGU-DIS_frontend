@@ -29,6 +29,13 @@ import DatePicker from "@openlguid/ui/components/date-picker"
 import { uploadWithProgress } from "#/lib/upload"
 import { buildIssuanceSubmissionFormData } from "./issuancePayload"
 import { parseIssuanceSubmissionFailure } from "./issuanceSubmissionErrors"
+import {
+  clearPhysicalIdReprintCache,
+  loadPhysicalIdReprintCache,
+  savePhysicalIdReprintCache,
+} from "#/features/id-management/reprint-cache"
+import { PhysicalLGUIDPreview } from "@openlguid/physical-id-template/preview"
+import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
 
 const STEPS = [
   { id: "applicant", title: "Applicant", description: "Name and basic info" },
@@ -43,6 +50,29 @@ const SECTOR_OPTIONS = [
 
 function getSectorLabel(value: string): string {
   return SECTOR_OPTIONS.find((sector) => sector.value === value)?.label ?? value
+}
+
+function buildReprintData(value: {
+  first_name: string
+  middle_name: string
+  last_name: string
+  gender: string
+  dob: string
+  address: string
+}, issuedUin: string, pcn?: string): PhysicalLGUIDTemplateData {
+  const fullName = [value.first_name, value.middle_name, value.last_name]
+    .filter((part) => part.trim().length > 0)
+    .join(" ")
+
+  return {
+    full_name: fullName,
+    uin: issuedUin,
+    dob: value.dob,
+    gender: value.gender,
+    address: value.address,
+    qrValue: issuedUin,
+    pcn,
+  }
 }
 
 
@@ -94,7 +124,11 @@ export default function IssuanceWizard(): JSX.Element {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [uploadAbortController, setUploadAbortController] = useState<AbortController | null>(null)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
+  const [isClearReprintDialogOpen, setIsClearReprintDialogOpen] = useState(false)
   const [submissionResult, setSubmissionResult] = useState<{ uin: string; pcn?: string } | null>(null)
+  const [reprintData, setReprintData] = useState<PhysicalLGUIDTemplateData | null>(() =>
+    loadPhysicalIdReprintCache()
+  )
   const [submissionFieldErrors, setSubmissionFieldErrors] = useState<Record<string, string>>({})
   const MAX_BYTES = 10 * 1024 * 1024
   const formRef = useRef<HTMLFormElement | null>(null)
@@ -209,6 +243,10 @@ export default function IssuanceWizard(): JSX.Element {
           uin: issuedUin,
           pcn: body.pcn,
         })
+
+        const nextReprintData = buildReprintData(value, issuedUin, body.pcn)
+        savePhysicalIdReprintCache(nextReprintData)
+        setReprintData(nextReprintData)
       } catch (err: any) {
         if (err && err.name === 'AbortError') {
           setFileError('Upload cancelled.')
@@ -253,6 +291,12 @@ export default function IssuanceWizard(): JSX.Element {
     if (formRef.current) formRef.current.reset()
   }
 
+  function handleClearReprintCache() {
+    clearPhysicalIdReprintCache()
+    setReprintData(null)
+    setIsClearReprintDialogOpen(false)
+  }
+
   // refs for scrolling
   const refs = useRef<Partial<Record<string, React.RefObject<HTMLElement>>>>({})
   STEPS.forEach((s) => {
@@ -274,9 +318,44 @@ export default function IssuanceWizard(): JSX.Element {
               PCN: <span className="font-medium text-foreground">{submissionResult.pcn}</span>
             </p>
           ) : null}
-          <div className="mt-4">
-            <Button onClick={navigateToDashboard}>Back to dashboard</Button>
-          </div>
+          {reprintData ? (
+            <div className="mt-6 space-y-4">
+              <div className="rounded-2xl border border-border/70 bg-muted/40 p-4">
+                <div className="text-sm font-medium">Cached reprint available for 1 hour</div>
+                <div className="mt-3">
+                  <PhysicalLGUIDPreview data={reprintData} className="min-h-[16rem]" />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" onClick={() => setIsClearReprintDialogOpen(true)}>
+                  Clear cached reprint
+                </Button>
+                <Button onClick={navigateToDashboard}>Back to dashboard</Button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4">
+              <Button onClick={navigateToDashboard}>Back to dashboard</Button>
+            </div>
+          )}
+          <Dialog open={isClearReprintDialogOpen} onOpenChange={setIsClearReprintDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Clear cached reprint?</DialogTitle>
+                <DialogDescription>
+                  This removes the locally cached Physical LGU ID preview from this browser.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4 flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setIsClearReprintDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleClearReprintCache}>
+                  Clear cache
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     )

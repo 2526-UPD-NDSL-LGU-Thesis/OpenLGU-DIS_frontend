@@ -58,21 +58,6 @@ export function createAuthRuntime(args: { queryClient: QueryClient }): AuthRunti
     // Ignore global assignment failures in restricted runtimes
   }
 
-  // Lazy-import the verification service setter to avoid circular deps in build-time
-  try {
-    // Import the setter dynamically to avoid coupling the UI library to app auth internals at module-eval time.
-    // This will be stripped by bundlers when unused in other apps.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { setVerificationRequestClient } = require("@openlguid/ui/features/verification/api/verificationService")
-    if (typeof setVerificationRequestClient === "function") {
-      setVerificationRequestClient((path: string, init?: RequestInit) =>
-        authenticatedApiClient.request(path, init)
-      )
-    }
-  } catch {
-    // Best-effort: if the UI library isn't available or import fails, fall back to the global above.
-  }
-
   return {
     store,
     sessionService,
