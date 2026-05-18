@@ -8,11 +8,11 @@ export async function buildPhysicalIdTemplateData(details: IdDetails, qrValue: s
   const qrData = await buildQrFromString(qrValue);
 
   return {
-    full_name: details.full_name,
+    full_name: details.first_name + " " + details.last_name,
     uin: details.uin,
     dob: details.dob,
     gender: details.gender,
-    address: details.location ?? "",
+    address: details.pob ?? "",
     qrValue: qrData,
     face: details.face,
     pcn: details.pcn,

@@ -13,30 +13,26 @@ export type VerificationResult =
 
 /* Backend Dependent */
 
-export interface IdDetails {// TODO possibly have a better agreed upon set of fields
-  uin: string
+export interface IdDetails {
+  issuer: string,
+  issued_at: string
   pcn?: string
-  full_name: string
+  version: string
+  first_name: string
+  middle_name: string
+  last_name: string
+  suffix_name: string
   dob: string
+  pob: string
   gender: string
-  location?: string
+  marital_status: string,
+  blood_type: string,
   email: string
   phone: string
   face: string
+  uin: string
 }
 
-export interface QRVerifyResponseIdDetails {
-  [key: string]: unknown
-  uin?: string
-  pcn?: string
-  full_name?: string
-  dob?: string
-  gender?: string
-  location?: string
-  email?: string
-  phone?: string
-  face?: string
-}
 
 export interface QRVerifyRequestBody {
   qr: string
@@ -46,5 +42,5 @@ export interface QRVerifyResponseBody {
   qr_type?: string
   error?: VerificationResult
   message?: string
-  id_details?: QRVerifyResponseIdDetails & { "169"?: QRVerifyResponseIdDetails }
+  id_details?: IdDetails
 }

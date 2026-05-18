@@ -69,6 +69,7 @@ function toRequiredString(value: unknown): string {
 
 export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
   try {
+    console.log(rawQRValue);
     const requestBody: QRVerifyRequestBody = {
       qr: rawQRValue,
     }
@@ -96,28 +97,14 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
       }
     }
 
-    const responseBody = (await response.json()) as QRVerifyResponseBody & {
-      cwt?: QRVerifyResponseBody["id_details"]
-    }
+    const responseBody = (await response.json()) as QRVerifyResponseBody;
 
-    const cwt = responseBody.cwt ?? responseBody.id_details?.["169"] ?? responseBody.id_details
-
-    const idDetails = {
-      uin: toRequiredString(cwt?.uin ?? cwt?.["75"] ?? cwt?.["2"]),
-      pcn: toStringValue(cwt?.pcn ?? cwt?.["1"]),
-      full_name: toRequiredString(cwt?.full_name ?? cwt?.["4"]),
-      dob: toRequiredString(cwt?.dob ?? cwt?.["8"]),
-      gender: toRequiredString(cwt?.gender ?? cwt?.["9"]),
-      location: toStringValue(cwt?.location ?? cwt?.["7"]),
-      email: toRequiredString(cwt?.email ?? cwt?.["11"]),
-      phone: toRequiredString(cwt?.phone ?? cwt?.["12"]),
-      face: toRequiredString(cwt?.face ?? cwt?.["62"]),
-    } satisfies IdDetails
-
+    const id_details = responseBody.id_details;
+    
     return {
       result: "success",
       qr_type: responseBody.qr_type,
-      idDetails,
+      responseBody.id_details,
       rawQRValue
     }
   } catch (error) {
