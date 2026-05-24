@@ -41,7 +41,7 @@ import { Input } from "@openlguid/ui/components/input"
 import { Textarea } from "@openlguid/ui/components/textarea"
 
 import { DataTable } from "#/features/service-claim/components/data-table"
-import { canAccessSectorManagement, canManageSectors } from "#/features/sector-management/sector-access-policy"
+import { canAccessSectorManagement, canManageSectors } from "#/features/auth/sector-access-policy"
 import {
   createSector,
   deleteSector,

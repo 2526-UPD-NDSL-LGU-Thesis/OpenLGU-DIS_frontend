@@ -23,7 +23,7 @@ export interface IdDetails {
   last_name: string
   suffix_name: string
   dob: string
-  pob: string
+  pob?: string
   gender: string
   marital_status: string,
   blood_type: string,

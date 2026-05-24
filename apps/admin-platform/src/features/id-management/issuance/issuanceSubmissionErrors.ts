@@ -8,7 +8,7 @@ export type IssuanceSubmissionFailure =
   | {
       kind: "validation"
       message: string
-      fieldErrors: Record<string, string>
+      fieldErrors: Partial<Record<string, string>>
     }
   | {
       kind: "server"
@@ -44,7 +44,7 @@ function readMessage(body: unknown): string | null {
   return firstString(body.detail) ?? firstString(body.message) ?? firstString(body.error)
 }
 
-function readFieldErrors(body: unknown): Record<string, string> {
+function readFieldErrors(body: unknown): Partial<Record<string, string>> {
   if (!isRecord(body)) {
     return {}
   }
@@ -54,7 +54,7 @@ function readFieldErrors(body: unknown): Record<string, string> {
     return {}
   }
 
-  const result: Record<string, string> = {}
+  const result: Partial<Record<string, string>> = {}
   for (const [field, value] of Object.entries(candidate)) {
     const message = firstString(value)
     if (message) {

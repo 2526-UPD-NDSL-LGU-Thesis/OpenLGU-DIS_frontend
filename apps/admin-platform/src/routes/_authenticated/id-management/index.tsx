@@ -10,10 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@openlguid/ui/components/dialog"
-import {
-  IdentifierCaptureDialog,
-  type IdentifierCaptureRequest,
-} from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
+import { IdentifierCaptureDialog } from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
+import type { IdentifierCaptureRequest } from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
 import { verifyQR } from "@openlguid/ui/features/verification/api/verificationService"
 
 import { submitIdentifierCapture } from "#/features/identifier-capture/identifier-capture-submit"
@@ -42,6 +40,7 @@ export const Route = createFileRoute('/_authenticated/id-management/')({
 
 export function IdManagementDashboard() {
   const router = useRouter()
+  const auth = (router.options.context as { auth?: { authenticatedApiClient?: { request: (path: string, init?: RequestInit) => Promise<Response> } } } | undefined)?.auth
   const [isCaptureOpen, setIsCaptureOpen] = useState(false)
   const [isIssuanceChoiceOpen, setIsIssuanceChoiceOpen] = useState(false)
   const [isNationalIdCaptureOpen, setIsNationalIdCaptureOpen] = useState(false)
@@ -58,27 +57,25 @@ export function IdManagementDashboard() {
   }
 
   const handleCaptureSubmit = async (request: IdentifierCaptureRequest) => {
-    const result = await submitIdentifierCapture(request, {
-      qr: async (rawQRValue) => verifyQR(rawQRValue),
-      manual: async () => {
-        throw new Error("Manual identifier capture is not supported for ID preview yet.")
-      },
-    })
+    if (request.kind !== "qr") {
+      throw new Error("Manual identifier capture is not supported for ID preview yet.")
+    }
+
+    const result = await verifyQR(request.rawQRValue)
 
     if (result.result !== "success" || !result.idDetails) {
       throw new Error(result.message ?? "Verification failed. Please try again.")
     }
-    console.log(result)
 
-    const templateData = await buildPhysicalIdTemplateData(result.idDetails, result.rawQRValue);
+    const templateData = await buildPhysicalIdTemplateData(result.idDetails, request.rawQRValue)
 
-    setIdPreviewData(templateData);
+    setIdPreviewData(templateData)
     await router.navigate({ to: "/id-management/id-preview" })
   }
 
   const handleNationalIdCapture = async (request: IdentifierCaptureRequest) => {
     const result = await submitIdentifierCapture(request, {
-      qr: async (rawQRValue) => verifyNationalId(rawQRValue),
+      qr: async (rawQRValue) => verifyNationalId(rawQRValue, auth?.authenticatedApiClient),
       manual: async () => {
         throw new Error("Manual identifier capture is not supported for National ID intake.")
       },

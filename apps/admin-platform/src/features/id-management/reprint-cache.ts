@@ -8,6 +8,10 @@ interface CachedReprintPayload {
   data: PhysicalLGUIDTemplateData
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
 function canUseLocalStorage(): boolean {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined"
 }
@@ -23,18 +27,20 @@ function readCachedPayload(): CachedReprintPayload | null {
   }
 
   try {
-    const parsed = JSON.parse(raw) as Partial<CachedReprintPayload>
-    if (
-      typeof parsed.savedAt !== "number" ||
-      typeof parsed.data !== "object" ||
-      parsed.data === null
-    ) {
+    const parsed = JSON.parse(raw) as unknown
+    if (!isRecord(parsed)) {
+      return null
+    }
+
+    const savedAt = parsed.savedAt
+    const data = parsed.data
+    if (typeof savedAt !== "number" || !isRecord(data)) {
       return null
     }
 
     return {
-      savedAt: parsed.savedAt,
-      data: parsed.data as PhysicalLGUIDTemplateData,
+      savedAt,
+      data: data as PhysicalLGUIDTemplateData,
     }
   } catch {
     return null

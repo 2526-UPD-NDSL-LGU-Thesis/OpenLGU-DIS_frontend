@@ -12,7 +12,7 @@ import type { IdentifierCaptureRequest } from "@openlguid/ui/features/verificati
 import { IdentifierCaptureDialog } from "@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
 
 import { DataTable } from "#/features/service-claim/components/data-table"
-import { canAccessSectorManagement } from "#/features/sector-management/sector-access-policy"
+import { canAccessSectorManagement } from "#/features/auth/sector-access-policy"
 import {
   enlistResidentToSector,
   getSectors,

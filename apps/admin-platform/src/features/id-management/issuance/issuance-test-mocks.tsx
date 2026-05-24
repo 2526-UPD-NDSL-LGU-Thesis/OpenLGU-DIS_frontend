@@ -9,6 +9,7 @@ vi.mock("@openlguid/ui/components/button", () => ({
   Button: ({ children, ...props }: { children?: ReactNode } & ComponentPropsWithoutRef<"button">) => (
     <button {...props}>{children}</button>
   ),
+  buttonVariants: () => "",
 }))
 
 vi.mock("@openlguid/ui/components/card", () => ({

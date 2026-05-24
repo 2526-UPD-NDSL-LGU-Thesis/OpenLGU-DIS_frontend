@@ -99,12 +99,10 @@ export async function verifyQR(rawQRValue: string): Promise<QRVerifyReturn> {
 
     const responseBody = (await response.json()) as QRVerifyResponseBody;
 
-    const id_details = responseBody.id_details;
-    
     return {
       result: "success",
       qr_type: responseBody.qr_type,
-      responseBody.id_details,
+      idDetails: responseBody.id_details,
       rawQRValue
     }
   } catch (error) {

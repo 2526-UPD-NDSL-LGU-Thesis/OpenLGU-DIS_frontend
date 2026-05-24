@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker"
 import { http, HttpResponse, passthrough } from "msw"
 
 import { authApiBaseUrl } from "#/features/auth/api/authAPI"
-import { UserRolesList } from "#/types/schema"
+import type { UserRolesList } from "#/types/schema"
 
 const IS_VITEST = Boolean(process.env.VITEST)
 const MOCK_USERNAME_PREFIX = "mock:"
@@ -90,8 +90,10 @@ export function buildMockUserProfile(overrides?: {
   roles?: UserRolesList[]
 }): MockUserProfilePayload {
   const username = overrides?.username ?? "employee-1"
-  const [firstNameToken, ...restTokens] = username.split(/[\s._-]+/).filter(Boolean)
-  const firstName = titleize(firstNameToken ?? "Mock")
+  const nameTokens = username.split(/[\s._-]+/).filter(Boolean)
+  const firstNameToken = nameTokens.length > 0 ? nameTokens[0] : "Mock"
+  const restTokens = nameTokens.slice(1)
+  const firstName = titleize(firstNameToken)
   const lastName = titleize(restTokens.join(" ") || "User")
   const roles = overrides?.roles ?? rolesForMockUser(username)
 

@@ -15,15 +15,26 @@ export interface NationalIdVerificationResponse {
   message?: string
 }
 
-export async function verifyNationalId(rawQRValue: string): Promise<NationalIdVerificationDetails> {
-  const response = await fetch("/api/mosip/verify/", {
+interface AuthenticatedRequestClient {
+  request: (path: string, init?: RequestInit) => Promise<Response>
+}
+
+export async function verifyNationalId(
+  rawQRValue: string,
+  apiClient?: AuthenticatedRequestClient
+): Promise<NationalIdVerificationDetails> {
+  const requestInit: RequestInit = {
     method: "POST",
     headers: {
       "content-type": "application/json",
     },
     body: JSON.stringify({ qr: rawQRValue }),
     credentials: "include",
-  })
+  }
+
+  const response = apiClient
+    ? await apiClient.request("/mosip/verify/", requestInit)
+    : await fetch("/api/mosip/verify/", requestInit)
 
   if (!response.ok) {
     throw new Error("Verification failed. Please try again.")

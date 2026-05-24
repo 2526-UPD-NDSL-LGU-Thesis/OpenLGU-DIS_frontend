@@ -26,20 +26,57 @@ import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
 import { ImagePlus } from "lucide-react"
 import DatePicker from "@openlguid/ui/components/date-picker"
-import { uploadWithProgress } from "#/lib/upload"
-import { buildIssuanceSubmissionFormData } from "./issuancePayload"
+import { UploadHttpError } from "#/lib/upload"
+import {
+  buildIssuanceSubmissionFormData,
+  type IssuanceEnrollResponseBody,
+} from "./issuancePayload"
+import { authApiBaseUrl } from "#/features/auth/api/authAPI"
 import { parseIssuanceSubmissionFailure } from "./issuanceSubmissionErrors"
 import {
-  clearPhysicalIdReprintCache,
-  loadPhysicalIdReprintCache,
   savePhysicalIdReprintCache,
 } from "#/features/id-management/reprint-cache"
 import {
   clearIssuancePrefill,
   getIssuancePrefill,
 } from "./issuance-prefill-store"
-import { PhysicalLGUIDPreview } from "@openlguid/physical-id-template/preview"
 import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
+import { setIssuanceSuccessData } from "./issuance-success-store"
+
+interface AuthenticatedRequestClient {
+  request: (path: string, init?: RequestInit) => Promise<Response>
+}
+
+interface IssuanceWizardProps {
+  apiClient?: AuthenticatedRequestClient
+}
+
+function getRuntimeAuthenticatedClient(): AuthenticatedRequestClient | undefined {
+  const runtimeClient = (globalThis as { __OPENLGU_AUTH_CLIENT?: unknown }).__OPENLGU_AUTH_CLIENT
+  if (
+    runtimeClient &&
+    typeof runtimeClient === "object" &&
+    "request" in runtimeClient &&
+    typeof (runtimeClient as { request?: unknown }).request === "function"
+  ) {
+    return runtimeClient as AuthenticatedRequestClient
+  }
+
+  return undefined
+}
+
+function getIssuanceSubmitUrl(): string {
+  const baseUrl = authApiBaseUrl?.trim()
+  if (baseUrl) {
+    return `${baseUrl.replace(/\/$/, "")}/ids/`
+  }
+
+  if (typeof window !== "undefined" && window.location.origin && window.location.origin !== "null") {
+    return `${window.location.origin}/ids/`
+  }
+
+  return "http://localhost/ids/"
+}
 
 const STEPS = [
   { id: "applicant", title: "Applicant", description: "Name and basic info" },
@@ -60,11 +97,14 @@ function buildReprintData(value: {
   first_name: string
   middle_name: string
   last_name: string
+  suffix_name?: string
   gender: string
   dob: string
   address: string
+  phone: string
+  face?: string
 }, issuedUin: string, pcn?: string): PhysicalLGUIDTemplateData {
-  const fullName = [value.first_name, value.middle_name, value.last_name]
+  const fullName = [value.first_name, value.middle_name, value.last_name, value.suffix_name]
     .filter((part) => part.trim().length > 0)
     .join(" ")
 
@@ -76,6 +116,8 @@ function buildReprintData(value: {
     address: value.address,
     qrValue: issuedUin,
     pcn,
+    phone: value.phone,
+    face: value.face,
   }
 }
 
@@ -121,33 +163,20 @@ function RouterSafeLink({
   )
 }
 
-export default function IssuanceWizard(): JSX.Element {
+export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.Element {
   const [fileError, setFileError] = useState<string | null>(null)
   const [proofFileName, setProofFileName] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [uploadAbortController, setUploadAbortController] = useState<AbortController | null>(null)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
-  const [isClearReprintDialogOpen, setIsClearReprintDialogOpen] = useState(false)
-  const [submissionResult, setSubmissionResult] = useState<{ uin: string; pcn?: string } | null>(null)
-  const [reprintData, setReprintData] = useState<PhysicalLGUIDTemplateData | null>(() =>
-    loadPhysicalIdReprintCache()
-  )
   const [submissionFieldErrors, setSubmissionFieldErrors] = useState<Record<string, string>>({})
   const MAX_BYTES = 10 * 1024 * 1024
   const formRef = useRef<HTMLFormElement | null>(null)
   const initialPrefill = getIssuancePrefill()
+  const resolvedApiClient = apiClient ?? getRuntimeAuthenticatedClient()
   if (initialPrefill) {
     clearIssuancePrefill()
-  }
-
-  function navigateToDashboard() {
-    if (typeof window === "undefined") {
-      return
-    }
-
-    window.history.pushState({}, "", "/id-management")
-    window.dispatchEvent(new PopStateEvent("popstate"))
   }
 
   function navigateToLogin() {
@@ -156,6 +185,24 @@ export default function IssuanceWizard(): JSX.Element {
     }
 
     window.history.pushState({}, "", "/login")
+    window.dispatchEvent(new PopStateEvent("popstate"))
+  }
+
+  function navigateToIssuanceSuccess() {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    window.history.pushState({}, "", "/id-management/issuance-success")
+    window.dispatchEvent(new PopStateEvent("popstate"))
+  }
+
+  function navigateToDashboard() {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    window.history.pushState({}, "", "/id-management")
     window.dispatchEvent(new PopStateEvent("popstate"))
   }
 
@@ -205,7 +252,6 @@ export default function IssuanceWizard(): JSX.Element {
     onSubmit: async ({ value }) => {
       setFileError(null)
       setSubmissionFieldErrors({})
-      setSubmissionResult(null)
 
       const proof = value.proof
       if (!(proof instanceof File)) {
@@ -239,22 +285,67 @@ export default function IssuanceWizard(): JSX.Element {
       setUploadProgress(0)
 
       try {
-        const response = await uploadWithProgress('/api/ids/issue', fd, (p) => setUploadProgress(p), controller.signal)
-        const body = (await response.json()) as { uin?: string; id?: string; pcn?: string }
-        const issuedUin = body.uin ?? body.id
+        const response =
+          resolvedApiClient
+            ? await resolvedApiClient.request("/ids/", {
+                method: "POST",
+                body: fd,
+                signal: controller.signal,
+              })
+            : await fetch(getIssuanceSubmitUrl(), {
+                method: "POST",
+                body: fd,
+                credentials: "include",
+              })
+
+        if (!response.ok) {
+          let errorBody: unknown = null
+          try {
+            errorBody = await response.json()
+          } catch {
+            errorBody = null
+          }
+          throw new UploadHttpError(response.status, errorBody)
+        }
+
+        const body = (await response.json()) as IssuanceEnrollResponseBody & {
+          uin?: string
+          id?: string
+          pcn?: string
+        }
+        const issuedDetails = body.id_details
+        const issuedUin = issuedDetails?.uin ?? body.uin ?? body.id
         if (!issuedUin) {
           setFileError('Upload succeeded but no UIN was returned.')
           return
         }
 
-        setSubmissionResult({
-          uin: issuedUin,
-          pcn: body.pcn,
-        })
+        const issuedQr = body.qr ?? issuedUin
 
-        const nextReprintData = buildReprintData(value, issuedUin, body.pcn)
+        const nextReprintData = buildReprintData(
+          {
+            first_name: issuedDetails?.first_name ?? value.first_name,
+            middle_name: issuedDetails?.middle_name ?? value.middle_name ?? "",
+            last_name: issuedDetails?.last_name ?? value.last_name,
+            suffix_name: issuedDetails?.suffix_name,
+            gender: issuedDetails?.gender ?? value.gender ?? "",
+            dob: issuedDetails?.date_of_birth ?? value.dob ?? "",
+            address: issuedDetails?.address ?? value.address ?? "",
+            phone: issuedDetails?.phone_number ?? value.contact_number ?? "",
+            face: issuedDetails?.face_image,
+          },
+          issuedUin,
+          issuedDetails?.pcn ?? body.pcn
+        )
         savePhysicalIdReprintCache(nextReprintData)
-        setReprintData(nextReprintData)
+        setIssuanceSuccessData({
+          uin: issuedUin,
+          pcn: issuedDetails?.pcn ?? body.pcn,
+          qr: issuedQr,
+          preview: nextReprintData,
+        })
+        setUploadProgress(100)
+        navigateToIssuanceSuccess()
       } catch (err: any) {
         if (err && err.name === 'AbortError') {
           setFileError('Upload cancelled.')
@@ -273,7 +364,11 @@ export default function IssuanceWizard(): JSX.Element {
 
         if (failure.kind === "validation") {
           setSubmissionFieldErrors(failure.fieldErrors)
-          setFileError(failure.message)
+          setFileError(
+            failure.fieldErrors.proof_of_residence ??
+              failure.fieldErrors.proof ??
+              failure.message
+          )
         } else {
           setFileError(failure.message)
         }
@@ -291,7 +386,6 @@ export default function IssuanceWizard(): JSX.Element {
     setProofFileName(null)
     setIsUploading(false)
     setUploadProgress(null)
-    setSubmissionResult(null)
     if (uploadAbortController) {
       uploadAbortController.abort()
       setUploadAbortController(null)
@@ -299,75 +393,11 @@ export default function IssuanceWizard(): JSX.Element {
     if (formRef.current) formRef.current.reset()
   }
 
-  function handleClearReprintCache() {
-    clearPhysicalIdReprintCache()
-    setReprintData(null)
-    setIsClearReprintDialogOpen(false)
-  }
-
   // refs for scrolling
   const refs = useRef<Partial<Record<string, React.RefObject<HTMLElement>>>>({})
   STEPS.forEach((s) => {
     if (!refs.current[s.id]) refs.current[s.id] = React.createRef<HTMLElement>()
   })
-
-  if (submissionResult) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Issuance complete</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Assigned UIN: <span className="font-medium text-foreground">{submissionResult.uin}</span>
-          </p>
-          {submissionResult.pcn ? (
-            <p className="mt-1 text-sm text-muted-foreground">
-              PCN: <span className="font-medium text-foreground">{submissionResult.pcn}</span>
-            </p>
-          ) : null}
-          {reprintData ? (
-            <div className="mt-6 space-y-4">
-              <div className="rounded-2xl border border-border/70 bg-muted/40 p-4">
-                <div className="text-sm font-medium">Cached reprint available for 1 hour</div>
-                <div className="mt-3">
-                  <PhysicalLGUIDPreview data={reprintData} className="min-h-[16rem]" />
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" onClick={() => setIsClearReprintDialogOpen(true)}>
-                  Clear cached reprint
-                </Button>
-                <Button onClick={navigateToDashboard}>Back to dashboard</Button>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4">
-              <Button onClick={navigateToDashboard}>Back to dashboard</Button>
-            </div>
-          )}
-          <Dialog open={isClearReprintDialogOpen} onOpenChange={setIsClearReprintDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Clear cached reprint?</DialogTitle>
-                <DialogDescription>
-                  This removes the locally cached Physical LGU ID preview from this browser.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-4 flex justify-end gap-3">
-                <Button variant="outline" onClick={() => setIsClearReprintDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button variant="destructive" onClick={handleClearReprintCache}>
-                  Clear cache
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </CardContent>
-      </Card>
-    )
-  }
 
   return (
     <Card>

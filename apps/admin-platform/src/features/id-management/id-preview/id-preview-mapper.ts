@@ -3,9 +3,11 @@ import type { IdDetails } from "@openlguid/ui/features/verification/types/verifi
 
 import { buildQrFromString } from "#/lib/buildQrFromString"
 
-export async function buildPhysicalIdTemplateData(details: IdDetails, qrValue: string): Promise<PhysicalLGUIDTemplateData> {
-
-  const qrData = await buildQrFromString(qrValue);
+export async function buildPhysicalIdTemplateData(
+  details: IdDetails,
+  qrValue: string
+): Promise<PhysicalLGUIDTemplateData> {
+  const qrData = await buildQrFromString(qrValue)
 
   return {
     full_name: details.first_name + " " + details.last_name,
@@ -16,6 +18,6 @@ export async function buildPhysicalIdTemplateData(details: IdDetails, qrValue: s
     qrValue: qrData,
     face: details.face,
     pcn: details.pcn,
-    phone: details.phone
+    phone: details.phone,
   }
 }

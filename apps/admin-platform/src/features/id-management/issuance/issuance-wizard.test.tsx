@@ -1,52 +1,47 @@
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { cleanup, render, screen, waitFor, fireEvent } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 
 import { server } from "#/tests/node"
+import {
+  clearIssuancePrefill,
+  setIssuancePrefill,
+} from "./issuance-prefill-store"
+import {
+  clearIssuanceSuccessData,
+  getIssuanceSuccessData,
+} from "./issuance-success-store"
 
 import "./issuance-test-mocks"
 
 import IssuanceWizard from "./IssuanceWizard"
 
 describe("IssuanceWizard", () => {
-  afterEach(() => {
-    cleanup()
+  beforeEach(() => {
+    ;(globalThis as any).__OPENLGU_AUTH_CLIENT = undefined
   })
 
-  it("autofills issuance form after verifying a National ID scan", async () => {
-    server.use(
-      http.post(`/api/mosip/verify/`, () => {
-        return HttpResponse.json(
-          {
-            id_details: {
-              first_name: "Juan",
-              middle_name: "Santos",
-              last_name: "Dela Cruz",
-              gender: "Male",
-              birthdate: "2000-01-01",
-              address: "Gubat, Diyan",
-              phone: "09221 924 7284",
-              pcn: "PCN-2026-0001",
-            },
-          },
-          { status: 200 }
-        )
-      })
-    )
+  afterEach(() => {
+    cleanup()
+    clearIssuancePrefill()
+    clearIssuanceSuccessData()
+    ;(globalThis as any).__OPENLGU_AUTH_CLIENT = undefined
+  })
 
-    const user = userEvent.setup()
+  it("uses prefill values from National ID intake when present", async () => {
+    setIssuancePrefill({
+      first_name: "Juan",
+      middle_name: "Santos",
+      last_name: "Dela Cruz",
+      gender: "Male",
+      dob: "2000-01-01",
+      address: "Gubat, Diyan",
+      contact_number: "09221 924 7284",
+      pcn: "PCN-2026-0001",
+    })
+
     render(<IssuanceWizard />)
-
-    await user.click(screen.getByRole("button", { name: /Scan National ID/i }))
-
-    expect(await screen.findByRole("button", { name: "Submit capture" })).toBeInTheDocument()
-
-    await user.click(screen.getByRole("button", { name: "Submit capture" }))
-
-    expect(await screen.findByText(/Review National ID details/i)).toBeInTheDocument()
-
-    await user.click(screen.getByRole("button", { name: /Continue to issuance form/i }))
 
     expect(await screen.findByLabelText(/First name/i)).toHaveValue("Juan")
     expect(await screen.findByText("PCN-2026-0001")).toBeInTheDocument()
@@ -54,7 +49,7 @@ describe("IssuanceWizard", () => {
 
   it("redirects to login when issuance submit is unauthorized", async () => {
     server.use(
-      http.post(`/api/ids/issue`, () => {
+      http.post(`*/api/ids/`, () => {
         return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
       })
     )
@@ -77,11 +72,28 @@ describe("IssuanceWizard", () => {
   })
 
   it("submits applicant data and calls issuance endpoint", async () => {
-    let called = false
     server.use(
-      http.post(`/api/ids/issue`, () => {
-        called = true
-        return HttpResponse.json({ id: "issued-1" }, { status: 201 })
+      http.post(`*/api/ids/`, async ({ request }) => {
+        return HttpResponse.json(
+          {
+            qr: "QR-2026-0001",
+            id_details: {
+              pcn: "PCN-2026-0001",
+              first_name: "Juan",
+              middle_name: "",
+              last_name: "Dela Cruz",
+              suffix_name: "",
+              date_of_birth: "",
+              gender: "Male",
+              address: "",
+              email_id: "",
+              phone_number: "09221 924 7284",
+              uin: "UIN-2026-0001",
+              face_image: "",
+            },
+          },
+          { status: 201 }
+        )
       })
     )
 
@@ -90,48 +102,8 @@ describe("IssuanceWizard", () => {
 
     await user.type(screen.getByLabelText(/First name/i), "Juan")
     await user.type(screen.getByLabelText(/Last name/i), "Dela Cruz")
-
-    const file = new File(["residence"], "proof.pdf", { type: "application/pdf" })
-    const input = screen.getByLabelText(/Proof of residence/i)
-    await user.upload(input, file)
-
-    const form = screen.getByRole('form', { name: /Issuance form/i })
-    fireEvent.submit(form)
-
-    await waitFor(() => {
-      expect(called).toBe(true)
-    })
-  })
-
-  it("shows PCN as a distinct non-interactive applicant summary item", async () => {
-    render(<IssuanceWizard />)
-
-    expect(screen.getByText("PCN")).toBeInTheDocument()
-    expect(screen.getByText("Empty")).toBeInTheDocument()
-    expect(screen.queryByLabelText(/PCN/i)).not.toBeInTheDocument()
-  })
-
-  it("submits a structured payload, uploads the proof, and shows the issued UIN", async () => {
-    server.use(
-      http.post(`/api/ids/issue`, () =>
-        HttpResponse.json(
-          {
-            ok: true,
-            uin: "UIN-2026-0001",
-            pcn: "PCN-2026-0001",
-            sector: ["health", "education"],
-          },
-          { status: 201 }
-        )
-      )
-    )
-
-    const user = userEvent.setup()
-    render(<IssuanceWizard />)
-
-    await user.type(screen.getByLabelText(/First name/i), "Juan")
-    await user.type(screen.getByLabelText(/Last name/i), "Dela Cruz")
     await user.type(screen.getByLabelText(/Gender/i), "Male")
+    await user.type(screen.getByLabelText(/Contact number/i), "09221 924 7284")
     const sectorsInput = screen.getByLabelText(/Sectors/i)
     await user.click(sectorsInput)
     await user.click(await screen.findByRole("option", { name: "Health" }))
@@ -144,48 +116,49 @@ describe("IssuanceWizard", () => {
     const form = screen.getByRole("form", { name: /Issuance form/i })
     fireEvent.submit(form)
 
-    expect(await screen.findByText(/UIN-2026-0001/)).toBeInTheDocument()
-    expect(await screen.findByRole("button", { name: /Back to dashboard/i })).toBeInTheDocument()
-    expect(await screen.findByText(/Cached reprint available for 1 hour/i)).toBeInTheDocument()
-    expect(await screen.findByRole("button", { name: /Clear cached reprint/i })).toBeInTheDocument()
-    expect(await screen.findByTitle("Physical LGU ID preview")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/id-management/issuance-success")
+    })
+
+    expect(getIssuanceSuccessData()).toMatchObject({
+      uin: "UIN-2026-0001",
+      pcn: "PCN-2026-0001",
+      qr: "QR-2026-0001",
+      preview: {
+        full_name: "Juan Dela Cruz",
+        uin: "UIN-2026-0001",
+        dob: "",
+        gender: "Male",
+        address: "",
+        phone: "09221 924 7284",
+        pcn: "PCN-2026-0001",
+      },
+    })
   })
 
-  it("clears the cached reprint after confirmation", async () => {
-    server.use(
-      http.post(`/api/ids/issue`, () =>
-        HttpResponse.json(
-          {
-            ok: true,
-            uin: "UIN-2026-0001",
-            pcn: "PCN-2026-0001",
-          },
-          { status: 201 }
-        )
-      )
-    )
+  it("shows PCN as a distinct non-interactive applicant summary item", async () => {
+    render(<IssuanceWizard />)
 
+    expect(screen.getByText("PCN")).toBeInTheDocument()
+    expect(screen.getByText("Empty")).toBeInTheDocument()
+    expect(screen.queryByLabelText(/PCN/i)).not.toBeInTheDocument()
+  })
+
+  it("cancels issuance and returns to the dashboard", async () => {
     const user = userEvent.setup()
     render(<IssuanceWizard />)
 
-    await user.type(screen.getByLabelText(/First name/i), "Juan")
-    await user.type(screen.getByLabelText(/Last name/i), "Dela Cruz")
-    const file = new File(["residence"], "proof.pdf", { type: "application/pdf" })
-    await user.upload(screen.getByLabelText(/Proof of residence/i), file)
+    await user.click(screen.getByRole("button", { name: "Cancel issuance" }))
+    await user.click(screen.getByRole("button", { name: "Yes, cancel" }))
 
-    fireEvent.submit(screen.getByRole("form", { name: /Issuance form/i }))
-
-    await user.click(await screen.findByRole("button", { name: /Clear cached reprint/i }))
-    expect(await screen.findByText(/Clear cached reprint\?/i)).toBeInTheDocument()
-
-    await user.click(screen.getByRole("button", { name: /^Clear cache$/i }))
-
-    expect(screen.queryByText(/Cached reprint available for 1 hour/i)).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/id-management")
+    })
   })
 
   it("shows inline validation errors when issuance submit is rejected", async () => {
     server.use(
-      http.post(`/api/ids/issue`, () => {
+      http.post(`*/api/ids/`, () => {
         return HttpResponse.json(
           {
             detail: "Validation error",
@@ -212,12 +185,12 @@ describe("IssuanceWizard", () => {
     fireEvent.submit(form)
 
     expect(await screen.findByText("First name is required.")).toBeInTheDocument()
-    expect(await screen.findByText("Proof of residence must be a PDF.")).toBeInTheDocument()
+    expect((await screen.findAllByText("Proof of residence must be a PDF.")).length).toBeGreaterThan(0)
   })
 
   it("shows a retryable message when issuance submit hits a server error", async () => {
     server.use(
-      http.post(`/api/ids/issue`, () => {
+      http.post(`*/api/ids/`, () => {
         return HttpResponse.json({ detail: "Server error" }, { status: 500 })
       })
     )
