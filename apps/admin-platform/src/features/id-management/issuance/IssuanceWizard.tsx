@@ -105,7 +105,7 @@ function buildReprintData(value: {
   face?: string
 }, issuedUin: string, pcn?: string): PhysicalLGUIDTemplateData {
   const fullName = [value.first_name, value.middle_name, value.last_name, value.suffix_name]
-    .filter((part) => part.trim().length > 0)
+    .filter((part): part is string => typeof part === "string" && part.trim().length > 0)
     .join(" ")
 
   return {
@@ -212,6 +212,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
     first_name: z.string().min(1, { message: 'First name is required.' }),
     middle_name: z.string().optional(),
     last_name: z.string().min(1, { message: 'Last name is required.' }),
+    suffix_name: z.string().optional(),
     gender: z.string().optional(),
     pcn: z.string().optional(),
     dob: z.string().optional(),
@@ -226,6 +227,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
       first_name: initialPrefill?.first_name ?? '',
       middle_name: initialPrefill?.middle_name ?? '',
       last_name: initialPrefill?.last_name ?? '',
+      suffix_name: '',
       gender: initialPrefill?.gender ?? '',
       pcn: initialPrefill?.pcn ?? '',
       dob: initialPrefill?.dob ?? '',
@@ -327,7 +329,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
             first_name: issuedDetails?.first_name ?? value.first_name,
             middle_name: issuedDetails?.middle_name ?? value.middle_name ?? "",
             last_name: issuedDetails?.last_name ?? value.last_name,
-            suffix_name: issuedDetails?.suffix_name,
+            suffix_name: issuedDetails?.suffix_name ?? value.suffix_name ?? "",
             gender: issuedDetails?.gender ?? value.gender ?? "",
             dob: issuedDetails?.date_of_birth ?? value.dob ?? "",
             address: issuedDetails?.address ?? value.address ?? "",
@@ -456,6 +458,23 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
                                     {submissionFieldErrors.first_name}
                                   </div>
                                 ) : null}
+                              </Field>
+                            )}
+                          </form.Field>
+
+                          <form.Field name="suffix_name">
+                            {(field: any) => (
+                              <Field>
+                                <FieldLabel htmlFor={field.name}>Suffix name</FieldLabel>
+                                <Input
+                                  id={field.name}
+                                  name={field.name}
+                                  aria-label="Suffix name"
+                                  value={field.state.value}
+                                  placeholder="Jr., Sr., III (optional)"
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: any) => field.handleChange(e.target.value)}
+                                />
                               </Field>
                             )}
                           </form.Field>

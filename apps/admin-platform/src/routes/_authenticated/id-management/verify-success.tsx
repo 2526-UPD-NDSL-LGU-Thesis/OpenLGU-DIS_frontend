@@ -6,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/componen
 import { IdPreviewSuccessPage } from "#/features/id-management/id-preview/IdPreviewSuccessPage"
 import { getIdPreviewData } from "#/features/id-management/id-preview/id-preview-store"
 
-export const Route = createFileRoute('/_authenticated/id-management/id-preview')({
-  component: IdPreviewRouteComponent,
+export const Route = createFileRoute('/_authenticated/id-management/verify-success')({
+  component: VerifySuccessRouteComponent,
 })
 
-export function IdPreviewRouteComponent() {
+export function VerifySuccessRouteComponent() {
   const previewData = getIdPreviewData()
 
   if (!previewData) {
@@ -33,7 +33,7 @@ export function IdPreviewRouteComponent() {
 
   return (
     <div className="p-6">
-      <IdPreviewSuccessPage data={previewData} title="ID verified" />
+      <IdPreviewSuccessPage data={previewData} title="Verification complete" />
     </div>
   )
 }

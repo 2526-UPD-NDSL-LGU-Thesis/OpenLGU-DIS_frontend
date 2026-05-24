@@ -136,12 +136,62 @@ describe("IssuanceWizard", () => {
     })
   })
 
+  it("navigates to issuance success even when suffix_name is omitted in response", async () => {
+    server.use(
+      http.post(`*/api/ids/`, async () => {
+        return HttpResponse.json(
+          {
+            qr: "QR-2026-0002",
+            id_details: {
+              pcn: "PCN-2026-0002",
+              first_name: "Juan",
+              middle_name: "",
+              last_name: "Dela Cruz",
+              date_of_birth: "",
+              gender: "Male",
+              address: "",
+              email_id: "",
+              phone_number: "09221 924 7284",
+              uin: "UIN-2026-0002",
+              face_image: "",
+            },
+          },
+          { status: 201 }
+        )
+      })
+    )
+
+    const user = userEvent.setup()
+    render(<IssuanceWizard />)
+
+    await user.type(screen.getByLabelText(/First name/i), "Juan")
+    await user.type(screen.getByLabelText(/Last name/i), "Dela Cruz")
+    await user.type(screen.getByLabelText(/Gender/i), "Male")
+    await user.type(screen.getByLabelText(/Contact number/i), "09221 924 7284")
+    const file = new File(["residence"], "proof.pdf", { type: "application/pdf" })
+    await user.upload(screen.getByLabelText(/Proof of residence/i), file)
+
+    const form = screen.getByRole("form", { name: /Issuance form/i })
+    fireEvent.submit(form)
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/id-management/issuance-success")
+    })
+
+    expect(getIssuanceSuccessData()).toMatchObject({
+      uin: "UIN-2026-0002",
+      pcn: "PCN-2026-0002",
+      qr: "QR-2026-0002",
+    })
+  })
+
   it("shows PCN as a distinct non-interactive applicant summary item", async () => {
     render(<IssuanceWizard />)
 
     expect(screen.getByText("PCN")).toBeInTheDocument()
     expect(screen.getByText("Empty")).toBeInTheDocument()
     expect(screen.queryByLabelText(/PCN/i)).not.toBeInTheDocument()
+    expect(screen.getByLabelText(/Suffix name/i)).toBeInTheDocument()
   })
 
   it("cancels issuance and returns to the dashboard", async () => {

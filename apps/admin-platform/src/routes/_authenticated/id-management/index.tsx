@@ -70,7 +70,7 @@ export function IdManagementDashboard() {
     const templateData = await buildPhysicalIdTemplateData(result.idDetails, request.rawQRValue)
 
     setIdPreviewData(templateData)
-    await router.navigate({ to: "/id-management/id-preview" })
+    await router.navigate({ to: "/id-management/verify-success" })
   }
 
   const handleNationalIdCapture = async (request: IdentifierCaptureRequest) => {

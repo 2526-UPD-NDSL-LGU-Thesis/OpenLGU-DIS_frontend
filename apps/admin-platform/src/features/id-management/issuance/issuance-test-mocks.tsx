@@ -6,7 +6,7 @@ let comboboxSelected: string[] = []
 let comboboxOnValueChange: ((next: string[]) => void) | null = null
 
 vi.mock("@openlguid/ui/components/button", () => ({
-  Button: ({ children, ...props }: { children?: ReactNode } & ComponentPropsWithoutRef<"button">) => (
+  Button: ({ children, asChild: _asChild, ...props }: { children?: ReactNode; asChild?: boolean } & ComponentPropsWithoutRef<"button">) => (
     <button {...props}>{children}</button>
   ),
   buttonVariants: () => "",
@@ -77,7 +77,7 @@ vi.mock("@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
 
 vi.mock("@openlguid/physical-id-template/preview", () => ({
   PhysicalLGUIDPreview: ({ className }: { className?: string }) => (
-    <iframe title="Physical LGU ID preview" className={className} />
+    <iframe title="Physical LGU ID preview" className={className} src="blob:mock-physical-id-preview" />
   ),
 }))
 

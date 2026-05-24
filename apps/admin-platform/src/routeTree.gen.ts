@@ -17,9 +17,9 @@ import { Route as AuthenticatedSectorManagementIndexRouteImport } from './routes
 import { Route as AuthenticatedIdManagementIndexRouteImport } from './routes/_authenticated/id-management/index'
 import { Route as AuthenticatedServiceClaimServiceIDRouteImport } from './routes/_authenticated/service-claim/$serviceID'
 import { Route as AuthenticatedSectorManagementSectorIDRouteImport } from './routes/_authenticated/sector-management/$sectorID'
+import { Route as AuthenticatedIdManagementVerifySuccessRouteImport } from './routes/_authenticated/id-management/verify-success'
 import { Route as AuthenticatedIdManagementIssuanceSuccessRouteImport } from './routes/_authenticated/id-management/issuance-success'
 import { Route as AuthenticatedIdManagementIssuanceRouteImport } from './routes/_authenticated/id-management/issuance'
-import { Route as AuthenticatedIdManagementIdPreviewRouteImport } from './routes/_authenticated/id-management/id-preview'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -65,6 +65,12 @@ const AuthenticatedSectorManagementSectorIDRoute =
     path: '/sector-management/$sectorID',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedIdManagementVerifySuccessRoute =
+  AuthenticatedIdManagementVerifySuccessRouteImport.update({
+    id: '/id-management/verify-success',
+    path: '/id-management/verify-success',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedIdManagementIssuanceSuccessRoute =
   AuthenticatedIdManagementIssuanceSuccessRouteImport.update({
     id: '/id-management/issuance-success',
@@ -77,19 +83,13 @@ const AuthenticatedIdManagementIssuanceRoute =
     path: '/id-management/issuance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedIdManagementIdPreviewRoute =
-  AuthenticatedIdManagementIdPreviewRouteImport.update({
-    id: '/id-management/id-preview',
-    path: '/id-management/id-preview',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof PublicLoginRoute
-  '/id-management/id-preview': typeof AuthenticatedIdManagementIdPreviewRoute
   '/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
   '/id-management/issuance-success': typeof AuthenticatedIdManagementIssuanceSuccessRoute
+  '/id-management/verify-success': typeof AuthenticatedIdManagementVerifySuccessRoute
   '/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
   '/id-management/': typeof AuthenticatedIdManagementIndexRoute
@@ -99,9 +99,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof PublicLoginRoute
   '/': typeof AuthenticatedIndexRoute
-  '/id-management/id-preview': typeof AuthenticatedIdManagementIdPreviewRoute
   '/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
   '/id-management/issuance-success': typeof AuthenticatedIdManagementIssuanceSuccessRoute
+  '/id-management/verify-success': typeof AuthenticatedIdManagementVerifySuccessRoute
   '/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
   '/id-management': typeof AuthenticatedIdManagementIndexRoute
@@ -113,9 +113,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_public/login': typeof PublicLoginRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/id-management/id-preview': typeof AuthenticatedIdManagementIdPreviewRoute
   '/_authenticated/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
   '/_authenticated/id-management/issuance-success': typeof AuthenticatedIdManagementIssuanceSuccessRoute
+  '/_authenticated/id-management/verify-success': typeof AuthenticatedIdManagementVerifySuccessRoute
   '/_authenticated/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
   '/_authenticated/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
   '/_authenticated/id-management/': typeof AuthenticatedIdManagementIndexRoute
@@ -127,9 +127,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/id-management/id-preview'
     | '/id-management/issuance'
     | '/id-management/issuance-success'
+    | '/id-management/verify-success'
     | '/sector-management/$sectorID'
     | '/service-claim/$serviceID'
     | '/id-management/'
@@ -139,9 +139,9 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/'
-    | '/id-management/id-preview'
     | '/id-management/issuance'
     | '/id-management/issuance-success'
+    | '/id-management/verify-success'
     | '/sector-management/$sectorID'
     | '/service-claim/$serviceID'
     | '/id-management'
@@ -152,9 +152,9 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/_public/login'
     | '/_authenticated/'
-    | '/_authenticated/id-management/id-preview'
     | '/_authenticated/id-management/issuance'
     | '/_authenticated/id-management/issuance-success'
+    | '/_authenticated/id-management/verify-success'
     | '/_authenticated/sector-management/$sectorID'
     | '/_authenticated/service-claim/$serviceID'
     | '/_authenticated/id-management/'
@@ -225,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSectorManagementSectorIDRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/id-management/verify-success': {
+      id: '/_authenticated/id-management/verify-success'
+      path: '/id-management/verify-success'
+      fullPath: '/id-management/verify-success'
+      preLoaderRoute: typeof AuthenticatedIdManagementVerifySuccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/id-management/issuance-success': {
       id: '/_authenticated/id-management/issuance-success'
       path: '/id-management/issuance-success'
@@ -239,21 +246,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIdManagementIssuanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/id-management/id-preview': {
-      id: '/_authenticated/id-management/id-preview'
-      path: '/id-management/id-preview'
-      fullPath: '/id-management/id-preview'
-      preLoaderRoute: typeof AuthenticatedIdManagementIdPreviewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedIdManagementIdPreviewRoute: typeof AuthenticatedIdManagementIdPreviewRoute
   AuthenticatedIdManagementIssuanceRoute: typeof AuthenticatedIdManagementIssuanceRoute
   AuthenticatedIdManagementIssuanceSuccessRoute: typeof AuthenticatedIdManagementIssuanceSuccessRoute
+  AuthenticatedIdManagementVerifySuccessRoute: typeof AuthenticatedIdManagementVerifySuccessRoute
   AuthenticatedSectorManagementSectorIDRoute: typeof AuthenticatedSectorManagementSectorIDRoute
   AuthenticatedServiceClaimServiceIDRoute: typeof AuthenticatedServiceClaimServiceIDRoute
   AuthenticatedIdManagementIndexRoute: typeof AuthenticatedIdManagementIndexRoute
@@ -263,12 +263,12 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedIdManagementIdPreviewRoute:
-    AuthenticatedIdManagementIdPreviewRoute,
   AuthenticatedIdManagementIssuanceRoute:
     AuthenticatedIdManagementIssuanceRoute,
   AuthenticatedIdManagementIssuanceSuccessRoute:
     AuthenticatedIdManagementIssuanceSuccessRoute,
+  AuthenticatedIdManagementVerifySuccessRoute:
+    AuthenticatedIdManagementVerifySuccessRoute,
   AuthenticatedSectorManagementSectorIDRoute:
     AuthenticatedSectorManagementSectorIDRoute,
   AuthenticatedServiceClaimServiceIDRoute:
