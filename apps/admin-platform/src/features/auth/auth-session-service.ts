@@ -119,6 +119,34 @@ function buildPublicLoginRedirect(redirectTo: string) {
   })
 }
 
+export const REFRESH_TOKEN_STORAGE_KEY = "openlguid:auth-refresh-token"
+
+function readStoredRefreshToken(): string | null {
+  if (typeof window === "undefined") {
+    return null
+  }
+  try {
+    return window.sessionStorage.getItem(REFRESH_TOKEN_STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function writeStoredRefreshToken(token: string | null) {
+  if (typeof window === "undefined") {
+    return
+  }
+  try {
+    if (!token) {
+      window.sessionStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY)
+    } else {
+      window.sessionStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, token)
+    }
+  } catch {
+    // Ignore sessionStorage errors (e.g., disabled or full storage)
+  }
+}
+
 export function createAuthSessionService(
   apiClient: AuthApiClient = defaultAuthApiClient,
   queryClient: QueryClient = defaultQueryClient,
@@ -127,7 +155,7 @@ export function createAuthSessionService(
   let authenticatedApiClient: {
     request: (path: string, init?: RequestInit) => Promise<Response>
   } | null = null
-  let currentRefreshToken: string | null = null
+  let currentRefreshToken: string | null = readStoredRefreshToken()
 
   const getAuthState = () => {
     return stateStore.getState()
@@ -135,6 +163,7 @@ export function createAuthSessionService(
 
   const clear = () => {
     currentRefreshToken = null
+    writeStoredRefreshToken(null)
     stateStore.setState({ ...unauthenticatedState })
   }
 
@@ -151,6 +180,9 @@ export function createAuthSessionService(
 
   const refreshAndHydrate = async (): Promise<boolean> => {
     if (!currentRefreshToken) {
+      currentRefreshToken = readStoredRefreshToken()
+    }
+    if (!currentRefreshToken) {
       return false
     }
 
@@ -161,6 +193,7 @@ export function createAuthSessionService(
       )
       const userProfile = userProfileSchema.parse(userPayload)
       currentRefreshToken = tokenPayload.refresh ?? currentRefreshToken
+      writeStoredRefreshToken(currentRefreshToken)
 
       setAuthenticated({ accessToken: tokenPayload.access, userProfile })
       return true
@@ -178,6 +211,7 @@ export function createAuthSessionService(
       try {
         const tokenPayload = await apiClient.requestAccessToken(credentials)
         currentRefreshToken = tokenPayload.refresh ?? null
+        writeStoredRefreshToken(currentRefreshToken)
         const userPayload = await apiClient.requestUserProfile(
           tokenPayload.access
         )

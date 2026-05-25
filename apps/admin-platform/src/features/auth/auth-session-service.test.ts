@@ -1,13 +1,13 @@
 // TODO these broke after changing to UserSchemas
 
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { http, HttpResponse } from "msw"
 
 import { server } from "#/tests/node"
 import { buildMockAccessToken } from "#/tests/handlers/auth"
 
 import { authApiBaseUrl, createAuthApiClient } from "./api/authAPI"
-import { createAuthSessionService } from "./auth-session-service"
+import { createAuthSessionService, REFRESH_TOKEN_STORAGE_KEY } from "./auth-session-service"
 
 const DISPLAY_ROLES = new Set([
   "Super",
@@ -22,6 +22,11 @@ const DISPLAY_ROLES = new Set([
 ])
 
 describe("createAuthSessionService", () => {
+  beforeEach(() => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.clear()
+    }
+  })
   it("starts in unknown auth state before protected-route resolution", () => {
     const service = createAuthSessionService()
 
@@ -150,6 +155,33 @@ describe("createAuthSessionService", () => {
       accessToken: null,
       userProfile: null,
     })
+  })
+
+  it("hydrates session from refresh token stored in sessionStorage", async () => {
+    window.sessionStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, "stored-refresh")
+    server.use(
+      http.post(`${authApiBaseUrl}/token/refresh/`, () => {
+        return HttpResponse.json({ access: buildMockAccessToken(), refresh: "rotated-refresh" }, { status: 200 })
+      }),
+      http.get(`${authApiBaseUrl}/users/me/`, () => {
+        return HttpResponse.json({
+          username: "employee-1",
+          first_name: "Alex",
+          last_name: "Ramos",
+          groups: [{ name: "Service Employee" }],
+          assignment: null,
+        })
+      })
+    )
+
+    const service = createAuthSessionService()
+    const result = await service.ensureAuthenticated({
+      redirectTo: "/service-claim",
+    })
+
+    expect(result.ok).toBe(true)
+    expect(service.getAuthState().phase).toBe("authenticated")
+    expect(window.sessionStorage.getItem(REFRESH_TOKEN_STORAGE_KEY)).toBe("rotated-refresh")
   })
 
   it("redirects to Public Area login with return target when silent refresh fails", async () => {
