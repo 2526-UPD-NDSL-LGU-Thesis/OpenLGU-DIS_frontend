@@ -162,3 +162,7 @@ vi.mock("@openlguid/ui/components/combobox", () => ({
   ),
   ComboboxValue: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }))
+
+vi.mock("#/lib/buildQrFromString", () => ({
+  buildQrFromString: async () => "data:image/png;base64,mocked-qr",
+}))

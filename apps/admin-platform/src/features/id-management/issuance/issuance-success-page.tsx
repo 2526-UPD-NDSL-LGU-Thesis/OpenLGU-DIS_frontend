@@ -26,18 +26,20 @@ export function IssuanceSuccessPage({ data }: { data: IssuanceSuccessData }) {
     }
   }, [warnOnLeave])
 
+  const qrLabel =
+    data.preview.qrValue.startsWith("data:image/") ? "Generated" : data.preview.qrValue
   const details: ReactNode = (
     <>
       <p className="text-sm text-muted-foreground">
-        Assigned UIN: <span className="font-medium text-foreground">{data.uin}</span>
+        Assigned UIN: <span className="font-medium text-foreground">{data.preview.uin}</span>
       </p>
-      {data.pcn ? (
+      {data.preview.pcn ? (
         <p className="mt-1 text-sm text-muted-foreground">
-          PCN: <span className="font-medium text-foreground">{data.pcn}</span>
+          PCN: <span className="font-medium text-foreground">{data.preview.pcn}</span>
         </p>
       ) : null}
       <div className="mt-1 text-sm text-muted-foreground">
-        QR: <span className="font-medium text-foreground">{data.qr}</span>
+        QR: <span className="font-medium text-foreground">{qrLabel}</span>
       </div>
     </>
   )
@@ -64,4 +66,3 @@ export function IssuanceSuccessPage({ data }: { data: IssuanceSuccessData }) {
     />
   )
 }
-

@@ -42,9 +42,6 @@ describe("IssuanceSuccessPage", () => {
     render(
       <IssuanceSuccessPage
         data={{
-          uin: "UIN-2026-0001",
-          pcn: "PCN-2026-0001",
-          qr: "QR-2026-0001",
           preview: {
             full_name: "Juan Dela Cruz",
             uin: "UIN-2026-0001",
@@ -53,6 +50,7 @@ describe("IssuanceSuccessPage", () => {
             address: "Sample Address",
             phone: "09170000000",
             qrValue: "QR-2026-0001",
+            pcn: "PCN-2026-0001",
           },
         }}
       />
@@ -72,8 +70,6 @@ describe("IssuanceSuccessPage", () => {
     render(
       <IssuanceSuccessPage
         data={{
-          uin: "UIN-2026-0001",
-          qr: "QR-2026-0001",
           preview: {
             full_name: "Juan Dela Cruz",
             uin: "UIN-2026-0001",
@@ -97,8 +93,6 @@ describe("IssuanceSuccessPage", () => {
     render(
       <IssuanceSuccessPage
         data={{
-          uin: "UIN-2026-0001",
-          qr: "QR-2026-0001",
           preview: {
             full_name: "Juan Dela Cruz",
             uin: "UIN-2026-0001",
@@ -128,8 +122,6 @@ describe("IssuanceSuccessPage", () => {
     render(
       <IssuanceSuccessPage
         data={{
-          uin: "UIN-2026-0001",
-          qr: "QR-2026-0001",
           preview: {
             full_name: "Juan Dela Cruz",
             uin: "UIN-2026-0001",

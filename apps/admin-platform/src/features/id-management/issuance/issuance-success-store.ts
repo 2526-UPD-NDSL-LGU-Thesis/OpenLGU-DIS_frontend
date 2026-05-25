@@ -1,9 +1,6 @@
 import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
 
 export interface IssuanceSuccessData {
-  uin: string
-  pcn?: string
-  qr: string
   preview: PhysicalLGUIDTemplateData
 }
 

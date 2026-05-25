@@ -40,8 +40,8 @@ import {
   clearIssuancePrefill,
   getIssuancePrefill,
 } from "./issuance-prefill-store"
-import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
 import { setIssuanceSuccessData } from "./issuance-success-store"
+import { buildPhysicalIdTemplateDataFromSource } from "#/features/id-management/id-preview/id-preview-mapper"
 
 interface AuthenticatedRequestClient {
   request: (path: string, init?: RequestInit) => Promise<Response>
@@ -92,35 +92,6 @@ const SECTOR_OPTIONS = [
 function getSectorLabel(value: string): string {
   return SECTOR_OPTIONS.find((sector) => sector.value === value)?.label ?? value
 }
-
-function buildReprintData(value: {
-  first_name: string
-  middle_name: string
-  last_name: string
-  suffix_name?: string
-  gender: string
-  dob: string
-  address: string
-  phone: string
-  face?: string
-}, issuedUin: string, pcn?: string): PhysicalLGUIDTemplateData {
-  const fullName = [value.first_name, value.middle_name, value.last_name, value.suffix_name]
-    .filter((part): part is string => typeof part === "string" && part.trim().length > 0)
-    .join(" ")
-
-  return {
-    full_name: fullName,
-    uin: issuedUin,
-    dob: value.dob,
-    gender: value.gender,
-    address: value.address,
-    qrValue: issuedUin,
-    pcn,
-    phone: value.phone,
-    face: value.face,
-  }
-}
-
 
 function RouterSafeLink({
   to,
@@ -324,27 +295,25 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
 
         const issuedQr = body.qr ?? issuedUin
 
-        const nextReprintData = buildReprintData(
+        const previewData = await buildPhysicalIdTemplateDataFromSource(
           {
             first_name: issuedDetails?.first_name ?? value.first_name,
             middle_name: issuedDetails?.middle_name ?? value.middle_name ?? "",
             last_name: issuedDetails?.last_name ?? value.last_name,
             suffix_name: issuedDetails?.suffix_name ?? value.suffix_name ?? "",
-            gender: issuedDetails?.gender ?? value.gender ?? "",
             dob: issuedDetails?.date_of_birth ?? value.dob ?? "",
+            gender: issuedDetails?.gender ?? value.gender ?? "",
             address: issuedDetails?.address ?? value.address ?? "",
             phone: issuedDetails?.phone_number ?? value.contact_number ?? "",
             face: issuedDetails?.face_image,
+            uin: issuedUin,
+            pcn: issuedDetails?.pcn ?? body.pcn,
           },
-          issuedUin,
-          issuedDetails?.pcn ?? body.pcn
+          issuedQr
         )
-        savePhysicalIdReprintCache(nextReprintData)
+        savePhysicalIdReprintCache(previewData)
         setIssuanceSuccessData({
-          uin: issuedUin,
-          pcn: issuedDetails?.pcn ?? body.pcn,
-          qr: issuedQr,
-          preview: nextReprintData,
+          preview: previewData,
         })
         setUploadProgress(100)
         navigateToIssuanceSuccess()

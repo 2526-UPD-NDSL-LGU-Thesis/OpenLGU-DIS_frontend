@@ -121,9 +121,6 @@ describe("IssuanceWizard", () => {
     })
 
     expect(getIssuanceSuccessData()).toMatchObject({
-      uin: "UIN-2026-0001",
-      pcn: "PCN-2026-0001",
-      qr: "QR-2026-0001",
       preview: {
         full_name: "Juan Dela Cruz",
         uin: "UIN-2026-0001",
@@ -131,6 +128,7 @@ describe("IssuanceWizard", () => {
         gender: "Male",
         address: "",
         phone: "09221 924 7284",
+        qrValue: "data:image/png;base64,mocked-qr",
         pcn: "PCN-2026-0001",
       },
     })
@@ -179,9 +177,49 @@ describe("IssuanceWizard", () => {
     })
 
     expect(getIssuanceSuccessData()).toMatchObject({
-      uin: "UIN-2026-0002",
-      pcn: "PCN-2026-0002",
-      qr: "QR-2026-0002",
+      preview: {
+        uin: "UIN-2026-0002",
+        pcn: "PCN-2026-0002",
+        qrValue: "data:image/png;base64,mocked-qr",
+      },
+    })
+  })
+
+  it("uses base64 QR response payloads without failing the success flow", async () => {
+    server.use(
+      http.post(`*/api/ids/`, async () => {
+        return HttpResponse.json(
+          {
+            uin: "UIN-2026-0003",
+            qr: "iVBORw0KGgoAAAANSUhEUgAA",
+          },
+          { status: 201 }
+        )
+      })
+    )
+
+    const user = userEvent.setup()
+    render(<IssuanceWizard />)
+
+    await user.type(screen.getByLabelText(/First name/i), "Juan")
+    await user.type(screen.getByLabelText(/Last name/i), "Dela Cruz")
+    await user.type(screen.getByLabelText(/Gender/i), "Male")
+    await user.type(screen.getByLabelText(/Contact number/i), "09221 924 7284")
+    const file = new File(["residence"], "proof.pdf", { type: "application/pdf" })
+    await user.upload(screen.getByLabelText(/Proof of residence/i), file)
+
+    const form = screen.getByRole("form", { name: /Issuance form/i })
+    fireEvent.submit(form)
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/id-management/issuance-success")
+    })
+
+    expect(getIssuanceSuccessData()).toMatchObject({
+      preview: {
+        uin: "UIN-2026-0003",
+        qrValue: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA",
+      },
     })
   })
 
