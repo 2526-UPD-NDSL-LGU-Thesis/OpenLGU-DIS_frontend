@@ -10,6 +10,7 @@ export interface LoginCredentials {
 
 export interface AccessTokenPayload {
   access: string
+  refresh?: string
 }
 
 export interface UserProfilePayload {
@@ -20,7 +21,12 @@ export interface UserProfilePayload {
   assignment?: any | null
 }
 
-type AuthApiErrorCode = "invalid_credentials" | "response_not_json" | "missing_access_token" | "user_profile_failed"
+type AuthApiErrorCode =
+  | "invalid_credentials"
+  | "response_not_json"
+  | "missing_access_token"
+  | "missing_refresh_token"
+  | "user_profile_failed"
 
 export class AuthApiError extends Error {
   code: AuthApiErrorCode
@@ -34,7 +40,7 @@ export class AuthApiError extends Error {
 
 export interface AuthApiClient {
   requestAccessToken: (credentials: LoginCredentials) => Promise<AccessTokenPayload>
-  requestRefreshAccessToken: () => Promise<AccessTokenPayload>
+  requestRefreshAccessToken: (refreshToken: string) => Promise<AccessTokenPayload>
   requestUserProfile: (accessToken: string) => Promise<UserProfilePayload>
 }
 
@@ -83,7 +89,7 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
             throw new AuthApiError("missing_access_token", "Auth server response is missing access token.")
           }
 
-          return { access: payload.access }
+          return { access: payload.access, refresh: payload.refresh }
         },
       })
     },
@@ -117,9 +123,14 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
       })
     },
 
-    async requestRefreshAccessToken() {
+    async requestRefreshAccessToken(refreshToken) {
+      const normalizedRefresh = refreshToken.trim()
+      if (!normalizedRefresh) {
+        throw new AuthApiError("missing_refresh_token", "Refresh token is missing.")
+      }
+
       return queryClient.fetchQuery({
-        queryKey: ["auth", "token-refresh"],
+        queryKey: ["auth", "token-refresh", normalizedRefresh],
         staleTime: 0,
         gcTime: 0,
         retry: false,
@@ -132,7 +143,7 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
                 "content-type": "application/json",
               },
               credentials: "include",
-              body: JSON.stringify({}),
+              body: JSON.stringify({ refresh: normalizedRefresh }),
             })
           } catch {
             throw new AuthApiError("user_profile_failed", "Unable to reach auth server.")
@@ -151,7 +162,7 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
             throw new AuthApiError("missing_access_token", "Auth server refresh response is missing access token.")
           }
 
-          return { access: payload.access }
+          return { access: payload.access, refresh: payload.refresh }
         },
       })
     },

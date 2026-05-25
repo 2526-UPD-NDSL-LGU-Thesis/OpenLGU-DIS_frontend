@@ -105,7 +105,7 @@ describe("createAuthSessionService", () => {
   it("returns user_profile_failed and clears session when /users/me hydration fails", async () => {
     server.use(
       http.post(`${authApiBaseUrl}/token/`, () => {
-        return HttpResponse.json({ access: buildMockAccessToken() }, { status: 200 })
+        return HttpResponse.json({ access: buildMockAccessToken(), refresh: "refresh-token" }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/users/me/`, () => {
         return HttpResponse.json({ detail: "Server error" }, { status: 500 })
@@ -129,18 +129,27 @@ describe("createAuthSessionService", () => {
     })
   })
 
-  it("performs one silent Refresh Session recovery for protected-route entry", async () => {
+  it("redirects to login when no refresh token is available for silent refresh", async () => {
     const service = createAuthSessionService()
 
     const result = await service.ensureAuthenticated({
       redirectTo: "/service-claim",
     })
 
-    expect(result.ok).toBe(true)
-    const state = service.getAuthState()
-    expect(state.phase).toBe("authenticated")
-    expect(typeof state.accessToken).toBe("string")
-    expect(state.userProfile?.roles.length).toBeGreaterThan(0)
+    expect(result).toEqual({
+      ok: false,
+      redirect: {
+        to: "/login",
+        search: {
+          redirect: "/service-claim",
+        },
+      },
+    })
+    expect(service.getAuthState()).toEqual({
+      phase: "unauthenticated",
+      accessToken: null,
+      userProfile: null,
+    })
   })
 
   it("redirects to Public Area login with return target when silent refresh fails", async () => {

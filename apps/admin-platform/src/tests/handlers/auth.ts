@@ -137,6 +137,7 @@ export const authHandlers = [
     return HttpResponse.json(
       {
         access: buildMockAccessToken(),
+        refresh: "mock-refresh-token",
       },
       {
         status: 200,
@@ -144,14 +145,19 @@ export const authHandlers = [
     )
   }),
 
-  http.post(`${authApiBaseUrl}/token/refresh/`, ({ request }) => {
+  http.post(`${authApiBaseUrl}/token/refresh/`, async ({ request }) => {
     if (!isMockModeRequest(request)) {
       return passthrough()
+    }
+    const payload = (await request.json()) as Partial<{ refresh: string }>
+    if (!payload.refresh) {
+      return HttpResponse.json({ detail: "Refresh token missing" }, { status: 401 })
     }
 
     return HttpResponse.json(
       {
         access: buildMockAccessToken(),
+        refresh: "mock-refresh-token",
       },
       { status: 200 }
     )

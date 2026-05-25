@@ -109,7 +109,7 @@ describe("LoginForm", () => {
         await new Promise((resolve) => {
           setTimeout(resolve, 250)
         })
-        return HttpResponse.json({ access: "token" }, { status: 200 })
+        return HttpResponse.json({ access: "token", refresh: "refresh-token" }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/users/me/`, () => {
         return HttpResponse.json(

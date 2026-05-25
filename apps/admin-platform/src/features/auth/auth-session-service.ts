@@ -23,6 +23,7 @@ export interface LoginFailure {
       | "invalid_credentials"
       | "response_not_json"
       | "missing_access_token"
+      | "missing_refresh_token"
       | "user_profile_failed"
     message: string
   }
@@ -126,12 +127,14 @@ export function createAuthSessionService(
   let authenticatedApiClient: {
     request: (path: string, init?: RequestInit) => Promise<Response>
   } | null = null
+  let currentRefreshToken: string | null = null
 
   const getAuthState = () => {
     return stateStore.getState()
   }
 
   const clear = () => {
+    currentRefreshToken = null
     stateStore.setState({ ...unauthenticatedState })
   }
 
@@ -147,12 +150,17 @@ export function createAuthSessionService(
   }
 
   const refreshAndHydrate = async (): Promise<boolean> => {
+    if (!currentRefreshToken) {
+      return false
+    }
+
     try {
-      const tokenPayload = await apiClient.requestRefreshAccessToken()
+      const tokenPayload = await apiClient.requestRefreshAccessToken(currentRefreshToken)
       const userPayload = await apiClient.requestUserProfile(
         tokenPayload.access
       )
       const userProfile = userProfileSchema.parse(userPayload)
+      currentRefreshToken = tokenPayload.refresh ?? currentRefreshToken
 
       setAuthenticated({ accessToken: tokenPayload.access, userProfile })
       return true
@@ -169,6 +177,7 @@ export function createAuthSessionService(
     async login(credentials) {
       try {
         const tokenPayload = await apiClient.requestAccessToken(credentials)
+        currentRefreshToken = tokenPayload.refresh ?? null
         const userPayload = await apiClient.requestUserProfile(
           tokenPayload.access
         )
