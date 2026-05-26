@@ -14,7 +14,6 @@ export interface IdPreviewSource {
   phone?: string
   face?: string
   uin: string
-  pcn?: string
 }
 
 function buildFullName(source: IdPreviewSource): string {
@@ -66,7 +65,6 @@ export async function buildPhysicalIdTemplateDataFromSource(
     address: source.address ?? "",
     qrValue: qrData,
     face: source.face,
-    pcn: source.pcn,
     phone: source.phone ?? "",
   }
 }
@@ -86,8 +84,7 @@ export async function buildPhysicalIdTemplateData(
       address: details.pob ?? "",
       phone: details.phone,
       face: details.face,
-      uin: details.uin,
-      pcn: details.pcn,
+      uin: details.uin
     },
     qrValue
   )

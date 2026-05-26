@@ -40,14 +40,6 @@ export const PHYSICAL_LGU_ID_TEMPLATE: Template = {
         fontSize: 8,
       },
       {
-        name: "pcn",
-        type: "text",
-        position: { x: 24, y: 20 },
-        width: 32,
-        height: 4,
-        fontSize: 8,
-      },
-      {
         name: "dob",
         type: "text",
         position: { x: 24, y: 25 },
@@ -98,7 +90,6 @@ export function buildPhysicalLGUIDInputs(data: PhysicalLGUIDTemplateData) {
       face: normalizeImageValue(data.face),
       full_name: data.full_name,
       uin: `UIN: ${data.uin}`,
-      pcn: data.pcn ? `PCN: ${data.pcn}` : "PCN: —",
       dob: `DOB: ${data.dob}`,
       gender: `Gender: ${data.gender}`,
       address: `Address: ${data.address}`,

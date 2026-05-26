@@ -95,7 +95,7 @@ export function IdManagementDashboard() {
       <h1 className="text-2xl font-bold">ID Management</h1>
 
       <div className="mt-4 grid grid-cols-2 gap-4">
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="text-sm">Total issued (this month)</CardTitle>
           </CardHeader>
@@ -111,7 +111,7 @@ export function IdManagementDashboard() {
           <CardContent>
             <p className="text-3xl font-semibold">{metrics.pendingVerifications}</p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
       <div className="mt-6">
         <div className="flex flex-wrap gap-3">
@@ -155,13 +155,13 @@ export function IdManagementDashboard() {
             >
               Scan National ID
             </button>
-            <button
+            {/* <button
               type="button"
               className={buttonVariants({ variant: "outline" })}
               onClick={() => handleContinueToIssuance()}
             >
               Continue without National ID
-            </button>
+            </button> */}
           </div>
         </DialogContent>
       </Dialog>

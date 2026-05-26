@@ -98,7 +98,6 @@ export function LoginForm({
                       id={field.name}
                       name={field.name}
                       type="text"
-                      placeholder="super"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) => field.handleChange(event.target.value)}

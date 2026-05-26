@@ -151,7 +151,6 @@ describe("IssuanceWizard", () => {
         address: "",
         phone: "09221 924 7284",
         qrValue: "data:image/png;base64,mocked-qr",
-        pcn: "PCN-2026-0001",
       },
     })
   })
@@ -201,7 +200,6 @@ describe("IssuanceWizard", () => {
     expect(getIssuanceSuccessData()).toMatchObject({
       preview: {
         uin: "UIN-2026-0002",
-        pcn: "PCN-2026-0002",
         qrValue: "data:image/png;base64,mocked-qr",
       },
     })

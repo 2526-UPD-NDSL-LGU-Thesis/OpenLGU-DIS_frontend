@@ -30,6 +30,7 @@ import { UploadHttpError } from "#/lib/upload"
 import {
   buildIssuanceSubmissionFormData,
   type IssuanceEnrollResponseBody,
+  type IssuanceSubmissionValues,
 } from "./issuancePayload"
 import { authApiBaseUrl } from "#/features/auth/api/authAPI"
 import { parseIssuanceSubmissionFailure } from "./issuanceSubmissionErrors"
@@ -79,9 +80,29 @@ function getIssuanceSubmitUrl(): string {
   return "http://localhost/ids/"
 }
 
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result !== "string") {
+        reject(new Error("Invalid file result."))
+        return
+      }
+      const commaIndex = reader.result.indexOf(",")
+      if (commaIndex === -1) {
+        reject(new Error("Invalid file data."))
+        return
+      }
+      resolve(reader.result.slice(commaIndex + 1))
+    }
+    reader.onerror = () => reject(reader.error ?? new Error("Failed to read file."))
+    reader.readAsDataURL(file)
+  })
+}
+
 const STEPS = [
   { id: "applicant", title: "Applicant", description: "Name and basic info" },
-  { id: "documents", title: "Documents", description: "Sectors and proof" },
+  { id: "documents", title: "Documents", description: "Proof" },
 ]
 
 const SECTOR_OPTIONS = [
@@ -137,7 +158,9 @@ function RouterSafeLink({
 
 export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.Element {
   const [fileError, setFileError] = useState<string | null>(null)
+  const [profileImageError, setProfileImageError] = useState<string | null>(null)
   const [proofFileName, setProofFileName] = useState<string | null>(null)
+  const [profileImageFileName, setProfileImageFileName] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [uploadAbortController, setUploadAbortController] = useState<AbortController | null>(null)
@@ -188,6 +211,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
     address: z.string().optional(),
     contact_number: z.string().optional(),
     sectors: z.array(z.string()).optional(),
+    profile_image: z.any().optional(),
     proof: z.any().optional(),
   })
 
@@ -203,6 +227,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
       address: initialPrefill?.address ?? '',
       contact_number: initialPrefill?.contact_number ?? '',
       sectors: [],
+      profile_image: null,
       proof: null,
     },
     // zod schema
@@ -222,7 +247,35 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
     },
     onSubmit: async ({ value }) => {
       setFileError(null)
+      setProfileImageError(null)
       setSubmissionFieldErrors({})
+
+      const profileImage = value.profile_image
+      let profileImageData: string | undefined
+      if (profileImage) {
+        if (!(profileImage instanceof File)) {
+          setProfileImageError('Profile image must be a PNG file.')
+          return
+        }
+
+        if (profileImage.type !== 'image/png') {
+          setProfileImageError('Profile image must be a PNG file.')
+          return
+        }
+
+        if (profileImage.size > MAX_BYTES) {
+          setProfileImageError('Profile image exceeds the maximum size of 10 MB.')
+          return
+        }
+
+        try {
+          profileImageData = await readFileAsBase64(profileImage)
+        } catch (error) {
+          console.error(error)
+          setProfileImageError('Unable to read profile image.')
+          return
+        }
+      }
 
       const proof = value.proof
       if (!(proof instanceof File)) {
@@ -248,7 +301,11 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
         return
       }
 
-      const fd = buildIssuanceSubmissionFormData(parsed.data, proof)
+      const submissionValues: IssuanceSubmissionValues = {
+        ...parsed.data,
+        profile_image_data: profileImageData,
+      }
+      const fd = buildIssuanceSubmissionFormData(submissionValues, proof)
 
       const controller = new AbortController()
       setUploadAbortController(controller)
@@ -296,17 +353,15 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
 
         const previewData = await buildPhysicalIdTemplateDataFromSource(
           {
-            first_name: issuedDetails?.first_name ?? value.first_name,
-            middle_name: issuedDetails?.middle_name ?? value.middle_name ?? "",
-            last_name: issuedDetails?.last_name ?? value.last_name,
-            suffix_name: issuedDetails?.suffix_name ?? value.suffix_name ?? "",
-            dob: issuedDetails?.date_of_birth ?? value.dob ?? "",
-            gender: issuedDetails?.gender ?? value.gender ?? "",
-            address: issuedDetails?.address ?? value.address ?? "",
-            phone: issuedDetails?.phone_number ?? value.contact_number ?? "",
-            face: issuedDetails?.face_image,
+            first_name: value.first_name,
+            middle_name: value.middle_name ?? "",
+            last_name: value.last_name,
+            suffix_name: value.suffix_name ?? "",
+            dob: value.dob,
+            gender: value.gender,
+            address: value.address,
+            phone: value.contact_number ?? "",
             uin: issuedUin,
-            pcn: issuedDetails?.pcn ?? body.pcn,
           },
           issuedQr
         )
@@ -577,7 +632,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
 
                     {s.id === "documents" && (
                       <>
-                        <form.Field name="sectors">
+                        {/* <form.Field name="sectors">
                           {(field: any) => (
                             <Field>
                               <FieldLabel htmlFor={field.name}>Sectors</FieldLabel>
@@ -614,45 +669,90 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
                               </Combobox>
                             </Field>
                           )}
-                        </form.Field>
+                        </form.Field> */}
+
+                        <Field>
+                          <FieldLabel>Profile image</FieldLabel>
+                          <form.Field name="profile_image">{(field: any) => (
+                            <div className="space-y-2">
+                              <input
+                                id={field.name}
+                                name={field.name}
+                                type="file"
+                                accept="image/png"
+                                aria-label="Profile image"
+                                className="sr-only"
+                                onChange={(e:any) => {
+                                  const selected = e.target.files?.[0] ?? null
+                                  field.handleChange(selected)
+                                  setProfileImageFileName(selected?.name ?? null)
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  const imageInput = document.getElementById(field.name) as HTMLInputElement | null
+                                  imageInput?.click()
+                                }}
+                              >
+                                <ImagePlus className="size-4" />
+                                Upload profile image PNG
+                              </Button>
+                              {profileImageFileName ? (
+                                <p className="text-xs text-muted-foreground">{profileImageFileName}</p>
+                              ) : null}
+                              {submissionFieldErrors.profile_image ? (
+                                <div role="alert" className="text-sm text-destructive">
+                                  {submissionFieldErrors.profile_image}
+                                </div>
+                              ) : null}
+                            </div>
+                          )}</form.Field>
+                          {profileImageError ? (
+                            <div role="alert" className="mt-2 text-sm text-destructive">
+                              {profileImageError}
+                            </div>
+                          ) : null}
+                        </Field>
 
                         <Field>
                           <FieldLabel>Proof of residence</FieldLabel>
                           <form.Field name="proof">{(field: any) => (
-                              <div className="space-y-2">
-                                <input
-                                  id={field.name}
-                                  name={field.name}
-                                  type="file"
-                                  aria-label="Proof of residence"
-                                  className="sr-only"
-                                  onChange={(e:any) => {
-                                    const selected = e.target.files?.[0] ?? null
-                                    field.handleChange(selected)
-                                    setProofFileName(selected?.name ?? null)
-                                  }}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  onClick={() => {
-                                    const proofInput = document.getElementById(field.name) as HTMLInputElement | null
-                                    proofInput?.click()
-                                  }}
-                                >
-                                  <ImagePlus className="size-4" />
-                                  Upload proof PDF
-                                </Button>
-                                {proofFileName ? (
-                                  <p className="text-xs text-muted-foreground">{proofFileName}</p>
-                                ) : null}
-                                {submissionFieldErrors.proof ? (
-                                  <div role="alert" className="text-sm text-destructive">
-                                    {submissionFieldErrors.proof}
-                                  </div>
-                                ) : null}
-                              </div>
-                            )}</form.Field>
+                            <div className="space-y-2">
+                              <input
+                                id={field.name}
+                                name={field.name}
+                                type="file"
+                                aria-label="Proof of residence"
+                                className="sr-only"
+                                onChange={(e:any) => {
+                                  const selected = e.target.files?.[0] ?? null
+                                  field.handleChange(selected)
+                                  setProofFileName(selected?.name ?? null)
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  const proofInput = document.getElementById(field.name) as HTMLInputElement | null
+                                  proofInput?.click()
+                                }}
+                              >
+                                <ImagePlus className="size-4" />
+                                Upload proof PDF
+                              </Button>
+                              {proofFileName ? (
+                                <p className="text-xs text-muted-foreground">{proofFileName}</p>
+                              ) : null}
+                              {submissionFieldErrors.proof ? (
+                                <div role="alert" className="text-sm text-destructive">
+                                  {submissionFieldErrors.proof}
+                                </div>
+                              ) : null}
+                            </div>
+                          )}</form.Field>
                           {fileError ? (
                             <div role="alert" className="mt-2 text-sm text-destructive">
                               {fileError}

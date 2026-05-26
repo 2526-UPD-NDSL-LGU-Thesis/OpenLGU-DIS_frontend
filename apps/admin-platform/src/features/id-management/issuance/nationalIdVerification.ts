@@ -8,7 +8,6 @@ export interface NationalIdVerificationDetails {
   address?: string
   email_id?: string
   phone?: string
-  face?: string
   pcn?: string
 }
 
@@ -22,7 +21,6 @@ export interface NationalIdVerificationResponseDetails {
   address?: string
   email_id?: string
   phone_number?: string
-  face_image?: string
   pcn?: string
 }
 
@@ -73,7 +71,6 @@ export async function verifyNationalId(
     address: body.id_details.address,
     email_id: body.id_details.email_id,
     phone: body.id_details.phone_number,
-    face: body.id_details.face_image,
     pcn: body.id_details.pcn,
   }
 }
