@@ -7,7 +7,7 @@ import { server } from "#/tests/node"
 import {
   clearIssuancePrefill,
   setIssuancePrefill,
-} from "./issuance-prefill-store"
+} from "#/features/id-management/issuance/issuance-prefill-store"
 import {
   clearIssuanceSuccessData,
   getIssuanceSuccessData,
@@ -34,6 +34,7 @@ describe("IssuanceWizard", () => {
       first_name: "Juan",
       middle_name: "Santos",
       last_name: "Dela Cruz",
+      suffix_name: "Jr.",
       gender: "Male",
       dob: "2000-01-01",
       address: "Gubat, Diyan",
@@ -44,7 +45,28 @@ describe("IssuanceWizard", () => {
     render(<IssuanceWizard />)
 
     expect(await screen.findByLabelText(/First name/i)).toHaveValue("Juan")
+    expect(await screen.findByLabelText(/Suffix name/i)).toHaveValue("Jr.")
     expect(await screen.findByText("PCN-2026-0001")).toBeInTheDocument()
+  })
+
+  it("applies prefill values after the form has already mounted", async () => {
+    render(<IssuanceWizard />)
+
+    setIssuancePrefill({
+      first_name: "Maria",
+      middle_name: "Lopez",
+      last_name: "Reyes",
+      gender: "Female",
+      dob: "1999-12-31",
+      address: "Pasig City",
+      contact_number: "09123 456 789",
+      pcn: "PCN-2026-0002",
+    })
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/First name/i)).toHaveValue("Maria")
+    })
+    expect(screen.getByText("PCN-2026-0002")).toBeInTheDocument()
   })
 
   it("redirects to login when issuance submit is unauthorized", async () => {

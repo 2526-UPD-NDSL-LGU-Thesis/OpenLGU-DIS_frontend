@@ -18,6 +18,7 @@ import { submitIdentifierCapture } from "#/features/identifier-capture/identifie
 import { buildPhysicalIdTemplateData } from "#/features/id-management/id-preview/id-preview-mapper"
 import { setIdPreviewData } from "#/features/id-management/id-preview/id-preview-store"
 import { verifyNationalId } from "#/features/id-management/issuance/nationalIdVerification"
+import type { NationalIdVerificationDetails } from "#/features/id-management/issuance/nationalIdVerification"
 import { mapNationalIdToIssuancePrefill } from "#/features/id-management/issuance/issuance-prefill-mapper"
 import { setIssuancePrefill } from "#/features/id-management/issuance/issuance-prefill-store"
 
@@ -44,12 +45,7 @@ export function IdManagementDashboard() {
   const [isCaptureOpen, setIsCaptureOpen] = useState(false)
   const [isIssuanceChoiceOpen, setIsIssuanceChoiceOpen] = useState(false)
   const [isNationalIdCaptureOpen, setIsNationalIdCaptureOpen] = useState(false)
-  const [nationalIdDetails, setNationalIdDetails] = useState<{
-    first_name?: string
-    last_name?: string
-    birthdate?: string
-    pcn?: string
-  } | null>(null)
+  const [nationalIdDetails, setNationalIdDetails] = useState<NationalIdVerificationDetails | null>(null)
   // Mocked metrics for tracer/demo purposes
   const metrics = {
     totalIssuedThisMonth: 124,
@@ -81,32 +77,15 @@ export function IdManagementDashboard() {
       },
     })
 
-    setNationalIdDetails({
-      first_name: result.first_name,
-      last_name: result.last_name,
-      birthdate: result.birthdate,
-      pcn: result.pcn,
-    })
+    setNationalIdDetails(result)
   }
 
-  const handleContinueToIssuance = async (prefill?: {
-    first_name?: string
-    last_name?: string
-    birthdate?: string
-    pcn?: string
-  }) => {
+  const handleContinueToIssuance = async (prefill?: NationalIdVerificationDetails) => {
     setIsIssuanceChoiceOpen(false)
     setIsNationalIdCaptureOpen(false)
     setNationalIdDetails(null)
     if (prefill) {
-      setIssuancePrefill(
-        mapNationalIdToIssuancePrefill({
-          first_name: prefill.first_name,
-          last_name: prefill.last_name,
-          birthdate: prefill.birthdate,
-          pcn: prefill.pcn,
-        })
-      )
+      setIssuancePrefill(mapNationalIdToIssuancePrefill(prefill))
     }
     await router.navigate({ to: "/id-management/issuance" })
   }

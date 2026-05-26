@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
 import { Field, FieldLabel } from "@openlguid/ui/components/field"
 import { Input } from "@openlguid/ui/components/input"
@@ -39,7 +39,8 @@ import {
 import {
   clearIssuancePrefill,
   getIssuancePrefill,
-} from "./issuance-prefill-store"
+  subscribeIssuancePrefill,
+} from "#/features/id-management/issuance/issuance-prefill-store"
 import { setIssuanceSuccessData } from "./issuance-success-store"
 import { buildPhysicalIdTemplateDataFromSource } from "#/features/id-management/id-preview/id-preview-mapper"
 
@@ -146,9 +147,6 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
   const formRef = useRef<HTMLFormElement | null>(null)
   const initialPrefill = getIssuancePrefill()
   const resolvedApiClient = apiClient ?? getRuntimeAuthenticatedClient()
-  if (initialPrefill) {
-    clearIssuancePrefill()
-  }
 
   function navigateToLogin() {
     if (typeof window === "undefined") {
@@ -198,7 +196,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
       first_name: initialPrefill?.first_name ?? '',
       middle_name: initialPrefill?.middle_name ?? '',
       last_name: initialPrefill?.last_name ?? '',
-      suffix_name: '',
+      suffix_name: initialPrefill?.suffix_name ?? '',
       gender: initialPrefill?.gender ?? '',
       pcn: initialPrefill?.pcn ?? '',
       dob: initialPrefill?.dob ?? '',
@@ -265,6 +263,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
                 body: fd,
                 signal: controller.signal,
               })
+
             : await fetch(getIssuanceSubmitUrl(), {
                 method: "POST",
                 body: fd,
@@ -349,6 +348,27 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
       }
     },
   })
+
+  useEffect(() => {
+    const applyPrefill = (prefill: ReturnType<typeof getIssuancePrefill>) => {
+      if (!prefill) {
+        return
+      }
+      if (prefill.first_name !== undefined) form.setFieldValue("first_name", prefill.first_name)
+      if (prefill.middle_name !== undefined) form.setFieldValue("middle_name", prefill.middle_name)
+      if (prefill.last_name !== undefined) form.setFieldValue("last_name", prefill.last_name)
+      if (prefill.suffix_name !== undefined) form.setFieldValue("suffix_name", prefill.suffix_name)
+      if (prefill.gender !== undefined) form.setFieldValue("gender", prefill.gender)
+      if (prefill.dob !== undefined) form.setFieldValue("dob", prefill.dob)
+      if (prefill.address !== undefined) form.setFieldValue("address", prefill.address)
+      if (prefill.contact_number !== undefined) form.setFieldValue("contact_number", prefill.contact_number)
+      if (prefill.pcn !== undefined) form.setFieldValue("pcn", prefill.pcn)
+      clearIssuancePrefill()
+    }
+
+    applyPrefill(getIssuancePrefill())
+    return subscribeIssuancePrefill(applyPrefill)
+  }, [form])
 
   function handleCancel() {
     // reset form and local state

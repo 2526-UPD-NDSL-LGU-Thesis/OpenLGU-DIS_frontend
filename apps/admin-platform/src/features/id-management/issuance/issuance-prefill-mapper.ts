@@ -1,5 +1,5 @@
 import type { NationalIdVerificationDetails } from "./nationalIdVerification"
-import type { IssuancePrefillData } from "./issuance-prefill-store"
+import type { IssuancePrefillData } from "#/features/id-management/issuance/issuance-prefill-store"
 
 export function mapNationalIdToIssuancePrefill(
   details: NationalIdVerificationDetails
@@ -8,6 +8,7 @@ export function mapNationalIdToIssuancePrefill(
     first_name: details.first_name,
     middle_name: details.middle_name,
     last_name: details.last_name,
+    suffix_name: details.suffix_name,
     gender: details.gender,
     dob: details.birthdate,
     address: details.address,
