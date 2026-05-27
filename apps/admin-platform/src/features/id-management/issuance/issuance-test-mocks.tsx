@@ -75,7 +75,7 @@ vi.mock("@openlguid/ui/features/verification/components/IdentifierCaptureDialog"
   },
 }))
 
-vi.mock("@openlguid/physical-id-template/preview", () => ({
+vi.mock("@openlguid/physical-id-template/components/PhysicalLGUIDPreview.tsx", () => ({
   PhysicalLGUIDPreview: ({ className }: { className?: string }) => (
     <iframe title="Physical LGU ID preview" className={className} src="blob:mock-physical-id-preview" />
   ),

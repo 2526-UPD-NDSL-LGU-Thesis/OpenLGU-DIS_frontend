@@ -3,8 +3,8 @@ import { Link } from "@tanstack/react-router"
 
 import { Button } from "@openlguid/ui/components/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@openlguid/ui/components/card"
-import { PhysicalLGUIDPreview } from "@openlguid/physical-id-template/preview"
-import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
+import { PhysicalLGUIDPreview } from "@openlguid/physical-id-template/components/PhysicalLGUIDPreview.tsx"
+import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types.ts"
 
 interface IdPreviewSuccessPageProps {
   data: PhysicalLGUIDTemplateData

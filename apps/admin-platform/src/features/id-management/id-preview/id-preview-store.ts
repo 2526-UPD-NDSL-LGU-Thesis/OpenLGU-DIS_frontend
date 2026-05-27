@@ -1,4 +1,4 @@
-import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
+import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types.ts"
 
 let cachedPreview: PhysicalLGUIDTemplateData | null = null
 

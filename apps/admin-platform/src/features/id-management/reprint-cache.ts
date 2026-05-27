@@ -1,4 +1,4 @@
-import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
+import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types.ts"
 
 const REPRINT_CACHE_KEY = "openlguid:id-management:physical-lgu-id-reprint"
 const REPRINT_CACHE_TTL_MS = 60 * 60 * 1000

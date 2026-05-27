@@ -26,9 +26,7 @@
     "vitest": "catalog:"
   },
   "exports": {
-    "./template": "./src/template.ts",
-    "./preview": "./src/components/PhysicalLGUIDPreview.tsx",
-    "./types": "./src/types.ts"
+    "./*": "./src/*"
   },
   "imports": {
     "#*": "./src/*"

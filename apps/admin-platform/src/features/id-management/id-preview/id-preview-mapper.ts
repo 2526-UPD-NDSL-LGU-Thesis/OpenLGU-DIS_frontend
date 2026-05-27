@@ -1,4 +1,4 @@
-import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
+import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types.ts"
 import type { IdDetails } from "@openlguid/ui/features/verification/types/verification"
 
 import { buildQrFromString } from "#/lib/buildQrFromString"

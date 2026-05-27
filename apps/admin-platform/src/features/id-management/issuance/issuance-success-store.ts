@@ -1,4 +1,4 @@
-import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types"
+import type { PhysicalLGUIDTemplateData } from "@openlguid/physical-id-template/types.ts"
 
 export interface IssuanceSuccessData {
   preview: PhysicalLGUIDTemplateData
