@@ -6,6 +6,10 @@ import { createRoot } from 'react-dom/client'
 import App from '#/App.tsx';
 import { ThemeProvider } from '#/components/theme-provider.tsx';
 
+// Initializes zxing-wasm engine as per internal QR Scanner Component
+import { prepareZXingModule } from "@openlguid/ui/features/verification/intializer.ts"
+void prepareZXingModule()
+
 // From https://mswjs.io/docs/integrations/browser#conditionally-enable-mocking
 async function enableMocking() {
   if (process.env.NODE_ENV !== 'development') {

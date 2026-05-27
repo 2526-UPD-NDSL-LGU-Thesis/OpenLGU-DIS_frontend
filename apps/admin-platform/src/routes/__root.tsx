@@ -18,6 +18,9 @@ import type { AuthRuntime } from '#/features/auth/auth'
 import globalAppCss from '@openlguid/ui/globals.css?url';
 import localAppCss from '../styles/locals.css?url';
 
+// Initializes zxing-wasm engine as per internal QR Scanner Component
+import { prepareZXingModule } from "@openlguid/ui/features/verification/intializer.ts"
+void prepareZXingModule()
 
 interface MyRouterContext {
   queryClient: QueryClient
