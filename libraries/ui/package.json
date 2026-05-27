@@ -62,7 +62,7 @@
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
-    "./features/*": "./src/features/**/*"
+    "./features/*": "./src/features/*"
   },
   "imports": {
     "#*": "./src/*"
