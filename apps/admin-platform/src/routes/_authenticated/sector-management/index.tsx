@@ -492,11 +492,6 @@ function SectorManagementDashboard() {
         cell: ({ row }) => row.original.description ?? "—",
       },
       {
-        accessorKey: "created_at",
-        header: "Created At",
-        cell: ({ row }) => new Date(row.original.created_at).toLocaleString(),
-      },
-      {
         accessorKey: "resident_count",
         header: "Resident Count",
       },
