@@ -697,7 +697,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
                                 }}
                               >
                                 <ImagePlus className="size-4" />
-                                Upload profile image PNG
+                                Upload profile image
                               </Button>
                               {profileImageFileName ? (
                                 <p className="text-xs text-muted-foreground">{profileImageFileName}</p>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 import {
   buildPhysicalLGUIDInputs,
@@ -37,38 +37,36 @@ export function PhysicalLGUIDPreview({
   const [status, setStatus] = useState<RenderStatus>("loading")
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
 
-  const inputs = useMemo(() => buildPhysicalLGUIDInputs(data), [data])
-  console.log(inputs)
-
   useEffect(() => {
     let isActive = true
     let nextUrl: string | null = null
 
     setStatus("loading")
 
-    void loadPdfme()
-      .then(async ({ generate, plugins }: PdfmePreviewDependencies) => {
-        const pdf = await generate({
-          template: PHYSICAL_LGU_ID_TEMPLATE,
-          inputs,
-          plugins: plugins as import("@pdfme/common").Plugins,
-        })
+    void (async () => {
+      const normalizedInputs = await buildPhysicalLGUIDInputs(data)
+      const { generate, plugins } = await loadPdfme()
 
-        if (!isActive) {
-          return
-        }
+      const pdf = await generate({
+        template: PHYSICAL_LGU_ID_TEMPLATE,
+        inputs: normalizedInputs,
+        plugins: plugins as import("@pdfme/common").Plugins,
+      })
 
-        const blob = new Blob([pdf], { type: "application/pdf" })
-        nextUrl = URL.createObjectURL(blob)
-        setPdfUrl(nextUrl)
-        setStatus("ready")
-      })
-      .catch((err) => {
-        console.error("pdfme generation failed:", err);
-        if (isActive) {
-          setStatus("error")
-        }
-      })
+      if (!isActive) {
+        return
+      }
+
+      const blob = new Blob([pdf], { type: "application/pdf" })
+      nextUrl = URL.createObjectURL(blob)
+      setPdfUrl(nextUrl)
+      setStatus("ready")
+    })().catch((err) => {
+      console.error("pdfme generation failed:", err)
+      if (isActive) {
+        setStatus("error")
+      }
+    })
 
     return () => {
       isActive = false
@@ -76,7 +74,7 @@ export function PhysicalLGUIDPreview({
         URL.revokeObjectURL(nextUrl)
       }
     }
-  }, [inputs, loadPdfme])
+  }, [data, loadPdfme])
 
   if (status === "error") {
     return (
