@@ -18,7 +18,6 @@
     "@dnd-kit/utilities": "catalog:",
     "@fontsource-variable/noto-sans": "catalog:",
     "@tanstack/react-table": "catalog:",
-    "@yudiel/react-qr-scanner": "catalog:",
     "@zxing/browser": "catalog:",
     "@zxing/library": "catalog:",
     "class-variance-authority": "catalog:",
@@ -35,7 +34,8 @@
     "tailwind-merge": "catalog:",
     "tw-animate-css": "catalog:",
     "vaul": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zxing-wasm": "catalog:"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

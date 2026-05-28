@@ -66,6 +66,7 @@ catalog:
   vitest: ^3.2.4
   zod: ^4.4.3
   zustand: ^5.0.13
+  zxing-wasm: ^3.0.3
 catalogMode: strict # Force you to analyze version ranges and update the catalog when you want to update a dependency. This is the recommended mode for most users.
 
 onlyBuiltDependencies:

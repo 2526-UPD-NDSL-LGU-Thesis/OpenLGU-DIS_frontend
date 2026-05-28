@@ -6,4 +6,4 @@
  * import { prepareZXingModule } from "@openlguid/ui/features/verification/initializer"
  * void prepareZXingModule()
  */
-export { prepareZXingModule } from "@yudiel/react-qr-scanner"
+export { prepareZXingModule } from "zxing-wasm/reader"

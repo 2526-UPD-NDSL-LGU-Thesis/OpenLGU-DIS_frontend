@@ -1,3 +1,5 @@
+// TODO is this repeated due to verify/qr already existing?
+
 export interface NationalIdVerificationDetails {
   first_name?: string
   middle_name?: string
