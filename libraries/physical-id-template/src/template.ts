@@ -154,7 +154,7 @@ export function buildPhysicalLGUIDInputs(data: PhysicalLGUIDTemplateData) {
   ]
 }
 
-function normalizeImageValue(image: string | undefined) { // TODO do I need this? It used to wrap around data.face above
+function normalizeImageValue(image: string | undefined) {
   if (!image) {
     return TRANSPARENT_PIXEL
   }
@@ -163,5 +163,21 @@ function normalizeImageValue(image: string | undefined) { // TODO do I need this
     return image
   }
 
-  return `data:image/jpg;base64,${image}`
+  if (isBase64Png(image)) {
+    return `data:image/png;base64,${image}`
+  }
+
+  if (isBase64Jpeg(image)) {
+    return `data:image/jpeg;base64,${image}`
+  }
+
+  return TRANSPARENT_PIXEL
+}
+
+function isBase64Png(value: string): boolean {
+  return value.startsWith("iVBORw0KGgo")
+}
+
+function isBase64Jpeg(value: string): boolean {
+  return value.startsWith("/9j/")
 }
