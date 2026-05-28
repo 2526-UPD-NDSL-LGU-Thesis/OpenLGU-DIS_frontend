@@ -19,18 +19,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@openlguid/ui/components/dialog"
+import { Field, FieldLabel } from "@openlguid/ui/components/field"
 import { Input } from "@openlguid/ui/components/input"
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+} from "@openlguid/ui/components/combobox"
 
 import {
   createService,
+  getClaimGroups,
   getServices,
 } from "#/features/service-claim/serviceClaimAPI"
-import type {
-  ClaimType,
-  CreateServicePayload,
-  ServiceItem,
-  StocksType,
-} from "#/features/service-claim/types/serviceClaim"
+import {
+  ClaimGroup,
+  type ServiceItem,
+  type serviceItemSchema,
+} from "#/features/service-claim/types/serviceSchema"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 import { DataTable } from "#/features/service-claim/components/data-table"
 import {
@@ -58,24 +71,25 @@ export const Route = createFileRoute("/_authenticated/service-claim/")({
   component: RouteComponent,
 })
 
-const defaultFormState = {
+const defaultFormState: ServiceItem = {
   id: "",
   name: "",
-  verbose_name: "",
-  description: "",
+  description: null,
   max_claims_per_user: 1,
-  claim_type: "onetime" as ClaimType,
+  claim_type: "onetime",
   refresh_interval: null,
-  stocks_type: "unlimited" as StocksType,
+  stocks_type: "unlimited",
   stocks: 1,
   active: true,
-  recepient_sectors: [],
+  recipient_sectors: [],
   allowed_groups: [],
 }
 
+
 function RouteComponent() {
-  const [sectors, setSectors] = useState<SectorItem[]>([]) // TODO REMOVE THIS
+  const [sectors, setSectors] = useState<SectorItem[]>([]) // TODO MAKE THIS BETTER SOMEHOW?
   const [services, setServices] = useState<ServiceItem[]>([])
+  const [claimGroups, setClaimGroups] = useState<ClaimGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -147,10 +161,12 @@ function RouteComponent() {
     setErrorMessage(null)
 
     try {
-      const response = await getServices(apiClient)
-      const otherResponse = await getSectors(apiClient); // TODO REMOVE THIS
-      setServices(response)
-      setSectors(otherResponse);
+      const serviceResponse = await getServices(apiClient);
+      const sectorResponse = await getSectors(apiClient); // TODO THIS SHOULD BE BETTER SOMEHOW MAYBE
+      const claimGroupResponse = await getClaimGroups(apiClient);
+      setServices(serviceResponse);
+      setSectors(sectorResponse);
+      setClaimGroups(claimGroupResponse);
     } catch {
       setErrorMessage("Unable to load services right now.")
     } finally {
@@ -165,9 +181,8 @@ function RouteComponent() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const payload: CreateServicePayload = {
+    const payload = { // TODO issue is that recipient sectors and allowed_groups have different shapes between GET response and POST request bodies
       name: formState.name.trim(),
-      verbose_name: formState.verbose_name.trim(),
       description: formState.description.trim(),
       max_claims_per_user: Number(formState.max_claims_per_user),
       claim_type: formState.claim_type,
@@ -175,9 +190,8 @@ function RouteComponent() {
       stocks_type: formState.stocks_type,
       stocks: Number(formState.stocks),
       active: formState.active,
-      recipient_sectors: [formState.recepient_sectors], // TODO FIX
-      allowed_groups: [1, 2, 3] // TODO REMOVE
-        // splitCommaSeparatedValues(formState.allowed_groups).map((groupId) => Number(groupId)),
+      recipient_sectors: formState.recipient_sectors.map(sector => sector.id),
+      allowed_groups: formState.allowed_groups.map(group => group.id)
     }
 
     setIsSubmitting(true)
@@ -267,17 +281,6 @@ function RouteComponent() {
                 />
               </label>
 
-              {/* <label className="space-y-1 text-sm">
-                <span>Verbose Name</span>
-                <Input
-                  required
-                  value={formState.verbose_name}
-                  onChange={(event) =>
-                    setFormState((previous) => ({ ...previous, verbose_name: event.target.value }))
-                  }
-                />
-              </label> */}
-
               <label className="space-y-1 text-sm md:col-span-2">
                 <span>Description</span>
                 <textarea
@@ -329,7 +332,7 @@ function RouteComponent() {
                   onChange={(event) =>
                     setFormState((previous) => ({
                       ...previous,
-                      claim_type: event.target.value as ClaimType,
+                      claim_type: event.target.value,
                     }))
                   }
                 >
@@ -346,7 +349,7 @@ function RouteComponent() {
                   onChange={(event) =>
                     setFormState((previous) => ({
                       ...previous,
-                      stocks_type: event.target.value as StocksType,
+                      stocks_type: event.target.value,
                     }))
                   }
                 >
@@ -357,8 +360,8 @@ function RouteComponent() {
 
               <label className="space-y-1 text-sm md:col-span-2">
                 <span>Refresh Interval (optional)</span>
-                <Input
-                  placeholder="ex: monthly"
+                <select
+                  className="h-9 w-full rounded-md border bg-background px-3"
                   value={formState.refresh_interval}
                   onChange={(event) =>
                     setFormState((previous) => ({
@@ -366,50 +369,85 @@ function RouteComponent() {
                       refresh_interval: event.target.value,
                     }))
                   }
-                />
-              </label>
-
-              <label className="space-y-1 text-sm md:col-span-2">
-                <span>Recipient Sectors (comma-separated)</span>
-                {/* <Input
-                  placeholder="4PS, RESIDENT, SENIOR"
-                  value={formState.recepient_sectors}
-                  onChange={(event) =>
-                    setFormState((previous) => ({
-                      ...previous,
-                      recepient_sectors: event.target.value,
-                    }))
-                  }
-                /> */}
-                <select
-                  className="h-9 w-full rounded-md border bg-background px-3"
-                  value={formState.recepient_sectors}
-                  onChange={(event) =>
-                    setFormState((previous) => ({
-                      ...previous,
-                      recepient_sectors: event.target.value,
-                    }))
-                  }
                 >
-                  {sectors.map((sector) => (
-                    <option value={sector.id}>{sector.name}</option>
-                  ))}
+                  <option value="null">none</option>
+                  <option value="daily">daily</option> // TODO I SHOULD PULL THIS FROM SCHEMA
+                  <option value="weekly">weekly</option>
+                  <option value="monthly">monthly</option>
+                  <option value="quarterly">quarterly</option>
+                  <option value="yearly">yearly</option>
                 </select>
               </label>
 
-                {/* <label className="space-y-1 text-sm md:col-span-2">
-                  <span>Allowed Groups (comma-separated group ids)</span>
-                  <Input
-                    placeholder="1, 2"
-                    value={formState.allowed_groups}
-                    onChange={(event) =>
-                      setFormState((previous) => ({
-                        ...previous,
-                        allowed_groups: event.target.value,
-                      }))
-                    }
-                  />
-                </label> */}
+              <label className="space-y-1 text-sm md:col-span-2">
+                <span>Recipient Sectors</span>
+                <Combobox
+                  items={sectors}
+                  multiple
+                  value={formState.recipient_sectors}
+                  onValueChange={(selected_sectors) =>
+                    setFormState((previous) => ({
+                      ...previous,
+                      recipient_sectors: selected_sectors,
+                    }))}
+                >
+                  <ComboboxChips>
+                    <ComboboxValue>
+                      {formState.recipient_sectors.map((sector) => (
+                        <ComboboxChip key={sector.id}>
+                          {sector.name}
+                        </ComboboxChip>
+                      ))}
+                    </ComboboxValue>
+                    <ComboboxChipsInput placeholder="Choose Sectors" />
+                  </ComboboxChips>
+                  <ComboboxContent>
+                    <ComboboxEmpty>No items found.</ComboboxEmpty>
+                    <ComboboxList>
+                      {(sector) => (
+                        <ComboboxItem key={sector.id} value={sector}>
+                          {sector.name}
+                        </ComboboxItem>
+                      )}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+              </label>
+
+              <label className="space-y-1 text-sm md:col-span-2">
+                <span>Allowed Claim Groups</span>
+                                <Combobox
+                  items={claimGroups}
+                  multiple
+                  value={formState.allowed_groups}
+                  onValueChange={(selected_claim_groups) =>
+                    setFormState((previous) => ({
+                      ...previous,
+                      allowed_groups: selected_claim_groups,
+                    }))}
+                >
+                  <ComboboxChips>
+                    <ComboboxValue>
+                      {formState.allowed_groups.map((claimGroup) => (
+                        <ComboboxChip key={claimGroup.id}>
+                          {claimGroup.name}
+                        </ComboboxChip>
+                      ))}
+                    </ComboboxValue>
+                    <ComboboxChipsInput placeholder="Choose Sectors" />
+                  </ComboboxChips>
+                  <ComboboxContent>
+                    <ComboboxEmpty>No items found.</ComboboxEmpty>
+                    <ComboboxList>
+                      {(claimGroup) => (
+                        <ComboboxItem key={claimGroup.id} value={claimGroup}>
+                          {claimGroup.name}
+                        </ComboboxItem>
+                      )}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+              </label>
 
               <label className="inline-flex items-center gap-2 text-sm">
                 <input

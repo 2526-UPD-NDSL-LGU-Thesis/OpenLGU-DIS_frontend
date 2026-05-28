@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker"
 import { http, HttpResponse, passthrough } from "msw"
 
 import { authApiBaseUrl } from "#/features/auth/api/authAPI"
-import type { ClaimItem, ServiceItem } from "#/features/service-claim/types/serviceClaim"
+import type { ClaimItem, ServiceItem } from "#/features/service-claim/types/serviceSchema"
 import { isMockModeRequest } from "#/tests/handlers/auth"
 
 const services = new Map<string, ServiceItem>()

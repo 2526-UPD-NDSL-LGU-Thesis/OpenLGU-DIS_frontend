@@ -1,10 +1,11 @@
 /* API helpers for LGU service creation and service claiming flows. */
+// TODO modify these to be Zod checked
 
 import type {
   ClaimItem,
-  CreateServicePayload,
   ServiceItem,
-} from "#/features/service-claim/types/serviceClaim"
+  ClaimGroup,
+} from "#/features/service-claim/types/serviceSchema"
 import type { AuthenticatedApiClient } from "#/features/auth/authenticated-api-client"
 
 const inFlightClaimsByClient = new WeakMap<AuthenticatedApiClient, Map<string, Promise<ClaimItem>>>()
@@ -42,8 +43,9 @@ export async function getServices(apiClient: AuthenticatedApiClient): Promise<Se
 
 export async function createService(
   apiClient: AuthenticatedApiClient,
-  payload: CreateServicePayload
+  payload: ServiceItem
 ): Promise<ServiceItem> {
+  console.log(JSON.stringify(payload))
   const response = await apiClient.request("/services/", {
     method: "POST",
     headers: {
@@ -110,4 +112,14 @@ export async function createClaim(
   return requestPromise.finally(() => {
     inFlight.delete(key)
   })
+}
+
+export async function getClaimGroups(apiClient: AuthenticatedApiClient): Promise<ClaimGroup[]> {
+  const response = await apiClient.request("/servicegroups/")
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch claiming groups")
+  }
+
+  return (await response.json()) as ClaimGroup[]
 }

@@ -13,7 +13,7 @@ import {
 
 import { createClaim, getClaims } from "#/features/service-claim/serviceClaimAPI"
 import { createClaimSubmissionGuard } from "#/features/service-claim/claim-submission-guard"
-import type { ClaimItem } from "#/features/service-claim/types/serviceClaim"
+import type { ClaimItem } from "#/features/service-claim/types/serviceSchema"
 import { canAccessServiceClaim } from "#/features/auth/service-claim-access-policy"
 import { DataTable } from "#/features/service-claim/components/data-table"
 import { submitIdentifierCapture } from "#/features/identifier-capture/identifier-capture-submit"
