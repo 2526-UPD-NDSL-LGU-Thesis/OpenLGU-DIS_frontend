@@ -79,11 +79,11 @@ export async function buildPhysicalIdTemplateData(
       middle_name: details.middle_name,
       last_name: details.last_name,
       suffix_name: details.suffix_name,
-      dob: details.dob,
+      dob: details.date_of_birth,
       gender: details.gender,
-      address: details.pob ?? "",
-      phone: details.phone,
-      face: details.face,
+      address: details.address ?? "",
+      phone: details.phone_number,
+      face: details.face_image,
       uin: details.uin
     },
     qrValue
