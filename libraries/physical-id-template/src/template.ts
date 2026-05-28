@@ -9,6 +9,21 @@ import type { PhysicalLGUIDTemplateData } from "#types"
 const TRANSPARENT_PIXEL =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7/7GQAAAAASUVORK5CYII="
 
+const PHYSICAL_LGU_ID_BACKGROUND_PDF_URL = new URL(
+  "../public/LGU_ID_Background.pdf",
+  import.meta.url
+).href
+
+async function loadPhysicalLGUIDBackgroundPdf() {
+  const response = await fetch(PHYSICAL_LGU_ID_BACKGROUND_PDF_URL)
+
+  if (!response.ok) {
+    throw new Error("Failed to load Physical LGU ID background PDF")
+  }
+
+  return response.arrayBuffer()
+}
+
 type PhysicalLGUIDInput = {
   face: string
   full_name: string
@@ -148,6 +163,13 @@ export const PHYSICAL_LGU_ID_TEMPLATE: Template = {
       }
     ]
   ]
+}
+
+export async function getPhysicalLGUIDTemplate(): Promise<Template> {
+  return {
+    ...PHYSICAL_LGU_ID_TEMPLATE,
+    basePdf: await loadPhysicalLGUIDBackgroundPdf(),
+  }
 }
 
 function isBase64Webp(value: string): boolean {

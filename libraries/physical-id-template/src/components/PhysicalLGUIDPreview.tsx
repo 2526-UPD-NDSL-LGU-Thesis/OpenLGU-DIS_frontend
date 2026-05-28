@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 import {
   buildPhysicalLGUIDInputs,
-  PHYSICAL_LGU_ID_TEMPLATE,
+  getPhysicalLGUIDTemplate,
 } from "#template"
 import type {
   PdfmePreviewDependencies,
@@ -45,10 +45,11 @@ export function PhysicalLGUIDPreview({
 
     void (async () => {
       const normalizedInputs = await buildPhysicalLGUIDInputs(data)
+      const template = await getPhysicalLGUIDTemplate()
       const { generate, plugins } = await loadPdfme()
 
       const pdf = await generate({
-        template: PHYSICAL_LGU_ID_TEMPLATE,
+        template,
         inputs: normalizedInputs,
         plugins: plugins as import("@pdfme/common").Plugins,
       })

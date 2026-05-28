@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { buildPhysicalLGUIDInputs } from "./template"
+import { buildPhysicalLGUIDInputs, getPhysicalLGUIDTemplate } from "./template"
 
 class MockImage {
   width = 2
@@ -18,6 +18,13 @@ class MockImage {
 }
 
 beforeEach(() => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => ({
+      ok: true,
+      arrayBuffer: async () => new ArrayBuffer(8),
+    }))
+  )
   vi.stubGlobal("Image", MockImage)
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
     drawImage: vi.fn(),
@@ -107,5 +114,11 @@ describe("buildPhysicalLGUIDInputs", () => {
     expect(inputs.face).toBe(
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7/7GQAAAAASUVORK5CYII="
     )
+  })
+
+  it("loads the PDF background as the template basePdf", async () => {
+    const template = await getPhysicalLGUIDTemplate()
+
+    expect(template.basePdf).toBeInstanceOf(ArrayBuffer)
   })
 })

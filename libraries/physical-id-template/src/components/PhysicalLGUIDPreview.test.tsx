@@ -4,7 +4,6 @@ import { render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { PhysicalLGUIDPreview } from "./PhysicalLGUIDPreview"
-import { PHYSICAL_LGU_ID_TEMPLATE } from "#template"
 
 const generate = vi.fn(async () => new Uint8Array([1, 2, 3]))
 const createObjectURL = vi.fn(() => "blob:physical-id")
@@ -28,6 +27,13 @@ beforeEach(() => {
     createObjectURL,
     revokeObjectURL,
   })
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => ({
+      ok: true,
+      arrayBuffer: async () => new ArrayBuffer(8),
+    }))
+  )
   vi.stubGlobal("Image", MockImage)
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
     drawImage: vi.fn(),
@@ -71,7 +77,9 @@ describe("PhysicalLGUIDPreview", () => {
     await waitFor(() => {
       expect(loadPdfme).toHaveBeenCalledTimes(1)
       expect(generate).toHaveBeenCalledWith({
-        template: PHYSICAL_LGU_ID_TEMPLATE,
+        template: expect.objectContaining({
+          basePdf: expect.any(ArrayBuffer),
+        }),
         inputs: [
           expect.objectContaining({
             full_name: "Juan dela Cruz",
@@ -114,6 +122,9 @@ describe("PhysicalLGUIDPreview", () => {
     await waitFor(() => {
       expect(generate).toHaveBeenCalledWith(
         expect.objectContaining({
+          template: expect.objectContaining({
+            basePdf: expect.any(ArrayBuffer),
+          }),
           inputs: [
             expect.objectContaining({
               face: "data:image/png;base64,converted",
