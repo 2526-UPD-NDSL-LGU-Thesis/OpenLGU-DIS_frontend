@@ -12,7 +12,7 @@ export const userRolesListSchema = z.enum([
     "ID Management Employee",
 ])
 
-const apiUserProfileSchema = z.object({
+export const apiUserProfileSchema = z.object({
     username: z.string(),
     first_name: z.string(),
     last_name: z.string(),

@@ -181,8 +181,8 @@ function RouteComponent() {
       stocks_type: formState.stocks_type,
       stocks: Number(formState.stocks),
       active: formState.active,
-      recipient_sectors: formState.recipient_sectors.map(sector => sector.id),
-      allowed_groups: formState.allowed_groups.map(group => group.id)
+      recipient_sectors_ids: formState.recipient_sectors.map(sector => sector.id),
+      allowed_groups_ids: formState.allowed_groups.map(group => group.id)
     }
 
     setIsSubmitting(true)
