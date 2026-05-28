@@ -121,24 +121,15 @@ function RouteComponent() {
         },
       },
       {
-        id: "claim_type",
-        header: "Claim Type",
-        cell: ({ row }) =>
-          row.original.claim_type === "onetime" ? "One-time" : "Periodic",
+        accessorKey: "description",
+        header: "Description"
       },
       {
-        id: "stocks_type",
-        header: "Stocks Type",
-        cell: ({ row }) =>
-          row.original.stocks_type === "unlimited" ? "Unlimited" : "Limited",
-      },
-      {
-        accessorKey: "refresh_interval",
-        header: "Refresh Interval",
-      },
-      {
-        accessorKey: "max_claims_per_user",
-        header: "Max Claims Per User",
+        id: "recipient_sectors",
+        header: "Recipient Sectors",
+        cell: ({ row }) => (row.original.recipient_sectors.map(sector =>
+          sector.name + ", "
+        )),
       },
       {
         accessorKey: "stocks",

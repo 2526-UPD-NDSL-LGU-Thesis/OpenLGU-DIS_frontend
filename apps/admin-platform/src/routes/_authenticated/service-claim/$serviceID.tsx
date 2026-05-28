@@ -54,12 +54,14 @@ function RouteComponent() {
   const claimColumns = useMemo<ColumnDef<ClaimItem>[]>(
     () => [
       {
-        accessorKey: "user",
+        id: "user",
         header: "Claimed By (Resident ID)",
+        cell: ({ row }) => row.original.user.uin,
       },
       {
-        accessorKey: "claimed_by",
-        header: "Facilitated By (Employee)",
+        id: "claimed_by",
+        header: "Facilitated By",
+        cell: ({ row }) => row.original.claimed_by.first_name + " " + row.original.claimed_by.last_name,
       },
       {
         id: "claimed_at",

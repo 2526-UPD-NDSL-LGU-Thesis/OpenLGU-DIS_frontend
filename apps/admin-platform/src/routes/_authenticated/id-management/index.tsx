@@ -46,11 +46,7 @@ export function IdManagementDashboard() {
   const [isIssuanceChoiceOpen, setIsIssuanceChoiceOpen] = useState(false)
   const [isNationalIdCaptureOpen, setIsNationalIdCaptureOpen] = useState(false)
   const [nationalIdDetails, setNationalIdDetails] = useState<NationalIdVerificationDetails | null>(null)
-  // Mocked metrics for tracer/demo purposes
-  const metrics = {
-    totalIssuedThisMonth: 124,
-    pendingVerifications: 3,
-  }
+
 
   const handleCaptureSubmit = async (request: IdentifierCaptureRequest) => {
     if (request.kind !== "qr") {
@@ -95,23 +91,12 @@ export function IdManagementDashboard() {
       <h1 className="text-2xl font-bold">ID Management</h1>
 
       <div className="mt-4 grid grid-cols-2 gap-4">
-        {/* <Card>
+        <Card>
           <CardHeader>
             <CardTitle className="text-sm">Total issued (this month)</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{metrics.totalIssuedThisMonth}</p>
-          </CardContent>
+          <CardContent className="text-muted-foreground">Placeholder</CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Pending verifications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{metrics.pendingVerifications}</p>
-          </CardContent>
-        </Card> */}
       </div>
       <div className="mt-6">
         <div className="flex flex-wrap gap-3">
