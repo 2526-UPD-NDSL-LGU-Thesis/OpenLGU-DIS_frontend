@@ -8,6 +8,7 @@ export interface IssuancePrefillData {
   address?: string
   contact_number?: string
   pcn?: string
+  face_image?: string
 }
 
 let cachedPrefill: IssuancePrefillData | null = null

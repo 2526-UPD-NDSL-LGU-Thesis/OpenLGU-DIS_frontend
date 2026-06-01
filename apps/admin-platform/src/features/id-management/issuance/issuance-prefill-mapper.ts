@@ -14,5 +14,6 @@ export function mapNationalIdToIssuancePrefill(
     address: details.address,
     contact_number: details.phone,
     pcn: details.pcn,
+    face_image: details.face_image
   }
 }

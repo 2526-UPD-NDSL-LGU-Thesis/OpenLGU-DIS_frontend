@@ -243,6 +243,50 @@ describe("IssuanceWizard", () => {
     })
   })
 
+  it("uses response UIN fallback and uploaded profile image when qr/face are missing", async () => {
+    server.use(
+      http.post(`*/api/ids/`, async () => {
+        return HttpResponse.json(
+          {
+            id_details: {
+              uin: "UIN-2026-0004",
+            },
+          },
+          { status: 201 }
+        )
+      })
+    )
+
+    const user = userEvent.setup()
+    render(<IssuanceWizard />)
+
+    await user.type(screen.getByLabelText(/First name/i), "Juan")
+    await user.type(screen.getByLabelText(/Last name/i), "Dela Cruz")
+
+    const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAA"
+    const pngBytes = Uint8Array.from(atob(pngBase64), (char) => char.charCodeAt(0))
+    const profileImage = new File([pngBytes], "profile.png", { type: "image/png" })
+    await user.upload(screen.getByLabelText(/Profile image/i), profileImage)
+
+    const proof = new File(["residence"], "proof.pdf", { type: "application/pdf" })
+    await user.upload(screen.getByLabelText(/Proof of residence/i), proof)
+
+    const form = screen.getByRole("form", { name: /Issuance form/i })
+    fireEvent.submit(form)
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/id-management/issuance-success")
+    })
+
+    expect(getIssuanceSuccessData()).toMatchObject({
+      preview: {
+        uin: "UIN-2026-0004",
+        qrValue: "data:image/png;base64,mocked-qr",
+        face: pngBase64,
+      },
+    })
+  })
+
   it("shows PCN as a distinct non-interactive applicant summary item", async () => {
     render(<IssuanceWizard />)
 

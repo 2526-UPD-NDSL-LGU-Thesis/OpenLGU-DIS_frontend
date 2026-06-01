@@ -52,7 +52,6 @@ export function buildIssuanceSubmissionFormData(
   formData.append("address", values.address ?? "")
   formData.append("email_id", values.email_id ?? "")
   formData.append("phone_number", values.phone_number ?? values.contact_number ?? "")
-
   formData.append("proof_of_residence", proof)
 
   return formData

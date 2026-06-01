@@ -161,6 +161,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
   const [profileImageError, setProfileImageError] = useState<string | null>(null)
   const [proofFileName, setProofFileName] = useState<string | null>(null)
   const [profileImageFileName, setProfileImageFileName] = useState<string | null>(null)
+  const [qrFaceImage, setQrFaceImage] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const [uploadAbortController, setUploadAbortController] = useState<AbortController | null>(null)
@@ -210,7 +211,6 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
     dob: z.string().optional(),
     address: z.string().optional(),
     contact_number: z.string().optional(),
-    sectors: z.array(z.string()).optional(),
     profile_image: z.any().optional(),
     proof: z.any().optional(),
   })
@@ -339,17 +339,18 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
 
         const body = (await response.json()) as IssuanceEnrollResponseBody & {
           uin?: string
-          id?: string
-          pcn?: string
+          qr?: string
+          face_image?: string
         }
-        const issuedDetails = body.id_details
-        const issuedUin = issuedDetails?.uin ?? body.uin ?? body.id
+
+        const issuedUin = body.uin;
         if (!issuedUin) {
           setFileError('Upload succeeded but no UIN was returned.')
           return
         }
 
-        const issuedQr = body.qr ?? issuedUin
+        const issuedQr = body.qr;
+        const issuedFace = profileImageData ?? qrFaceImage;
 
         const previewData = await buildPhysicalIdTemplateDataFromSource(
           {
@@ -361,6 +362,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
             gender: value.gender,
             address: value.address,
             phone: value.contact_number ?? "",
+            face: issuedFace,
             uin: issuedUin,
           },
           issuedQr
@@ -418,6 +420,7 @@ export default function IssuanceWizard({ apiClient }: IssuanceWizardProps): JSX.
       if (prefill.address !== undefined) form.setFieldValue("address", prefill.address)
       if (prefill.contact_number !== undefined) form.setFieldValue("contact_number", prefill.contact_number)
       if (prefill.pcn !== undefined) form.setFieldValue("pcn", prefill.pcn)
+      if (prefill.face_image !== undefined) setQrFaceImage(prefill.face_image)
       clearIssuancePrefill()
     }
 
