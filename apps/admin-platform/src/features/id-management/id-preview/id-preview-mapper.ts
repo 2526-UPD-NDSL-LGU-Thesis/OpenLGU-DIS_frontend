@@ -35,7 +35,59 @@ function isBase64Jpeg(value: string): boolean {
   return value.startsWith("/9j/")
 }
 
+function isBase64Webp(value: string): boolean {
+  return value.startsWith("UklGR")
+}
+
+function isWebpDataUrl(value: string): boolean {
+  return value.startsWith("data:image/webp;")
+}
+
+function toWebpDataUrl(image: string): string | null {
+  if (isWebpDataUrl(image)) {
+    return image
+  }
+
+  if (isBase64Webp(image)) {
+    return `data:image/webp;base64,${image}`
+  }
+
+  return null
+}
+
+async function convertWebpToPngDataUrl(image: string): Promise<string | null> {
+  const webpDataUrl = toWebpDataUrl(image)
+  if (!webpDataUrl) {
+    return null
+  }
+
+  if (typeof Image === "undefined" || typeof document === "undefined") {
+    return webpDataUrl
+  }
+
+  const decodedImage = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const nextImage = new Image()
+    nextImage.onload = () => resolve(nextImage)
+    nextImage.onerror = () => reject(new Error("Failed to decode WebP image"))
+    nextImage.src = webpDataUrl
+  })
+
+  const canvas = document.createElement("canvas")
+  canvas.width = decodedImage.width
+  canvas.height = decodedImage.height
+  const context = canvas.getContext("2d")
+  if (!context) {
+    return webpDataUrl
+  }
+  context.drawImage(decodedImage, 0, 0)
+  return canvas.toDataURL("image/png")
+}
+
 async function resolveQrValue(qrValue: string): Promise<string> {
+  if (isWebpDataUrl(qrValue) || isBase64Webp(qrValue)) {
+    return (await convertWebpToPngDataUrl(qrValue)) ?? qrValue
+  }
+
   if (qrValue.startsWith("data:image/")) {
     return qrValue
   }
