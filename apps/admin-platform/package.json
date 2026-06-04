@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "catalog:",
+    "@netlify/vite-plugin-tanstack-start": "catalog:",
     "@tailwindcss/typography": "^0.5.19",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/eslint-config": "latest",
