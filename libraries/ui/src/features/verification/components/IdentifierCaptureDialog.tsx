@@ -271,10 +271,6 @@ export function IdentifierCaptureDialog({
               <ImagePlus className="size-4" />
               Upload Image
             </TabsTrigger>
-            <TabsTrigger value="manual" className="gap-1.5">
-              <QrCode className="size-4" />
-              Manual Entry
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="qr" className="space-y-4 pt-3">
@@ -335,54 +331,6 @@ export function IdentifierCaptureDialog({
             </div>
           </TabsContent>
 
-          <TabsContent value="manual" className="space-y-4 pt-3">
-            <div className="grid gap-4 rounded-2xl border bg-muted/20 p-4">
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-medium">Identifier type</legend>
-                <div className="flex gap-4">
-                  {(["UIN", "PCN"] as const).map((option) => (
-                    <label key={option} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="manualIdentifierType"
-                        value={option}
-                        checked={manualIdentifierType === option}
-                        onChange={() => setManualIdentifierType(option)}
-                      />
-                      {option}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <label className="space-y-1 text-sm">
-                <span>UIN or PCN</span>
-                <Input
-                  value={manualIdentifierValue}
-                  onChange={(event) => setManualIdentifierValue(event.target.value)}
-                  placeholder="Enter the selected identifier"
-                  disabled={isBusy}
-                />
-              </label>
-
-              <div className="flex justify-end">
-                <Button
-                  type="button"
-                  onClick={handleManualSubmit}
-                  disabled={isBusy || manualIdentifierValue.trim().length === 0}
-                >
-                  {isBusy ? (
-                    <span className="inline-flex items-center gap-2">
-                      <Loader2 className="size-4 animate-spin" />
-                      Capturing...
-                    </span>
-                  ) : (
-                    "Capture"
-                  )}
-                </Button>
-              </div>
-            </div>
-            </TabsContent>
         </Tabs>
 
         {submissionError ? (
