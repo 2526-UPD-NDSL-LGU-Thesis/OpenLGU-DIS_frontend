@@ -90,14 +90,14 @@ export function IdManagementDashboard() {
     <div className="p-6">
       <h1 className="text-2xl font-bold">ID Management</h1>
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
+      {/* <div className="mt-4 grid grid-cols-2 gap-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Total issued (this month)</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground">Placeholder</CardContent>
         </Card>
-      </div>
+      </div> */}
       <div className="mt-6">
         <div className="flex flex-wrap gap-3">
           <button

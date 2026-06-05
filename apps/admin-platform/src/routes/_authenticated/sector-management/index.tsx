@@ -470,10 +470,6 @@ function SectorManagementDashboard() {
   const sectorColumns = useMemo<ColumnDef<SectorItem>[]>(
     () => [
       {
-        accessorKey: "id",
-        header: "Sector ID",
-      },
-      {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => (
@@ -485,16 +481,20 @@ function SectorManagementDashboard() {
             {row.original.name}
           </Link>
         ),
-      },
+      },    
       {
         accessorKey: "description",
         header: "Description",
         cell: ({ row }) => row.original.description ?? "—",
       },
       {
-        accessorKey: "resident_count",
-        header: "Resident Count",
+        accessorKey: "id",
+        header: "Sector ID",
       },
+      // {
+      //   accessorKey: "resident_count",
+      //   header: "Resident Count",
+      // },
       {
         id: "actions",
         header: "Actions",
@@ -560,12 +560,12 @@ function SectorManagementDashboard() {
           </CardHeader>
           <CardContent className="text-3xl font-semibold">{sectors.length}</CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Total Residents</CardTitle>
           </CardHeader>
           <CardContent className="text-3xl font-semibold">{totalResidents}</CardContent>
-        </Card>
+        </Card> */}
       </section>
 
       <section className="space-y-4">

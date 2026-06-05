@@ -215,12 +215,12 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="text-3xl font-semibold">{activeServices}</CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Claim Metrics</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground">Graph placeholder</CardContent>
-        </Card>
+        </Card> */}
       </section>
 
       <section className="space-y-4">
