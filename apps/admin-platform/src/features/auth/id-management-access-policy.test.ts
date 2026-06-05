@@ -1,52 +1,52 @@
 import { describe, expect, it } from "vitest"
 
-import { canAccessIdRegistration } from "./id-registration-access-policy"
+import { canAccessIdManagement } from "./id-management-access-policy"
 import type { AuthStateSnapshot } from "./auth-session-service"
 
-describe("canAccessIdRegistration", () => {
+describe("canAccessIdManagement", () => {
   it("allows SUPER role in Authenticated Area", () => {
     const authState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-1",
-        roles: ["SUPER"],
+        roles: ["Super"],
       },
     }
 
-    expect(canAccessIdRegistration(authState)).toBe(true)
+    expect(canAccessIdManagement(authState)).toBe(true)
   })
 
   it("allows ID Management roles in Authenticated Area", () => {
     const authState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-2",
-        roles: ["ID_MANAGEMENT_ADMIN", "ID_MANAGEMENT_EMPLOYEE"],
+        roles: ["ID Management Admin", "ID Management Employee"],
       },
     }
 
-    expect(canAccessIdRegistration(authState)).toBe(true)
+    expect(canAccessIdManagement(authState)).toBe(true)
   })
 
   it("denies non-ID-management roles and unauthenticated state", () => {
     const unauthorizedRoleState: AuthStateSnapshot = {
       phase: "authenticated",
       accessToken: "access-token",
-      identityProfile: {
+      userProfile: {
         username: "employee-3",
-        roles: ["SERVICE_CLAIM_EMPLOYEE"],
+        roles: ["Service Claim Employee"],
       },
     }
 
     const unauthenticatedState: AuthStateSnapshot = {
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     }
 
-    expect(canAccessIdRegistration(unauthorizedRoleState)).toBe(false)
-    expect(canAccessIdRegistration(unauthenticatedState)).toBe(false)
+    expect(canAccessIdManagement(unauthorizedRoleState)).toBe(false)
+    expect(canAccessIdManagement(unauthenticatedState)).toBe(false)
   })
 })

@@ -2,7 +2,8 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@openlguid/ui/components/avatar"
+} from "@openlguid/ui/components/avatar";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,25 +12,45 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@openlguid/ui/components/dropdown-menu"
+} from "@openlguid/ui/components/dropdown-menu";
+
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@openlguid/ui/components/sidebar"
-import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+} from "@openlguid/ui/components/sidebar";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
+import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react";
+import { useState } from "react";
+import useAuthStore from "#/features/auth/auth";
+import { useNavigate } from "@tanstack/react-router";
+import { logoutAndClearPhysicalIdReprintCache } from "#/features/id-management/reprint-cache"
+
+export function NavUser() { 
+  const navigate = useNavigate();
+  const { isMobile } = useSidebar();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { session, logout } = useAuthStore();
+
+  // Map UserProfile to NavUser user
+  const user = {
+    name: session.userProfile?.username ?? "Error No Username",
+    email: `${session.userProfile?.username}@openlguid.local`,
+    roles: session.userProfile?.roles ?? "Error No Roles",
+    avatar: "/avatars/shadcn.jpg", // TODO implement avatars in backend
   }
-}) {
-  const { isMobile } = useSidebar()
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await logoutAndClearPhysicalIdReprintCache(logout)
+      await navigate({ to: "/login" })
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+  
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -76,23 +97,16 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <CircleUserRoundIcon
-                />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon
-                />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon
-                />
-                Notifications
+                  <div className="grid flex-1 text-start text-sm leading-tight">
+                    <span className="truncate font-medium">Roles</span>
+                    <span className="text-xs text-muted-foreground">
+                      {user.roles.join(", ")}
+                    </span>
+                  </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
               <LogOutIcon
               />
               Log out

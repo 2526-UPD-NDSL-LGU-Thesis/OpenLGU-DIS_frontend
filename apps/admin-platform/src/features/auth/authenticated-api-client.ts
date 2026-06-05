@@ -1,4 +1,4 @@
-import { authApiBaseUrl } from "./authAPI"
+import { authApiBaseUrl } from "./api/authAPI"
 import type { AuthSessionService } from "./auth-session-service"
 
 export class AuthenticatedApiError extends Error {
@@ -32,6 +32,11 @@ function withAuthHeader(init: RequestInit | undefined, accessToken: string): Req
   }
 }
 
+function isRetryableAfterUnauthorized(init?: RequestInit): boolean {
+  const method = (init?.method ?? "GET").toUpperCase()
+  return method === "GET" || method === "HEAD"
+}
+
 async function runSingleFlightRefresh(authSessionService: AuthSessionService): Promise<boolean> {
   if (!inFlightRefresh) {
     inFlightRefresh = authSessionService.refreshSession().finally(() => {
@@ -56,6 +61,10 @@ export function createAuthenticatedApiClient(args: {
 
       const firstResponse = await fetch(toUrl(path), withAuthHeader(init, current.accessToken)) // TODO ASK why raw fetch? Need to walk through this thing.
       if (firstResponse.status !== 401) {
+        return firstResponse
+      }
+
+      if (!isRetryableAfterUnauthorized(init)) {
         return firstResponse
       }
 

@@ -1,0 +1,3 @@
+[build]
+  command = "pnpm --filter @openlguid/admin-platform build"
+  publish = "apps/admin-platform/dist/client"

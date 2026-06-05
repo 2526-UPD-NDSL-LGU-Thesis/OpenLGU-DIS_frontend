@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Link, linkOptions } from "@tanstack/react-router"
 
 import { NavDocuments } from "#/components/Sidebar/nav-documents"
 import { NavMain } from "#/components/Sidebar/nav-main"
@@ -13,133 +14,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@openlguid/ui/components/sidebar"
-import { LayoutDashboardIcon, ListIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
-import { Link, linkOptions } from "@tanstack/react-router"
-
-const dummyData = {
-  user: {
-    name: "LGU Super Admin",
-    email: "super@openlguid.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-
-
-  navClouds: [
-    {
-      title: "Capture",
-      icon: (
-        <CameraIcon
-        />
-      ),
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: (
-        <CircleHelpIcon
-        />
-      ),
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: (
-        <SearchIcon
-        />
-      ),
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: (
-        <DatabaseIcon
-        />
-      ),
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: (
-        <FileChartColumnIcon
-        />
-      ),
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <FileIcon
-        />
-      ),
-    },
-  ],
-}
+import { CommandIcon } from "lucide-react"
 
 
 const navMainItems = linkOptions([
     {
-      title: "ID Registration",
-      to: "/id-registration", // TODO how to have this auto-update?
+      title: "ID Management",
+      to: "/id-management",
       // icon: (
       //   <LayoutDashboardIcon />
       // ),
@@ -151,10 +32,13 @@ const navMainItems = linkOptions([
       //   <ListIcon
       //   />
       // ),
+    },
+    {
+      title: "Sector Management",
+      to: "/sector-management",
+      // icon: <LayoutDashboardIcon />,
     }
 ]);
-
-
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -166,7 +50,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <Link to="/"> {/* TODO: fix the styling here to not be block elements + autoupdating links */}
-                <CommandIcon className="size-5!" />
                 <span className="text-base font-semibold">OpenLGUID</span> 
               </Link>
             </SidebarMenuButton>
@@ -180,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={dummyData.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={dummyData.user} />
+        <NavUser/>
       </SidebarFooter>
     </Sidebar>
   )

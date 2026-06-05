@@ -10,14 +10,23 @@ export interface LoginCredentials {
 
 export interface AccessTokenPayload {
   access: string
+  refresh?: string
 }
 
-export interface IdentityProfilePayload {
+export interface UserProfilePayload {
   username: string
-  roles: string[]
+  first_name?: string
+  last_name?: string
+  groups?: Array<{ name: string }>
+  assignment?: any | null
 }
 
-type AuthApiErrorCode = "invalid_credentials" | "response_not_json" | "missing_access_token" | "identity_profile_failed"
+type AuthApiErrorCode =
+  | "invalid_credentials"
+  | "response_not_json"
+  | "missing_access_token"
+  | "missing_refresh_token"
+  | "user_profile_failed"
 
 export class AuthApiError extends Error {
   code: AuthApiErrorCode
@@ -31,8 +40,8 @@ export class AuthApiError extends Error {
 
 export interface AuthApiClient {
   requestAccessToken: (credentials: LoginCredentials) => Promise<AccessTokenPayload>
-  requestRefreshAccessToken: () => Promise<AccessTokenPayload>
-  requestIdentityProfile: (accessToken: string) => Promise<IdentityProfilePayload>
+  requestRefreshAccessToken: (refreshToken: string) => Promise<AccessTokenPayload>
+  requestUserProfile: (accessToken: string) => Promise<UserProfilePayload>
 }
 
 function isJsonResponse(response: Response): boolean {
@@ -53,14 +62,19 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
         gcTime: 0,
         retry: false,
         queryFn: async () => {
-          const response = await fetch(toUrl("/token/"), {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify(credentials),
-          })
+          let response: Response
+          try {
+            response = await fetch(toUrl("/token/"), {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify(credentials),
+            })
+          } catch {
+            throw new AuthApiError("user_profile_failed", "Unable to reach auth server.")
+          }
 
           if (!response.ok) {
             throw new AuthApiError("invalid_credentials", "Invalid username or password.")
@@ -75,50 +89,65 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
             throw new AuthApiError("missing_access_token", "Auth server response is missing access token.")
           }
 
-          return { access: payload.access }
+          return { access: payload.access, refresh: payload.refresh }
         },
       })
     },
 
-    async requestIdentityProfile(accessToken) {
+    async requestUserProfile(accessToken) {
       return queryClient.fetchQuery({
-        queryKey: ["auth", "identity-profile"],
+        queryKey: ["auth", "user-profile"],
         staleTime: 0,
         gcTime: 0,
         retry: false,
         queryFn: async () => {
-          const response = await fetch(toUrl("/me/"), {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-            credentials: "include",
-          })
-
-          if (!response.ok || !isJsonResponse(response)) {
-            throw new AuthApiError("identity_profile_failed", "Unable to load LGU Employee identity profile.")
+          let response: Response
+          try {
+            response = await fetch(toUrl("/users/me/"), {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+              credentials: "include",
+            })
+          } catch {
+            throw new AuthApiError("user_profile_failed", "Unable to reach auth server.")
           }
 
-          return (await response.json()) as IdentityProfilePayload
+          if (!response.ok || !isJsonResponse(response)) {
+            throw new AuthApiError("user_profile_failed", "Unable to load LGU Employee user profile.")
+          }
+
+          return (await response.json()) as UserProfilePayload
         },
       })
     },
 
-    async requestRefreshAccessToken() {
+    async requestRefreshAccessToken(refreshToken) {
+      const normalizedRefresh = refreshToken.trim()
+      if (!normalizedRefresh) {
+        throw new AuthApiError("missing_refresh_token", "Refresh token is missing.")
+      }
+
       return queryClient.fetchQuery({
-        queryKey: ["auth", "token-refresh"],
+        queryKey: ["auth", "token-refresh", normalizedRefresh],
         staleTime: 0,
         gcTime: 0,
         retry: false,
         queryFn: async () => {
-          const response = await fetch(toUrl("/token/refresh/"), {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({}),
-          })
+          let response: Response
+          try {
+            response = await fetch(toUrl("/token/refresh/"), {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({ refresh: normalizedRefresh }),
+            })
+          } catch {
+            throw new AuthApiError("user_profile_failed", "Unable to reach auth server.")
+          }
 
           if (!response.ok) {
             throw new AuthApiError("invalid_credentials", "Refresh session is invalid.")
@@ -133,7 +162,7 @@ export function createAuthApiClient(queryClient: QueryClient): AuthApiClient {
             throw new AuthApiError("missing_access_token", "Auth server refresh response is missing access token.")
           }
 
-          return { access: payload.access }
+          return { access: payload.access, refresh: payload.refresh }
         },
       })
     },

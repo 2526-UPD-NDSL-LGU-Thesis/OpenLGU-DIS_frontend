@@ -11,8 +11,6 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@zxing/browser": "catalog:",
-    "@zxing/library": "catalog:",
     "@base-ui/react": "catalog:",
     "@dnd-kit/core": "catalog:",
     "@dnd-kit/modifiers": "catalog:",
@@ -20,24 +18,30 @@
     "@dnd-kit/utilities": "catalog:",
     "@fontsource-variable/noto-sans": "catalog:",
     "@tanstack/react-table": "catalog:",
+    "@zxing/browser": "catalog:",
+    "@zxing/library": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
+    "date-fns": "catalog:",
     "lucide-react": "catalog:",
     "next-themes": "catalog:",
     "react": "catalog:",
+    "react-day-picker": "catalog:",
     "react-dom": "catalog:",
     "recharts": "catalog:",
     "shadcn": "catalog:",
     "sonner": "catalog:",
     "tailwind-merge": "catalog:",
     "tw-animate-css": "catalog:",
-    "vaul": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zxing-wasm": "catalog:"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
     "@openlguid/typescript-config": "workspace:*",
     "@tailwindcss/vite": "catalog:",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "catalog:",
     "@turbo/gen": "catalog:",
     "@types/node": "^25.5.0",
     "@types/react": "catalog:",
@@ -57,9 +61,7 @@
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
-    "./features/verification/components/VerificationDialog": "./src/features/verification/components/VerificationDialog.tsx",
-    "./features/verification/api/verificationService": "./src/features/verification/api/verificationService.ts",
-    "./features/verification/types/verification": "./src/features/verification/types/verification.ts"
+    "./features/*": "./src/features/*"
   },
   "imports": {
     "#*": "./src/*"

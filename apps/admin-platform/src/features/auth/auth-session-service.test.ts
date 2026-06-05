@@ -1,30 +1,39 @@
-import { describe, expect, it } from "vitest"
+// TODO these broke after changing to UserSchemas
+
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { http, HttpResponse } from "msw"
 
 import { server } from "#/tests/node"
 import { buildMockAccessToken } from "#/tests/handlers/auth"
 
-import { authApiBaseUrl } from "./authAPI"
-import { createAuthSessionService } from "./auth-session-service"
+import { authApiBaseUrl, createAuthApiClient } from "./api/authAPI"
+import { createAuthSessionService, REFRESH_TOKEN_STORAGE_KEY } from "./auth-session-service"
 
-const CANONICAL_ROLES = new Set([
-  "SUPER",
-  "SECTOR_ADMIN",
-  "SERVICE_CLAIM_ADMIN",
-  "SECTOR_EMPLOYEE",
-  "SERVICE_CLAIM_EMPLOYEE",
-  "ID_MANAGEMENT_ADMIN",
-  "ID_MANAGEMENT_EMPLOYEE",
+const DISPLAY_ROLES = new Set([
+  "Super",
+  "Sector Admin",
+  "Sector Employee",
+  "Service Admin",
+  "Service Employee",
+  "Service Claim Admin",
+  "Service Claim Employee",
+  "ID Management Admin",
+  "ID Management Employee",
 ])
 
 describe("createAuthSessionService", () => {
+  beforeEach(() => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.clear()
+    }
+  })
   it("starts in unknown auth state before protected-route resolution", () => {
     const service = createAuthSessionService()
 
     expect(service.getAuthState()).toEqual({
       phase: "unknown",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
@@ -38,10 +47,10 @@ describe("createAuthSessionService", () => {
     expect(state.phase).toBe("authenticated")
     expect(typeof state.accessToken).toBe("string")
     expect(state.accessToken).not.toHaveLength(0)
-    expect(typeof state.identityProfile?.username).toBe("string")
-    expect(state.identityProfile?.roles.length).toBeGreaterThan(0)
-    for (const role of state.identityProfile?.roles ?? []) {
-      expect(CANONICAL_ROLES.has(role)).toBe(true)
+    expect(typeof state.userProfile?.username).toBe("string")
+    expect(state.userProfile?.roles.length).toBeGreaterThan(0)
+    for (const role of state.userProfile?.roles ?? []) {
+      expect(DISPLAY_ROLES.has(role)).toBe(true)
     }
   })
 
@@ -65,7 +74,7 @@ describe("createAuthSessionService", () => {
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
@@ -94,16 +103,16 @@ describe("createAuthSessionService", () => {
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
-  it("returns identity_profile_failed and clears session when /me hydration fails", async () => {
+  it("returns user_profile_failed and clears session when /users/me hydration fails", async () => {
     server.use(
       http.post(`${authApiBaseUrl}/token/`, () => {
-        return HttpResponse.json({ access: buildMockAccessToken() }, { status: 200 })
+        return HttpResponse.json({ access: buildMockAccessToken(), refresh: "refresh-token" }, { status: 200 })
       }),
-      http.get(`${authApiBaseUrl}/me/`, () => {
+      http.get(`${authApiBaseUrl}/users/me/`, () => {
         return HttpResponse.json({ detail: "Server error" }, { status: 500 })
       })
     )
@@ -114,29 +123,65 @@ describe("createAuthSessionService", () => {
     expect(result).toEqual({
       ok: false,
       error: {
-        code: "identity_profile_failed",
-        message: "Unable to load LGU Employee identity profile.",
+        code: "user_profile_failed",
+        message: "Unable to load LGU Employee user profile.",
       },
     })
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
   })
 
-  it("performs one silent Refresh Session recovery for protected-route entry", async () => {
+  it("redirects to login when no refresh token is available for silent refresh", async () => {
     const service = createAuthSessionService()
 
     const result = await service.ensureAuthenticated({
-      redirectTo: "/_authenticated/service-claim",
+      redirectTo: "/service-claim",
+    })
+
+    expect(result).toEqual({
+      ok: false,
+      redirect: {
+        to: "/login",
+        search: {
+          redirect: "/service-claim",
+        },
+      },
+    })
+    expect(service.getAuthState()).toEqual({
+      phase: "unauthenticated",
+      accessToken: null,
+      userProfile: null,
+    })
+  })
+
+  it("hydrates session from refresh token stored in sessionStorage", async () => {
+    window.sessionStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, "stored-refresh")
+    server.use(
+      http.post(`${authApiBaseUrl}/token/refresh/`, () => {
+        return HttpResponse.json({ access: buildMockAccessToken(), refresh: "rotated-refresh" }, { status: 200 })
+      }),
+      http.get(`${authApiBaseUrl}/users/me/`, () => {
+        return HttpResponse.json({
+          username: "employee-1",
+          first_name: "Alex",
+          last_name: "Ramos",
+          groups: [{ name: "Service Employee" }],
+          assignment: null,
+        })
+      })
+    )
+
+    const service = createAuthSessionService()
+    const result = await service.ensureAuthenticated({
+      redirectTo: "/service-claim",
     })
 
     expect(result.ok).toBe(true)
-    const state = service.getAuthState()
-    expect(state.phase).toBe("authenticated")
-    expect(typeof state.accessToken).toBe("string")
-    expect(state.identityProfile?.roles.length).toBeGreaterThan(0)
+    expect(service.getAuthState().phase).toBe("authenticated")
+    expect(window.sessionStorage.getItem(REFRESH_TOKEN_STORAGE_KEY)).toBe("rotated-refresh")
   })
 
   it("redirects to Public Area login with return target when silent refresh fails", async () => {
@@ -148,22 +193,101 @@ describe("createAuthSessionService", () => {
 
     const service = createAuthSessionService()
     const result = await service.ensureAuthenticated({
-      redirectTo: "/_authenticated/id-registration?tab=1",
+      redirectTo: "/id-management?tab=1",
     })
 
     expect(result).toEqual({
       ok: false,
       redirect: {
-        to: "/_public/login",
+        to: "/login",
         search: {
-          redirect: "/_authenticated/id-registration?tab=1",
+          redirect: "/id-management?tab=1",
         },
       },
     })
     expect(service.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
+    })
+  })
+
+  it("logout transitions authenticated employee to unauthenticated state", async () => {
+    const service = createAuthSessionService()
+
+    // Setup: login first
+    await service.login({ username: "employee-1", password: "password" })
+    expect(service.getAuthState().phase).toBe("authenticated")
+
+    // Action: logout
+    await service.logout()
+
+    // Assertion: verify unauthenticated state
+    expect(service.getAuthState()).toEqual({
+      phase: "unauthenticated",
+      accessToken: null,
+      userProfile: null,
+    })
+  })
+
+  it("logout clears TanStack Query cache before clearing session state", async () => {
+    const queryClient = new (await import("@tanstack/react-query")).QueryClient()
+    const queryClearSpy = vi.spyOn(queryClient, "clear")
+    const apiClient = createAuthApiClient(queryClient)
+    const service = createAuthSessionService(apiClient, queryClient)
+
+    // Setup: login and add some cached data
+    await service.login({ username: "employee-1", password: "password" })
+    expect(queryClient.getQueryData(["test"])).toBeUndefined()
+
+    // Action: logout
+    await service.logout()
+
+    // Assertion: verify queryClient.clear was called
+    expect(queryClearSpy).toHaveBeenCalled()
+  })
+
+  it("logout attempts POST /logout to backend and gracefully continues on failure", async () => {
+    server.use(
+      http.post(`${authApiBaseUrl}/logout/`, () => {
+        return HttpResponse.json({ detail: "Logged out" }, { status: 200 })
+      })
+    )
+
+    const service = createAuthSessionService()
+
+    // Setup: login first
+    await service.login({ username: "employee-1", password: "password" })
+    expect(service.getAuthState().phase).toBe("authenticated")
+
+    // Action: logout (with successful backend call)
+    await service.logout()
+
+    // Assertion: verify logout succeeded despite backend call
+    expect(service.getAuthState().phase).toBe("unauthenticated")
+  })
+
+  it("logout clears session state even if POST /logout fails on backend", async () => {
+    server.use(
+      http.post(`${authApiBaseUrl}/logout/`, () => {
+        return HttpResponse.json({ detail: "Server error" }, { status: 500 })
+      })
+    )
+
+    const service = createAuthSessionService()
+
+    // Setup: login first
+    await service.login({ username: "employee-1", password: "password" })
+    expect(service.getAuthState().phase).toBe("authenticated")
+
+    // Action: logout (with failed backend call)
+    await service.logout()
+
+    // Assertion: verify logout succeeded and session cleared despite backend failure
+    expect(service.getAuthState()).toEqual({
+      phase: "unauthenticated",
+      accessToken: null,
+      userProfile: null,
     })
   })
 

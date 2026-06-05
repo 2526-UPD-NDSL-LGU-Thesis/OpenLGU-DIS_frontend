@@ -22,12 +22,29 @@ export function getMockVerificationResult(
     scenario === "random-success"
       ? createRandomSuccessResponseBody()
       : createFixedSuccessResponseBody()
+  const idDetails = responseBody.id_details
 
   return {
     result: "success",
+    qr_type: responseBody.qr_type,
     idDetails: {
-      ...responseBody.id_details,
-      issuerType: "LGU",
+      uin: idDetails?.uin ?? faker.string.numeric(10),
+      pcn: idDetails?.pcn,
+      full_name: idDetails?.full_name ?? faker.person.fullName(),
+      dob: idDetails?.dob ?? faker.date.birthdate().toDateString(),
+      gender: idDetails?.gender ?? faker.person.sexType(),
+      location: idDetails?.location ?? faker.location.city(),
+      email:
+        idDetails?.email ??
+        faker.internet.email({
+          firstName: faker.person.firstName(),
+          lastName: faker.person.lastName(),
+        }),
+      phone: idDetails?.phone ?? faker.phone.number(),
+      face:
+        idDetails?.face ??
+        faker.image.dataUri({ width: 320, type: "svg-base64" }).split(",")[1] ??
+        "",
     },
     message: "Loaded from local mock data utility.",
   }
@@ -70,23 +87,25 @@ function createRandomSuccessResponseBody(): QRVerifyResponseBody {
   const email = faker.internet.email({ firstName, lastName })
 
   return {
+    qr_type: "OpenLGUQR",
     id_details: {
-      local_id: faker.string.numeric(10),
+      uin: faker.string.numeric(10),
       full_name: faker.person.fullName(),
       dob: faker.date.birthdate().toDateString(),
       gender,
       location: faker.location.city(),
       email,
       phone: faker.phone.number(),
-      face: faker.image.dataUri({ width: 320, type: "svg-base64" }).substring(26),
+      face: faker.image.dataUri({ width: 320, type: "svg-base64" }).split(",")[1] ?? "",
     },
   }
 }
 
 function createFixedSuccessResponseBody(): QRVerifyResponseBody {
   return {
+    qr_type: "OpenLGUQR",
     id_details: {
-      local_id: "1000",
+      uin: "1000",
       full_name: "Juan Dela Cruz",
       dob: "2000-01-01",
       gender: "Male",

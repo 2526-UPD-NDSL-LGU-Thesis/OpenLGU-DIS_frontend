@@ -1,15 +1,18 @@
 import { faker } from "@faker-js/faker"
-import { http, HttpResponse } from "msw"
+import { http, HttpResponse, passthrough } from "msw"
 
-import { authApiBaseUrl } from "#/features/auth/authAPI"
-import type { ClaimItem, ServiceItem } from "#/features/service-claim/types/serviceClaim"
+import { authApiBaseUrl } from "#/features/auth/api/authAPI"
+import type { ClaimItem, ServiceItem } from "#/features/service-claim/types/serviceSchema"
+import { isMockModeRequest } from "#/tests/handlers/auth"
 
 const services = new Map<string, ServiceItem>()
 const claimsByService = new Map<string, ClaimItem[]>()
+const claimByServiceAndQR = new Map<string, ClaimItem>()
 
 function buildMockService(name?: string): ServiceItem {
   const serviceName = name ?? faker.helpers.slugify(faker.commerce.productName()).toLowerCase()
   return {
+    id: serviceName,
     name: serviceName,
     verbose_name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
@@ -51,6 +54,10 @@ function isAuthorized(request: Request): boolean {
 
 export const serviceClaimHandlers = [
   http.get(`${authApiBaseUrl}/services/`, ({ request }) => {
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
+
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
@@ -60,6 +67,10 @@ export const serviceClaimHandlers = [
   }),
 
   http.post(`${authApiBaseUrl}/services/`, async ({ request }) => {
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
+
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
@@ -81,6 +92,10 @@ export const serviceClaimHandlers = [
   }),
 
   http.get(`${authApiBaseUrl}/services/:serviceName/claims/`, ({ request, params }) => {
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
+
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
@@ -92,6 +107,10 @@ export const serviceClaimHandlers = [
   }),
 
   http.post(`${authApiBaseUrl}/claim/:serviceName/`, async ({ request, params }) => {
+    if (!isMockModeRequest(request)) {
+      return passthrough()
+    }
+
     if (!isAuthorized(request)) {
       return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
     }
@@ -102,9 +121,16 @@ export const serviceClaimHandlers = [
       return HttpResponse.json({ detail: "Missing QR value" }, { status: 400 })
     }
 
+    const dedupeKey = `${serviceName}::${body.qr}`
+    const existing = claimByServiceAndQR.get(dedupeKey)
+    if (existing) {
+      return HttpResponse.json(existing, { status: 201 })
+    }
+
     const claim = buildMockClaim(serviceName)
     const currentClaims = claimsByService.get(serviceName) ?? []
     claimsByService.set(serviceName, [claim, ...currentClaims])
+    claimByServiceAndQR.set(dedupeKey, claim)
     return HttpResponse.json(claim, { status: 201 })
   }),
 ]

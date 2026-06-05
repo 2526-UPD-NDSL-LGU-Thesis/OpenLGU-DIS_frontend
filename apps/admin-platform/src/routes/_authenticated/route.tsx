@@ -1,7 +1,6 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { AppSidebar } from "#/components/Sidebar/app-sidebar"
 import { SiteHeader } from "#/components/site-header"
-import { authSessionService } from "#/features/auth/auth"
 import { getRedirectTarget } from "#/features/auth/redirect-target"
 import {
   SidebarInset,
@@ -10,8 +9,8 @@ import {
 
 
 export const Route = createFileRoute('/_authenticated')({
-  beforeLoad: async ({ location }) => {
-    const access = await authSessionService.ensureAuthenticated({
+  beforeLoad: async ({ context, location }) => {
+    const access = await context.auth.sessionService.ensureAuthenticated({
       redirectTo: getRedirectTarget(location),
     })
 

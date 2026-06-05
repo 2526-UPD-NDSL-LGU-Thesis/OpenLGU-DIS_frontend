@@ -12,9 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
-import { Route as AuthenticatedIdRegistrationRouteImport } from './routes/_authenticated/id-registration'
 import { Route as AuthenticatedServiceClaimIndexRouteImport } from './routes/_authenticated/service-claim/index'
-import { Route as AuthenticatedServiceClaimServiceNameRouteImport } from './routes/_authenticated/service-claim/$serviceName'
+import { Route as AuthenticatedSectorManagementIndexRouteImport } from './routes/_authenticated/sector-management/index'
+import { Route as AuthenticatedIdManagementIndexRouteImport } from './routes/_authenticated/id-management/index'
+import { Route as AuthenticatedServiceClaimServiceIDRouteImport } from './routes/_authenticated/service-claim/$serviceID'
+import { Route as AuthenticatedSectorManagementSectorIDRouteImport } from './routes/_authenticated/sector-management/$sectorID'
+import { Route as AuthenticatedIdManagementVerifySuccessRouteImport } from './routes/_authenticated/id-management/verify-success'
+import { Route as AuthenticatedIdManagementIssuanceSuccessRouteImport } from './routes/_authenticated/id-management/issuance-success'
+import { Route as AuthenticatedIdManagementIssuanceRouteImport } from './routes/_authenticated/id-management/issuance'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -30,70 +35,130 @@ const PublicLoginRoute = PublicLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIdRegistrationRoute =
-  AuthenticatedIdRegistrationRouteImport.update({
-    id: '/id-registration',
-    path: '/id-registration',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedServiceClaimIndexRoute =
   AuthenticatedServiceClaimIndexRouteImport.update({
     id: '/service-claim/',
     path: '/service-claim/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedServiceClaimServiceNameRoute =
-  AuthenticatedServiceClaimServiceNameRouteImport.update({
-    id: '/service-claim/$serviceName',
-    path: '/service-claim/$serviceName',
+const AuthenticatedSectorManagementIndexRoute =
+  AuthenticatedSectorManagementIndexRouteImport.update({
+    id: '/sector-management/',
+    path: '/sector-management/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIdManagementIndexRoute =
+  AuthenticatedIdManagementIndexRouteImport.update({
+    id: '/id-management/',
+    path: '/id-management/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedServiceClaimServiceIDRoute =
+  AuthenticatedServiceClaimServiceIDRouteImport.update({
+    id: '/service-claim/$serviceID',
+    path: '/service-claim/$serviceID',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSectorManagementSectorIDRoute =
+  AuthenticatedSectorManagementSectorIDRouteImport.update({
+    id: '/sector-management/$sectorID',
+    path: '/sector-management/$sectorID',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIdManagementVerifySuccessRoute =
+  AuthenticatedIdManagementVerifySuccessRouteImport.update({
+    id: '/id-management/verify-success',
+    path: '/id-management/verify-success',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIdManagementIssuanceSuccessRoute =
+  AuthenticatedIdManagementIssuanceSuccessRouteImport.update({
+    id: '/id-management/issuance-success',
+    path: '/id-management/issuance-success',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIdManagementIssuanceRoute =
+  AuthenticatedIdManagementIssuanceRouteImport.update({
+    id: '/id-management/issuance',
+    path: '/id-management/issuance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
-  '/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/login': typeof PublicLoginRoute
-  '/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
+  '/id-management/issuance-success': typeof AuthenticatedIdManagementIssuanceSuccessRoute
+  '/id-management/verify-success': typeof AuthenticatedIdManagementVerifySuccessRoute
+  '/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
+  '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
+  '/id-management/': typeof AuthenticatedIdManagementIndexRoute
+  '/sector-management/': typeof AuthenticatedSectorManagementIndexRoute
   '/service-claim/': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRoutesByTo {
-  '/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/login': typeof PublicLoginRoute
   '/': typeof AuthenticatedIndexRoute
-  '/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
+  '/id-management/issuance-success': typeof AuthenticatedIdManagementIssuanceSuccessRoute
+  '/id-management/verify-success': typeof AuthenticatedIdManagementVerifySuccessRoute
+  '/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
+  '/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
+  '/id-management': typeof AuthenticatedIdManagementIndexRoute
+  '/sector-management': typeof AuthenticatedSectorManagementIndexRoute
   '/service-claim': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/_authenticated/id-registration': typeof AuthenticatedIdRegistrationRoute
   '/_public/login': typeof PublicLoginRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/service-claim/$serviceName': typeof AuthenticatedServiceClaimServiceNameRoute
+  '/_authenticated/id-management/issuance': typeof AuthenticatedIdManagementIssuanceRoute
+  '/_authenticated/id-management/issuance-success': typeof AuthenticatedIdManagementIssuanceSuccessRoute
+  '/_authenticated/id-management/verify-success': typeof AuthenticatedIdManagementVerifySuccessRoute
+  '/_authenticated/sector-management/$sectorID': typeof AuthenticatedSectorManagementSectorIDRoute
+  '/_authenticated/service-claim/$serviceID': typeof AuthenticatedServiceClaimServiceIDRoute
+  '/_authenticated/id-management/': typeof AuthenticatedIdManagementIndexRoute
+  '/_authenticated/sector-management/': typeof AuthenticatedSectorManagementIndexRoute
   '/_authenticated/service-claim/': typeof AuthenticatedServiceClaimIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/id-registration'
     | '/login'
-    | '/service-claim/$serviceName'
+    | '/id-management/issuance'
+    | '/id-management/issuance-success'
+    | '/id-management/verify-success'
+    | '/sector-management/$sectorID'
+    | '/service-claim/$serviceID'
+    | '/id-management/'
+    | '/sector-management/'
     | '/service-claim/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/id-registration'
     | '/login'
     | '/'
-    | '/service-claim/$serviceName'
+    | '/id-management/issuance'
+    | '/id-management/issuance-success'
+    | '/id-management/verify-success'
+    | '/sector-management/$sectorID'
+    | '/service-claim/$serviceID'
+    | '/id-management'
+    | '/sector-management'
     | '/service-claim'
   id:
     | '__root__'
     | '/_authenticated'
-    | '/_authenticated/id-registration'
     | '/_public/login'
     | '/_authenticated/'
-    | '/_authenticated/service-claim/$serviceName'
+    | '/_authenticated/id-management/issuance'
+    | '/_authenticated/id-management/issuance-success'
+    | '/_authenticated/id-management/verify-success'
+    | '/_authenticated/sector-management/$sectorID'
+    | '/_authenticated/service-claim/$serviceID'
+    | '/_authenticated/id-management/'
+    | '/_authenticated/sector-management/'
     | '/_authenticated/service-claim/'
   fileRoutesById: FileRoutesById
 }
@@ -125,13 +190,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/id-registration': {
-      id: '/_authenticated/id-registration'
-      path: '/id-registration'
-      fullPath: '/id-registration'
-      preLoaderRoute: typeof AuthenticatedIdRegistrationRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/service-claim/': {
       id: '/_authenticated/service-claim/'
       path: '/service-claim'
@@ -139,28 +197,85 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedServiceClaimIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/service-claim/$serviceName': {
-      id: '/_authenticated/service-claim/$serviceName'
-      path: '/service-claim/$serviceName'
-      fullPath: '/service-claim/$serviceName'
-      preLoaderRoute: typeof AuthenticatedServiceClaimServiceNameRouteImport
+    '/_authenticated/sector-management/': {
+      id: '/_authenticated/sector-management/'
+      path: '/sector-management'
+      fullPath: '/sector-management/'
+      preLoaderRoute: typeof AuthenticatedSectorManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/id-management/': {
+      id: '/_authenticated/id-management/'
+      path: '/id-management'
+      fullPath: '/id-management/'
+      preLoaderRoute: typeof AuthenticatedIdManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/service-claim/$serviceID': {
+      id: '/_authenticated/service-claim/$serviceID'
+      path: '/service-claim/$serviceID'
+      fullPath: '/service-claim/$serviceID'
+      preLoaderRoute: typeof AuthenticatedServiceClaimServiceIDRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sector-management/$sectorID': {
+      id: '/_authenticated/sector-management/$sectorID'
+      path: '/sector-management/$sectorID'
+      fullPath: '/sector-management/$sectorID'
+      preLoaderRoute: typeof AuthenticatedSectorManagementSectorIDRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/id-management/verify-success': {
+      id: '/_authenticated/id-management/verify-success'
+      path: '/id-management/verify-success'
+      fullPath: '/id-management/verify-success'
+      preLoaderRoute: typeof AuthenticatedIdManagementVerifySuccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/id-management/issuance-success': {
+      id: '/_authenticated/id-management/issuance-success'
+      path: '/id-management/issuance-success'
+      fullPath: '/id-management/issuance-success'
+      preLoaderRoute: typeof AuthenticatedIdManagementIssuanceSuccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/id-management/issuance': {
+      id: '/_authenticated/id-management/issuance'
+      path: '/id-management/issuance'
+      fullPath: '/id-management/issuance'
+      preLoaderRoute: typeof AuthenticatedIdManagementIssuanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedIdRegistrationRoute: typeof AuthenticatedIdRegistrationRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedServiceClaimServiceNameRoute: typeof AuthenticatedServiceClaimServiceNameRoute
+  AuthenticatedIdManagementIssuanceRoute: typeof AuthenticatedIdManagementIssuanceRoute
+  AuthenticatedIdManagementIssuanceSuccessRoute: typeof AuthenticatedIdManagementIssuanceSuccessRoute
+  AuthenticatedIdManagementVerifySuccessRoute: typeof AuthenticatedIdManagementVerifySuccessRoute
+  AuthenticatedSectorManagementSectorIDRoute: typeof AuthenticatedSectorManagementSectorIDRoute
+  AuthenticatedServiceClaimServiceIDRoute: typeof AuthenticatedServiceClaimServiceIDRoute
+  AuthenticatedIdManagementIndexRoute: typeof AuthenticatedIdManagementIndexRoute
+  AuthenticatedSectorManagementIndexRoute: typeof AuthenticatedSectorManagementIndexRoute
   AuthenticatedServiceClaimIndexRoute: typeof AuthenticatedServiceClaimIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedIdRegistrationRoute: AuthenticatedIdRegistrationRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedServiceClaimServiceNameRoute:
-    AuthenticatedServiceClaimServiceNameRoute,
+  AuthenticatedIdManagementIssuanceRoute:
+    AuthenticatedIdManagementIssuanceRoute,
+  AuthenticatedIdManagementIssuanceSuccessRoute:
+    AuthenticatedIdManagementIssuanceSuccessRoute,
+  AuthenticatedIdManagementVerifySuccessRoute:
+    AuthenticatedIdManagementVerifySuccessRoute,
+  AuthenticatedSectorManagementSectorIDRoute:
+    AuthenticatedSectorManagementSectorIDRoute,
+  AuthenticatedServiceClaimServiceIDRoute:
+    AuthenticatedServiceClaimServiceIDRoute,
+  AuthenticatedIdManagementIndexRoute: AuthenticatedIdManagementIndexRoute,
+  AuthenticatedSectorManagementIndexRoute:
+    AuthenticatedSectorManagementIndexRoute,
   AuthenticatedServiceClaimIndexRoute: AuthenticatedServiceClaimIndexRoute,
 }
 

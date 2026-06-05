@@ -14,7 +14,7 @@ describe("mockVerificationData", () => {
     const result = getMockVerificationResult("fixed-success")
 
     expect(result.result).toBe("success")
-    expect(result.idDetails?.issuerType).toBe("LGU")
+    expect(result.qr_type).toBe("OpenLGUQR")
   })
 
   it("returns mocked API tampered response for known raw QR", () => {

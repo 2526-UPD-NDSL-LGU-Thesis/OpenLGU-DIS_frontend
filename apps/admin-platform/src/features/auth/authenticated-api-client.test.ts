@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw"
 
 import { server } from "#/tests/node"
 
-import { authApiBaseUrl } from "./authAPI"
+import { authApiBaseUrl } from "./api/authAPI"
 import { AuthenticatedApiError, createAuthenticatedApiClient } from "./authenticated-api-client"
 import { createAuthSessionService } from "./auth-session-service"
 
@@ -16,21 +16,24 @@ function wait(ms: number): Promise<void> {
 describe("createAuthenticatedApiClient", () => {
   it("runs one refresh for concurrent 401 responses and retries queued requests", async () => {
     const expiredAccessToken = "expired-access-token"
+    const initialRefreshToken = "initial-refresh-token"
     const refreshedAccessToken = "refreshed-access-token"
     let refreshCalls = 0
     let protectedCalls = 0
+    let refreshRequestBody: unknown = null
 
     server.use(
       http.post(`${authApiBaseUrl}/token/`, () => {
-        return HttpResponse.json({ access: expiredAccessToken }, { status: 200 })
+        return HttpResponse.json({ access: expiredAccessToken, refresh: initialRefreshToken }, { status: 200 })
       }),
-      http.post(`${authApiBaseUrl}/token/refresh/`, async () => {
+      http.post(`${authApiBaseUrl}/token/refresh/`, async ({ request }) => {
         refreshCalls += 1
+        refreshRequestBody = await request.json()
         await wait(50)
-        return HttpResponse.json({ access: refreshedAccessToken }, { status: 200 })
+        return HttpResponse.json({ access: refreshedAccessToken, refresh: "next-refresh-token" }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/me/`, () => {
-        return HttpResponse.json({ username: "employee-1", roles: ["SUPER"] }, { status: 200 })
+        return HttpResponse.json({ username: "employee-1", roles: ["Super"] }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/services/`, ({ request }) => {
         protectedCalls += 1
@@ -60,6 +63,7 @@ describe("createAuthenticatedApiClient", () => {
     expect(responseA.status).toBe(200)
     expect(responseB.status).toBe(200)
     expect(refreshCalls).toBe(1)
+    expect(refreshRequestBody).toEqual({ refresh: initialRefreshToken })
     expect(protectedCalls).toBe(4)
     expect(authSessionService.getAuthState().accessToken).toBe(refreshedAccessToken)
   })
@@ -69,13 +73,13 @@ describe("createAuthenticatedApiClient", () => {
 
     server.use(
       http.post(`${authApiBaseUrl}/token/`, () => {
-        return HttpResponse.json({ access: expiredAccessToken }, { status: 200 })
+        return HttpResponse.json({ access: expiredAccessToken, refresh: "refresh-token" }, { status: 200 })
       }),
       http.post(`${authApiBaseUrl}/token/refresh/`, () => {
         return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
       }),
       http.get(`${authApiBaseUrl}/me/`, () => {
-        return HttpResponse.json({ username: "employee-1", roles: ["SUPER"] }, { status: 200 })
+        return HttpResponse.json({ username: "employee-1", roles: ["Super"] }, { status: 200 })
       }),
       http.get(`${authApiBaseUrl}/services/`, () => {
         return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
@@ -94,7 +98,46 @@ describe("createAuthenticatedApiClient", () => {
     expect(authSessionService.getAuthState()).toEqual({
       phase: "unauthenticated",
       accessToken: null,
-      identityProfile: null,
+      userProfile: null,
     })
+  })
+
+  it("does not auto-retry mutating POST claim requests after 401", async () => {
+    const expiredAccessToken = "expired-access-token"
+    let refreshCalls = 0
+    let claimCalls = 0
+
+    server.use(
+      http.post(`${authApiBaseUrl}/token/`, () => {
+        return HttpResponse.json({ access: expiredAccessToken, refresh: "refresh-token" }, { status: 200 })
+      }),
+      http.post(`${authApiBaseUrl}/token/refresh/`, () => {
+        refreshCalls += 1
+        return HttpResponse.json({ access: "refreshed-token", refresh: "next-refresh-token" }, { status: 200 })
+      }),
+      http.get(`${authApiBaseUrl}/me/`, () => {
+        return HttpResponse.json({ username: "employee-1", roles: ["Super"] }, { status: 200 })
+      }),
+      http.post(`${authApiBaseUrl}/claim/:serviceName/`, () => {
+        claimCalls += 1
+        return HttpResponse.json({ detail: "Unauthorized" }, { status: 401 })
+      })
+    )
+
+    const authSessionService = createAuthSessionService()
+    await authSessionService.login({ username: "employee-1", password: "password" })
+    const apiClient = createAuthenticatedApiClient({ authSessionService })
+
+    const response = await apiClient.request("/claim/medical-assistance/", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ qr: "mock-qr" }),
+    })
+
+    expect(response.status).toBe(401)
+    expect(refreshCalls).toBe(0)
+    expect(claimCalls).toBe(1)
   })
 })

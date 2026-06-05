@@ -1,32 +1,19 @@
 import { QueryClient } from "@tanstack/react-query"
 import { linkOptions } from "@tanstack/react-router"
+import { z } from 'zod';
 
-import { AuthApiError, createAuthApiClient } from "./authAPI"
-import type { AuthApiClient, LoginCredentials } from "./authAPI"
+import { AuthApiError, createAuthApiClient } from "./api/authAPI"
+import type { AuthApiClient, LoginCredentials } from "./api/authAPI"
 
-const CANONICAL_ROLES = [
-  "SUPER",
-  "SECTOR_ADMIN",
-  "SERVICE_CLAIM_ADMIN",
-  "SECTOR_EMPLOYEE",
-  "SERVICE_CLAIM_EMPLOYEE",
-  "ID_MANAGEMENT_ADMIN",
-  "ID_MANAGEMENT_EMPLOYEE",
-] as const
-
-type CanonicalRole = (typeof CANONICAL_ROLES)[number]
-
-export interface IdentityProfile {
-  username: string
-  roles: CanonicalRole[]
-}
+import { userProfileSchema } from "#/types/schema"
+import type { UserProfile } from "#/types/schema";
 
 export type AuthStatePhase = "unknown" | "authenticated" | "unauthenticated"
 
 export interface AuthStateSnapshot {
   phase: AuthStatePhase
   accessToken: string | null
-  identityProfile: IdentityProfile | null
+  userProfile: UserProfile | null
 }
 
 export interface LoginFailure {
@@ -36,7 +23,8 @@ export interface LoginFailure {
       | "invalid_credentials"
       | "response_not_json"
       | "missing_access_token"
-      | "identity_profile_failed"
+      | "missing_refresh_token"
+      | "user_profile_failed"
     message: string
   }
 }
@@ -56,125 +44,184 @@ export interface EnsureAuthenticatedSuccess {
 export interface EnsureAuthenticatedRedirect {
   ok: false
   redirect: {
-    to: "/_public/login"
+    to: "/login"
     search: {
       redirect: string
     }
   }
 }
 
-export type EnsureAuthenticatedResult = EnsureAuthenticatedSuccess | EnsureAuthenticatedRedirect
+export type EnsureAuthenticatedResult =
+  | EnsureAuthenticatedSuccess
+  | EnsureAuthenticatedRedirect
 
 export interface AuthSessionService {
   login: (credentials: LoginCredentials) => Promise<LoginResult>
-  ensureAuthenticated: (args: { redirectTo: string }) => Promise<EnsureAuthenticatedResult>
+  ensureAuthenticated: (args: {
+    redirectTo: string
+  }) => Promise<EnsureAuthenticatedResult>
   refreshSession: () => Promise<boolean>
   getAuthState: () => AuthStateSnapshot
   clear: () => void
+  logout: () => Promise<void>
+  _setAuthenticatedClient: (client: {
+    request: (path: string, init?: RequestInit) => Promise<Response>
+  }) => void
+}
+
+/**
+ * Minimal state-store contract.
+ *
+ * In runtime, this is typically backed by a Zustand vanilla store.
+ * In tests, you can use the in-memory default store.
+ */
+export interface AuthStateStore {
+  getState: () => AuthStateSnapshot
+  setState: (next: AuthStateSnapshot) => void
 }
 
 const initialAuthState: AuthStateSnapshot = {
   phase: "unknown",
   accessToken: null,
-  identityProfile: null,
+  userProfile: null,
 }
 
 const unauthenticatedState: AuthStateSnapshot = {
   phase: "unauthenticated",
   accessToken: null,
-  identityProfile: null,
+  userProfile: null,
 }
 
-function normalizeIdentityProfile(raw: unknown): IdentityProfile | null {
-  if (!raw || typeof raw !== "object") {
-    return null
-  }
-
-  const maybeUsername = (raw as { username?: unknown }).username
-  const maybeRoles = (raw as { roles?: unknown }).roles
-
-  if (typeof maybeUsername !== "string" || !Array.isArray(maybeRoles)) {
-    return null
-  }
-
-  const canonicalRoles = maybeRoles.filter((role): role is CanonicalRole => {
-    return typeof role === "string" && CANONICAL_ROLES.includes(role as CanonicalRole)
-  })
-
-  if (canonicalRoles.length === 0) {
-    return null
-  }
+function createInMemoryAuthStateStore(
+  initial: AuthStateSnapshot = initialAuthState
+): AuthStateStore {
+  let state: AuthStateSnapshot = { ...initial }
 
   return {
-    username: maybeUsername,
-    roles: canonicalRoles,
+    getState: () => state,
+    setState: (next) => {
+      state = { ...next }
+    },
   }
 }
+
+
 
 const defaultQueryClient = new QueryClient()
 const defaultAuthApiClient = createAuthApiClient(defaultQueryClient)
 
 function buildPublicLoginRedirect(redirectTo: string) {
   return linkOptions({
-    to: "/_public/login",
+    to: "/login",
     search: {
       redirect: redirectTo,
     },
   })
 }
 
-export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthApiClient): AuthSessionService {
-  let authState: AuthStateSnapshot = { ...initialAuthState }
+export const REFRESH_TOKEN_STORAGE_KEY = "openlguid:auth-refresh-token"
+
+function readStoredRefreshToken(): string | null {
+  if (typeof window === "undefined") {
+    return null
+  }
+  try {
+    return window.sessionStorage.getItem(REFRESH_TOKEN_STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function writeStoredRefreshToken(token: string | null) {
+  if (typeof window === "undefined") {
+    return
+  }
+  try {
+    if (!token) {
+      window.sessionStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY)
+    } else {
+      window.sessionStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, token)
+    }
+  } catch {
+    // Ignore sessionStorage errors (e.g., disabled or full storage)
+  }
+}
+
+export function createAuthSessionService(
+  apiClient: AuthApiClient = defaultAuthApiClient,
+  queryClient: QueryClient = defaultQueryClient,
+  stateStore: AuthStateStore = createInMemoryAuthStateStore()
+): AuthSessionService {
+  let authenticatedApiClient: {
+    request: (path: string, init?: RequestInit) => Promise<Response>
+  } | null = null
+  let currentRefreshToken: string | null = readStoredRefreshToken()
+
+  const getAuthState = () => {
+    return stateStore.getState()
+  }
 
   const clear = () => {
-    authState = { ...unauthenticatedState }
+    currentRefreshToken = null
+    writeStoredRefreshToken(null)
+    stateStore.setState({ ...unauthenticatedState })
+  }
+
+  const setAuthenticated = (next: {
+    accessToken: string
+    userProfile: UserProfile
+  }) => {
+    stateStore.setState({
+      phase: "authenticated",
+      accessToken: next.accessToken,
+      userProfile: next.userProfile,
+    })
   }
 
   const refreshAndHydrate = async (): Promise<boolean> => {
-    const tokenPayload = await apiClient.requestRefreshAccessToken()
-    const identityPayload = await apiClient.requestIdentityProfile(tokenPayload.access)
-    const identityProfile = normalizeIdentityProfile(identityPayload)
-
-    if (!identityProfile) {
+    if (!currentRefreshToken) {
+      currentRefreshToken = readStoredRefreshToken()
+    }
+    if (!currentRefreshToken) {
       return false
     }
 
-    authState = {
-      phase: "authenticated",
-      accessToken: tokenPayload.access,
-      identityProfile,
-    }
+    try {
+      const tokenPayload = await apiClient.requestRefreshAccessToken(currentRefreshToken)
+      const userPayload = await apiClient.requestUserProfile(
+        tokenPayload.access
+      )
+      const userProfile = userProfileSchema.parse(userPayload)
+      currentRefreshToken = tokenPayload.refresh ?? currentRefreshToken
+      writeStoredRefreshToken(currentRefreshToken)
 
-    return true
+      setAuthenticated({ accessToken: tokenPayload.access, userProfile })
+      return true
+    }
+    catch (error) {
+      if (error instanceof z.ZodError) {
+        return false
+      }
+      return false
+    }
   }
 
   return {
     async login(credentials) {
       try {
         const tokenPayload = await apiClient.requestAccessToken(credentials)
-        const identityPayload = await apiClient.requestIdentityProfile(tokenPayload.access)
-        const identityProfile = normalizeIdentityProfile(identityPayload)
+        currentRefreshToken = tokenPayload.refresh ?? null
+        writeStoredRefreshToken(currentRefreshToken)
+        const userPayload = await apiClient.requestUserProfile(
+          tokenPayload.access
+        )
+        const userProfile = userProfileSchema.parse(userPayload);
 
-        if (!identityProfile) {
-          clear()
-          return {
-            ok: false,
-            error: {
-              code: "identity_profile_failed",
-              message: "Identity profile response is invalid.",
-            },
-          }
-        }
-
-        authState = {
-          phase: "authenticated",
-          accessToken: tokenPayload.access,
-          identityProfile,
-        }
+        setAuthenticated({ accessToken: tokenPayload.access, userProfile })
 
         return {
           ok: true,
-          state: authState,
+          state: getAuthState(),
         }
       } catch (error) {
         clear()
@@ -188,20 +235,35 @@ export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthA
             },
           }
         }
+        else if (error instanceof z.ZodError){
+          console.error(error)
+          return {
+            ok: false,
+            error: {
+              code: "user_profile_failed",
+              message: "User profile response schema failed to parse"
+            }
+          }
+        }
 
         return {
           ok: false,
           error: {
-            code: "identity_profile_failed",
-            message: "Unable to load LGU Employee identity profile.",
+            code: "user_profile_failed",
+            message: "Unable to load LGU Employee user profile.",
           },
         }
       }
     },
 
     async ensureAuthenticated({ redirectTo }) {
-      if (authState.phase === "authenticated" && authState.accessToken && authState.identityProfile) {
-        return { ok: true, state: authState }
+      const current = getAuthState()
+      if (
+        current.phase === "authenticated" &&
+        current.accessToken &&
+        current.userProfile
+      ) {
+        return { ok: true, state: current }
       }
 
       try {
@@ -213,7 +275,7 @@ export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthA
             redirect: buildPublicLoginRedirect(redirectTo),
           }
         }
-        return { ok: true, state: authState }
+        return { ok: true, state: getAuthState() }
       } catch {
         clear()
         return {
@@ -237,10 +299,28 @@ export function createAuthSessionService(apiClient: AuthApiClient = defaultAuthA
       }
     },
 
-    getAuthState() {
-      return authState
-    },
+    getAuthState,
 
     clear,
+
+    async logout() {
+      // Try to call backend logout endpoint through authenticated client (graceful bypass if fails)
+      if (authenticatedApiClient) {
+        try {
+          await authenticatedApiClient.request("/logout/", { method: "POST" })
+        } catch {
+          // Gracefully ignore logout endpoint failures
+          // Session is cleared locally regardless of backend response
+        }
+      }
+      // Clear TanStack Query cache before session state
+      queryClient.clear()
+      // Clear local session state
+      clear()
+    },
+
+    _setAuthenticatedClient(client) {
+      authenticatedApiClient = client
+    },
   }
 }
