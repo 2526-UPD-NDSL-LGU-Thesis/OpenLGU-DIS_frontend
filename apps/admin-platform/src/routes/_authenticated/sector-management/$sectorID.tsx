@@ -93,26 +93,20 @@ function SectorDetailRoute() {
       <section className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Sector ID</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">{sectorID}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
             <CardTitle>Sector Name</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-semibold">
             {sector?.name ?? "Loading..."}
           </CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Resident Count</CardTitle>
           </CardHeader>
           <CardContent className="text-3xl font-semibold">
             {sector?.resident_count ?? 0}
           </CardContent>
-        </Card>
+        </Card> */}
       </section>
 
       <section className="space-y-4">
@@ -140,13 +134,11 @@ function SectorDetailRoute() {
               <DataTable
                 columns={[
                   { accessorKey: "id", header: "Sector ID" },
-                  { accessorKey: "name", header: "Name" },
                   {
                     accessorKey: "description",
                     header: "Description",
                     cell: ({ row }) => row.original.description ?? "—",
                   },
-                  { accessorKey: "resident_count", header: "Resident Count" },
                 ]}
                 data={[sector]}
                 emptyMessage="Sector details unavailable."
