@@ -176,13 +176,13 @@ export function IdManagementDashboard() {
             >
               Continue to issuance form
             </button>
-            <button
+            {/* <button
               type="button"
               className={buttonVariants({ variant: "outline" })}
               onClick={() => handleContinueToIssuance()}
             >
               Continue manually
-            </button>
+            </button> */}
           </div>
         </DialogContent>
       </Dialog>
