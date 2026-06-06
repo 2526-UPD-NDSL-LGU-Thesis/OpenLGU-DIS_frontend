@@ -412,7 +412,7 @@ function SectorActionsMenu({
         <EllipsisVerticalIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => onEnlist(sector)}>Enlist Resident</DropdownMenuItem>
+        {/* <DropdownMenuItem onSelect={() => onEnlist(sector)}>Enlist Resident</DropdownMenuItem> */}
         {canManage ? (
           <>
             <DropdownMenuItem onSelect={() => onCreateFrom(sector)}>Create From</DropdownMenuItem>
@@ -502,12 +502,12 @@ function SectorManagementDashboard() {
           <SectorActionsMenu
             sector={row.original}
             canManage={canManage}
-            onEnlist={() => {
-              void router.navigate({
-                to: "/sector-management/$sectorID",
-                params: { sectorID: row.original.id },
-              })
-            }}
+            // onEnlist={() => {
+            //   void router.navigate({
+            //     to: "/sector-management/$sectorID",
+            //     params: { sectorID: row.original.id },
+            //   })
+            // }}
             onCreateFrom={setCreateFromSource}
             onDelete={setDeleteTarget}
           />

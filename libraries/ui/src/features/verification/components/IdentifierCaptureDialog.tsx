@@ -27,18 +27,13 @@ import {
 import { useQRScanner } from "#features/verification/hooks/use-qr-scanner.js"
 
 type CaptureMode = "qr" | "manual"
-type ManualIdentifierType = "UIN" | "PCN"
 
 export type IdentifierCaptureRequest =
   | {
       kind: "qr"
       rawQRValue: string
     }
-  | {
-      kind: "manual"
-      identifierType: ManualIdentifierType
-      identifier: string
-    }
+
 
 type CaptureScanResult =
   | {
@@ -70,9 +65,7 @@ export function IdentifierCaptureDialog({
   const [activeTab, setActiveTab] = useState<CaptureMode>("qr")
   const [isDragging, setIsDragging] = useState(false)
   const [submissionError, setSubmissionError] = useState<string | null>(null)
-  const [manualIdentifierType, setManualIdentifierType] =
-    useState<ManualIdentifierType>("UIN")
-  const [manualIdentifierValue, setManualIdentifierValue] = useState("")
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const hasAutoStartedRef = useRef(false)
   const hasEmittedResultRef = useRef(false)
@@ -115,8 +108,6 @@ export function IdentifierCaptureDialog({
     if (!open) {
       resetCaptureState()
       setSubmissionError(null)
-      setManualIdentifierType("UIN")
-      setManualIdentifierValue("")
       return
     }
 
@@ -151,8 +142,6 @@ export function IdentifierCaptureDialog({
       reset()
       setActiveTab("qr")
       setSubmissionError(null)
-      setManualIdentifierType("UIN")
-      setManualIdentifierValue("")
       resetCaptureState()
       onSubmittingChange?.(false)
     } else {
@@ -201,8 +190,6 @@ export function IdentifierCaptureDialog({
       onOpenChange(false)
       reset()
       resetCaptureState()
-      setManualIdentifierValue("")
-      setManualIdentifierType("UIN")
     } catch (error) {
       setSubmissionError(
         error instanceof Error ? error.message : CAPTURE_FAILURE_MESSAGE
@@ -235,17 +222,7 @@ export function IdentifierCaptureDialog({
     })
   }, [open, reset, resetCaptureState, scanResult, submitCapture])
 
-  const handleManualSubmit = async () => {
-    if (manualIdentifierValue.trim().length === 0) {
-      return
-    }
 
-    await submitCapture({
-      kind: "manual",
-      identifierType: manualIdentifierType,
-      identifier: manualIdentifierValue.trim(),
-    })
-  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -253,7 +230,7 @@ export function IdentifierCaptureDialog({
         <DialogHeader>
           <DialogTitle>Capture Resident Identifier</DialogTitle>
           <DialogDescription>
-            Use the webcam, upload an image, or capture a UIN or PCN manually.
+            Use the webcam or upload an image of the ID QR.
           </DialogDescription>
         </DialogHeader>
 
