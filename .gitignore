@@ -40,6 +40,7 @@ logs
 # Builds
 dist
 dist-ssr
+/build
 
 ## Turbo
 .turbo
@@ -61,6 +62,11 @@ pnpm-debug.log*
 .vinxi
 __unconfig*
 todos.json
+
+## Docusaurus
+
+.docusaurus
+.cache-loader
 
 # Deployment
 
