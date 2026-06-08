@@ -1,0 +1,55 @@
+name: Deploy Docusaurus to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/website/**' # Only trigger when docs change
+      - '.github/workflows/deploy-docs.yml'
+
+jobs:
+  build:
+    name: Build Docusaurus site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: 'package.json' # Explicitly get monorepo root package.json
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: 'package.json'
+          cache: pnpm
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build docs
+        run: pnpm --filter @openlguid/website build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/website/build
+      
+  deploy: # Based from https://github.com/marketplace/actions/deploy-github-pages-site
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+  
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+  
+    # Specify runner + deployment step
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+    
