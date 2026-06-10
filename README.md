@@ -1,8 +1,25 @@
+> Project Status
+> Active Development
+
 # OpenLGU-DIS_frontend
 
 Frontend for the OpenLGU-DIS, an open customizable LGU ID system that leverages the Philippine National ID, PhilSys
 
-## Rationale
+## TOC
+
+- []
+- [Background]
+- [Usage]
+- [Features]
+- [Contributing / Forking](#contributing--forking)
+- [Deployment](#deployment)
+- [Authors and Acknowlgement](#authors-and-acknowlegements)
+- [License](#license)
+
+
+## Background
+
+### Rationale
 
 // TODO
 
@@ -12,9 +29,11 @@ For elaboration on motivation and significance, see our undergraduate [thesis pa
 
 // TODO Outline what's included in the framework. I'm not so fond of the heading though
 
-## Development / Forking
+## Contributing / Forking
 
 To develop on the project, the supported way is to use the provided dev container.
+
+> Limitation: 
 
 1. Clone / Fork the repository
 2. Open the repository within a dev container using any supported method (Recommended way: In VS Code using [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)).
@@ -39,3 +58,10 @@ To learn more about the project's tooling, read more in the [contribution docume
 ## Deployment
 
 // TODO
+
+## Authors and Acknowlegements
+
+
+## License
+
+See [LICENSE](LICENSE)

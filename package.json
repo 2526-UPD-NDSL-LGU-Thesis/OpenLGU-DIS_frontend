@@ -12,5 +12,6 @@
   "devDependencies": {
     "only-allow": "catalog:",
     "turbo": "catalog:"
-  }
+  },
+  "license": "MIT"
 }
