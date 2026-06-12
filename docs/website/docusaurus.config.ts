@@ -15,7 +15,7 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://2526-UPD-NDSL-LGU-Thesis.github.io',
+  url: 'https://2526-upd-ndsl-lgu-thesis.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/OpenLGU-DIS_frontend/',
@@ -24,9 +24,8 @@ const config: Config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: '2526-UPD-NDSL-LGU-Thesis', // Usually your GitHub org/user name.
   projectName: 'OpenLGU-DIS_frontend', // Usually your repo name.
-  deploymentBranch: 'main',
-  trailingSlash: false,
 
+  trailingSlash: false,
   onBrokenLinks: 'throw',
 
   // Even if you don't use internationalization, you can use this field to set
@@ -42,6 +41,7 @@ const config: Config = {
       'classic',
       {
         docs: {
+          routeBasePath: '/', // Serve the docs at the site's root
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
@@ -77,15 +77,15 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'My Site',
+      title: 'OpenLGU ID Documentation',
       logo: {
-        alt: 'My Site Logo',
+        alt: 'OpenLGU ID Logo',
         src: 'img/logo.svg',
       },
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'mainSidebar',
           position: 'left',
           label: 'Tutorial',
         },

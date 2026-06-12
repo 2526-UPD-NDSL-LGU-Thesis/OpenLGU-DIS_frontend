@@ -1,6 +1,6 @@
 # Note on Development Tooling and Preferences
 
-> | [Index](<../$ Navigation/Index.md>) |
+> | [Index](../../../for-project-implementors/$%20Navigation/Index.md) |
 
 
 - Uses pnpm (for monorepo) ESLint, Tailwind, 

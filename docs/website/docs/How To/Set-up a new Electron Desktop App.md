@@ -49,7 +49,7 @@ cd <app-name>
 - n - to git because it already exists
 
 
-4. Make sure to edit the name in the local `package.json` to include @openlguid/<app-name> plus change the description!
+4. Make sure to edit the name in the local `package.json` to include @openlguid/{app-name} plus change the description!
 
 
 5. Append `-- --no-sandbox` to the the start script in the local `package.json`

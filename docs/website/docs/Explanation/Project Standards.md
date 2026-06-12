@@ -1,6 +1,6 @@
 # Project Standards
 
-> | [Index](<../$ Navigation/Index.md>) |
+> | [Index](../../../for-project-implementors/$%20Navigation/Index.md) |
 
 
 > // TODO These should be enforced by automated tools like lints
